@@ -96,7 +96,8 @@ button{font-family:inherit}
 .row .sub{font-size:12.5px;color:var(--ink3)}
 .row .end{text-align:right;flex:none}
 .row .amt{font:600 22px/1 var(--font-num)}
-.av{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-strong);display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.av{overflow:hidden;width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-strong);display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
 .av.off{background:var(--surface2);color:var(--ink3)}
 .chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:1px 9px;border-radius:99px;background:var(--surface2);color:var(--ink2);white-space:nowrap}
 .chip.good{background:var(--good-soft);color:var(--good)}
@@ -213,6 +214,10 @@ table.compact td:first-child{white-space:normal}
 tr.sum td{font-weight:700;background:var(--surface2)}
 tr.fin td{font-weight:700;font-size:15px;border-top:2px solid var(--line)}
 .mstep{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 8px;font-weight:700}
+#lock{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;padding:24px}
+#lock[hidden]{display:none}
+.lockbox{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.lockbox input{text-align:center;font-size:24px;letter-spacing:6px}
 
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media print{
@@ -248,6 +253,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <section id="v-workers" class="page gut" hidden></section>
     <section id="v-ledger" class="page gut" hidden></section>
 
+    <div id="lock" hidden><div class="lockbox"><h2>🔒 मेरा लेबर खाता</h2><p class="hint">PIN डालें</p><input id="lock-pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="PIN"><div class="err" id="lock-err" hidden></div><button class="btn wide" data-act="lock-go">खोलें</button><button class="btn ghost wide" data-act="lock-forgot" style="margin-top:8px">PIN भूल गए</button></div></div>
     <section id="v-more" class="page gut" hidden>
       <div class="card menu">
         <button class="mi" data-go="production"><div class="ci" data-ic="box"></div><span>उत्पादन</span><i data-ic="chev" data-s="20"></i></button>
@@ -317,6 +323,9 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
       <div class="card form"><h3>महीने की फाइलें</h3>
         <p class="hint" style="margin:0">हर महीने की अलग फाइल बनती है, जैसे MeraLabourKhata_2026-11.json। "फोन में सेव" दबाने पर वह फोन की Downloads में आती है। चाहें तो Files ऐप में "Mera Labour Khata" नाम का फोल्डर बनाकर उसमें रख लें। शेयर बटन से Drive या WhatsApp पर भी भेज सकते हैं। फाइल रखनी है या हटानी है, यह आपके हाथ में है। डेटा वापस लाने के लिए नीचे "बैकअप वापस लाएँ" में वही फाइल चुनें।</p>
         <div id="months-list"></div></div>
+      <div class="card form"><h3>ऐप लॉक (PIN)</h3>
+        <p class="hint" style="margin:0" id="pin-note"></p>
+        <div class="btns"><button class="btn" data-act="pin-set">PIN लगाएँ / बदलें</button><button class="btn ghost" data-act="pin-remove" id="pin-rm" hidden>PIN हटाएँ</button></div></div>
       <div class="card form" id="install-card" hidden><h3>ऐप इंस्टॉल करें</h3>
         <p class="hint" style="margin:0">होम स्क्रीन पर आइकन के साथ, पूरी स्क्रीन में खुलने वाला ऐप।</p>
         <button class="btn wide" data-act="install">इंस्टॉल करें</button></div>
@@ -397,6 +406,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const sum=(a,f)=>a.reduce((v,x)=>v+(Number(f(x))||0),0);
 function money(n){const v=Number(n)||0;const whole=Math.abs(v-Math.round(v))<.005;return '₹'+v.toLocaleString('en-IN',{minimumFractionDigits:whole?0:2,maximumFractionDigits:whole?0:2})}
 const hh=n=>String(Math.round((Number(n)||0)*100)/100);
+const avIn=w=>w.photo?`<img src="${w.photo}" alt="">`:esc(initial(w.name));
 const initial=n=>Array.from(String(n||'?').trim())[0]||'?';
 
 /* data */
@@ -429,7 +439,8 @@ function norm(d){
   return d;
 }
 function load(){try{const s=localStorage.getItem(KEY);if(s){const d=JSON.parse(s);if(d&&Array.isArray(d.workers))return norm(d)}}catch(e){}return null}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+var storeWarn=false;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(db));storeWarn=false}catch(e){if(!storeWarn){storeWarn=true;toast('चेतावनी: फोन में जगह नहीं मिली, डेटा सेव नहीं हो पा रहा! अभी बैकअप डाउनलोड करें')}}}
 
 /* calculations (same rules as the original app) */
 const worker=id=>db.workers.find(w=>w.id===id);
@@ -539,11 +550,19 @@ function renderHome(){
   const t=today(),s=dayStats(t);
   const prod=sum(db.production.filter(p=>p.date===t),prodTotal),exp=sum(db.expenses.filter(e=>e.date===t),e=>e.amount),outT=sum(db.outside.filter(r=>r.kind==='work'&&r.date===t),r=>r.count*r.rate),left=prod-s.wages-outT-exp,msm=labourSummary(t.slice(0,8)+'01',t);
   const owed=db.workers.map(w=>({w,b:balanceOf(w).bal})).filter(x=>x.b>.005).sort((a,b)=>b.b-a.b).slice(0,4);
+  const allProd=sum(db.production,prodTotal),allOwn=sum(db.attendance,a=>calcAttendance(a).wage),allOut=sum(db.outside.filter(r=>r.kind==='work'),r=>r.count*r.rate),allExp=sum(db.expenses,e=>e.amount);
   const hasDemo=db.workers.some(w=>w.demo)||db.attendance.some(x=>x.demo);
   $('v-home').innerHTML=`
   ${dueBanner()}${hasDemo?`<div class="banner"><p>नमूना डेटा दिख रहा है। अपना काम शुरू करने से पहले इसे हटा दें।</p><button class="btn sm" data-act="remove-demo">नमूना हटाएँ</button></div>`:''}
   <div class="hero"><div class="date">${dfmt(t,{weekday:'long',day:'numeric',month:'long'})}</div><div class="lbl2">आज की मजदूरी</div><div class="big">${money(s.wages)}</div>
     <div class="hs-row"><div class="hs"><b>${s.present}</b><span>उपस्थित</span></div><div class="hs"><b>${s.absent}</b><span>अनुपस्थित</span></div><div class="hs"><b>${hh(s.hours)}</b><span>घंटे</span></div><div class="hs"><b>${hh(s.ot)}</b><span>OT घंटे</span></div></div></div>
+  <div class="card" style="margin-top:12px"><h3>अब तक का कुल हिसाब</h3>
+    <div class="kv"><span>कुल उत्पादन</span><b>${money(allProd)}</b></div>
+    <div class="kv"><span>कुल लेबर की मजदूरी (अपनी)</span><b>${money(allOwn)}</b></div>
+    <div class="kv"><span>बाहरी (नकद) लेबर</span><b>${money(allOut)}</b></div>
+    <div class="kv total"><span>बचत (उत्पादन − लेबर)</span><b class="${allProd-allOwn-allOut<0?'bad':'good'}">${money(allProd-allOwn-allOut)}</b></div>
+    <div class="kv"><span>अन्य खर्च</span><b>${money(allExp)}</b></div>
+    <div class="kv"><span>खर्च भी घटाकर बचत</span><b class="${allProd-allOwn-allOut-allExp<0?'bad':'good'}">${money(allProd-allOwn-allOut-allExp)}</b></div></div>
   <div class="qa-row">
     <button class="qa" data-act="open-att"><span class="ci">${ic('cal')}</span>हाजिरी</button>
     <button class="qa" data-act="add-prod"><span class="ci">${ic('box')}</span>उत्पादन</button>
@@ -564,7 +583,7 @@ function renderHome(){
     <div class="kv total"><span>कुल लेबर खर्च</span><b>${money(msm.ownAmt+msm.outAmt)}</b></div>
     <div style="margin-top:8px"><button class="btn ghost sm" data-go="outside">पूरा गणित देखें</button></div></div>
   <div class="card"><h3>पिछले 7 दिन की मजदूरी</h3>${chartHtml()}</div>
-  <div class="card"><h3>बकाया मजदूरी</h3>${owed.length?owed.map(x=>`<div class="row"><div class="av">${esc(initial(x.w.name))}</div><div class="mid"><div class="nm">${esc(x.w.name)}</div><div class="sub">${payLabel(x.w)}</div></div><div class="end"><div class="amt">${money(x.b)}</div></div></div>`).join('')+`<div style="margin-top:8px"><button class="btn ghost sm" data-go="ledger">पूरा हिसाब देखें</button></div>`:'<div class="muted">अभी किसी का बकाया नहीं है।</div>'}</div>`;
+  <div class="card"><h3>बकाया मजदूरी</h3>${owed.length?owed.map(x=>`<div class="row"><div class="av">${avIn(x.w)}</div><div class="mid"><div class="nm">${esc(x.w.name)}</div><div class="sub">${payLabel(x.w)}</div></div><div class="end"><div class="amt">${money(x.b)}</div></div></div>`).join('')+`<div style="margin-top:8px"><button class="btn ghost sm" data-go="ledger">पूरा हिसाब देखें</button></div>`:'<div class="muted">अभी किसी का बकाया नहीं है।</div>'}</div>`;
 }
 
 /* attendance */
@@ -581,7 +600,7 @@ function renderAttendance(){
   if(!db.workers.some(w=>w.active)){
     h+=`<div class="card empty"><div>हाजिरी लगाने के लिए पहले मजदूर जोड़ें।</div><button class="btn" data-act="add-worker">मजदूर जोड़ें</button></div>`;
   }else{
-    if(pending.length)h+=`<div class="card"><h3>हाजिरी बाकी (${pending.length})</h3>${pending.map(w=>`<div class="row"><div class="av">${esc(initial(w.name))}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${defIn(w)} से 19:00</div></div><div class="quick"><button class="btn sm" data-act="q-present" data-w="${w.id}">पूरा दिन</button><button class="btn ghost sm" data-act="q-absent" data-w="${w.id}">गैर-हाजिर</button><button class="ibtn" data-act="open-att" data-w="${w.id}" aria-label="विवरण भरें">${ic('edit',18)}</button></div></div>`).join('')}</div>`;
+    if(pending.length)h+=`<div class="card"><h3>हाजिरी बाकी (${pending.length})</h3>${pending.map(w=>`<div class="row"><div class="av">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${defIn(w)} से 19:00</div></div><div class="quick"><button class="btn sm" data-act="q-present" data-w="${w.id}">पूरा दिन</button><button class="btn ghost sm" data-act="q-absent" data-w="${w.id}">गैर-हाजिर</button><button class="ibtn" data-act="open-att" data-w="${w.id}" aria-label="विवरण भरें">${ic('edit',18)}</button></div></div>`).join('')}</div>`;
     h+=`<div class="sec"><span>${wkd(sel)}, ${dShort(sel)}${sel===t?' (आज)':''} की हाजिरी</span></div>`;
     h+=s.att.length?`<div class="card">${s.att.map(a=>{const c=calcAttendance(a),w=worker(a.workerId);return `<div class="row rec" data-act="edit-att" data-id="${a.id}"><div class="av${w&&!w.active?' off':''}">${esc(initial(w?w.name:'?'))}</div><div class="mid"><div class="nm">${esc(w?w.name:'हटाया गया')}</div><div class="chips"><span class="chip ${STATUS_CHIP[a.status]||''}">${esc(a.status)}</span>${a.shift!=='day'?`<span class="chip night">${ic('moon',12)} ${a.shift==='both'?'दिन+रात':'रात'}</span>`:''}${timeText(a)?`<span class="sub">${timeText(a)}</span>`:''}</div></div><div class="end"><div class="amt">${money(c.wage)}</div><div class="sub">${hh(c.hours)} घं</div>${c.ot>0?`<div class="sub good">OT ${hh(c.ot)} घं = ${money(c.otWage)}</div>`:''}${a.shift==='both'?`<div class="sub">दिन ${money(c.dayWage)} + रात ${money(c.nightWage)}</div>`:''}</div><button class="ibtn bad" data-act="del" data-arr="attendance" data-id="${a.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">इस तारीख की हाजिरी नहीं लगी।</div>`;
   }
@@ -657,7 +676,7 @@ function quick(wid,status){
 /* workers */
 function renderWorkers(){
   const list=db.workers;
-  $('v-workers').innerHTML=list.length?`<div class="btns" style="margin-bottom:10px"><button class="btn ghost sm" data-act="bulk">सब का OT रेट / ड्यूटी एक साथ</button></div><div class="card">${list.map(w=>`<div class="row"><div class="av${w.active?'':' off'}">${esc(initial(w.name))}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${w.gender} · ${payLabel(w)}</div><div class="sub">दैनिक <b>${money(dailyOf(w))}</b> · घंटे का <b>${money(baseHourly(w))}</b></div><div class="chips"><span class="chip ${w.active?'good':''}">${w.active?'सक्रिय':'बंद'}</span><span class="chip acc">OT ${w.otAuto===false&&!otRateOf(w)?'नहीं':money(otPerHour(w))+'/घं'}${w.otAuto===false&&otRateOf(w)?' (तय)':''}</span>${w.demo?'<span class="chip warn">नमूना</span>':''}</div>${w.phone?`<div class="sub">${esc(w.phone)}</div>`:''}</div><div class="actions"><button class="ibtn" data-act="open-card" data-id="${w.id}" aria-label="रिपोर्ट कार्ड">${ic('book',18)}</button><button class="ibtn" data-act="edit-worker" data-id="${w.id}" aria-label="बदलें">${ic('edit',18)}</button>${w.active?`<button class="ibtn bad" data-act="deact" data-id="${w.id}" aria-label="बंद करें">${ic('x',18)}</button>`:`<button class="ibtn" data-act="react" data-id="${w.id}" aria-label="फिर चालू करें">${ic('check',18)}</button>`}</div></div>`).join('')}</div>`:`<div class="card empty"><div>अभी कोई मजदूर नहीं जोड़ा गया है।</div><button class="btn" data-act="add-worker">पहला मजदूर जोड़ें</button></div>`;
+  $('v-workers').innerHTML=list.length?`<div class="btns" style="margin-bottom:10px"><button class="btn ghost sm" data-act="bulk">सब का OT रेट / ड्यूटी एक साथ</button></div><div class="card">${list.map(w=>`<div class="row"><div class="av${w.active?'':' off'}">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${w.gender} · ${payLabel(w)}</div><div class="sub">दैनिक <b>${money(dailyOf(w))}</b> · घंटे का <b>${money(baseHourly(w))}</b></div><div class="chips"><span class="chip ${w.active?'good':''}">${w.active?'सक्रिय':'बंद'}</span><span class="chip acc">OT ${w.otAuto===false&&!otRateOf(w)?'नहीं':money(otPerHour(w))+'/घं'}${w.otAuto===false&&otRateOf(w)?' (तय)':''}</span>${w.demo?'<span class="chip warn">नमूना</span>':''}</div>${w.phone?`<div class="sub">${esc(w.phone)}</div>`:''}</div><div class="actions"><button class="ibtn" data-act="open-card" data-id="${w.id}" aria-label="रिपोर्ट कार्ड">${ic('book',18)}</button><button class="ibtn" data-act="edit-worker" data-id="${w.id}" aria-label="बदलें">${ic('edit',18)}</button>${w.active?`<button class="ibtn bad" data-act="deact" data-id="${w.id}" aria-label="बंद करें">${ic('x',18)}</button>`:`<button class="ibtn" data-act="react" data-id="${w.id}" aria-label="फिर चालू करें">${ic('check',18)}</button>`}</div></div>`).join('')}</div>`:`<div class="card empty"><div>अभी कोई मजदूर नहीं जोड़ा गया है।</div><button class="btn" data-act="add-worker">पहला मजदूर जोड़ें</button></div>`;
 }
 function bulkSheet(){
   sheetCtx={type:'bulk'};
@@ -680,7 +699,7 @@ function workerSheet(id){
   const w=id?db.workers.find(x=>x.id===id):null;
   const known=['35','33','40','45','30','0'],sel=!w?'auto':(w.otAuto!==false?'auto':(known.includes(String(w.otRate))?String(w.otRate):'custom'));
   const mode=w?w.payMode:'monthly';
-  sheetCtx={type:'worker',id:id||''};
+  sheetCtx={type:'worker',id:id||'',photo:(w&&w.photo)||''};
   openSheet(w?'मजदूर बदलें':'नया मजदूर',`<div class="form">
     <div class="fld"><label class="lbl" for="f-wname">मजदूर का नाम *</label><input id="f-wname" value="${esc(w?w.name:'')}" placeholder="नाम लिखें" autocomplete="off"></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-wphone">मोबाइल नंबर</label><input id="f-wphone" type="tel" inputmode="numeric" maxlength="15" value="${esc(w?w.phone:'')}" placeholder="वैकल्पिक"></div>
@@ -697,13 +716,24 @@ function workerSheet(id){
     <div class="preview" id="w-prev"></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-wstart">शुरू तारीख</label><input id="f-wstart" type="date" value="${w&&w.start?w.start:today()}"></div>
     <div class="fld"><label class="lbl" for="f-winfo">पता / अन्य जानकारी</label><input id="f-winfo" value="${esc(w?w.info:'')}" placeholder="वैकल्पिक"></div></div>
+    <details class="fld it" style="padding:0"><summary style="padding:12px;font-weight:700;cursor:pointer">निजी जानकारी / बायोडाटा (सिर्फ आपके पास रहती है)</summary><div class="form" style="padding:0 12px 12px">
+      <div class="fld"><label class="lbl" for="f-wphoto">फोटो (कैमरा या गैलरी)</label><input id="f-wphoto" type="file" accept="image/*"><div style="display:flex;gap:10px;align-items:center;margin-top:8px"><img id="w-photo-prev" alt="फोटो" ${w&&w.photo?`src="${w.photo}"`:'hidden'} style="width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line)"><button type="button" class="btn ghost sm" data-act="photo-del">फोटो हटाएँ</button></div></div>
+      <div class="g2"><div class="fld"><label class="lbl" for="f-wfather">पिता / पति का नाम</label><input id="f-wfather" value="${esc(w?w.father||'':'')}"></div>
+      <div class="fld"><label class="lbl" for="f-wdob">जन्मतिथि</label><input id="f-wdob" type="date" value="${esc(w?w.dob||'':'')}"></div></div>
+      <div class="fld"><label class="lbl" for="f-waddress">पूरा पता</label><input id="f-waddress" value="${esc(w?w.address||'':'')}" placeholder="गाँव / मोहल्ला, शहर, जिला"></div>
+      <div class="fld"><label class="lbl" for="f-waadhaar">आधार नंबर (12 अंक)</label><input id="f-waadhaar" inputmode="numeric" maxlength="14" value="${esc(w?w.aadhaar||'':'')}" placeholder="XXXX XXXX XXXX"></div>
+      <div class="g2"><div class="fld"><label class="lbl" for="f-wbank">बैंक खाता नंबर</label><input id="f-wbank" inputmode="numeric" value="${esc(w?w.bankAcc||'':'')}"></div>
+      <div class="fld"><label class="lbl" for="f-wifsc">IFSC</label><input id="f-wifsc" value="${esc(w?w.ifsc||'':'')}"></div></div>
+      <div class="g2"><div class="fld"><label class="lbl" for="f-wemn">आपातकालीन संपर्क का नाम</label><input id="f-wemn" value="${esc(w?w.emerName||'':'')}"></div>
+      <div class="fld"><label class="lbl" for="f-wemp">उसका मोबाइल</label><input id="f-wemp" type="tel" inputmode="numeric" maxlength="15" value="${esc(w?w.emerPhone||'':'')}"></div></div>
+    </div></details>
     <div class="hint">सामान्य दिन: पुरुष 10 घंटे (सुबह 9 से शाम 7), महिला 9.5 घंटे (सुबह 9:30 से शाम 7)। 30 मिनट का ब्रेक ड्यूटी में शामिल है।</div>
     <div class="err" id="formErr" hidden></div>
     <button class="btn wide" data-act="save-worker" data-id="${id||''}">मजदूर सेव करें</button></div>`,()=>{wFields();wPrev()});
 }
 function wPrev(){
   const b=$('w-prev');if(!b)return;
-  const std=$('f-wgender').value===FEM?9.5:10,m=$('f-wmode').value;
+  const std=+$('f-wduty').value>0?+$('f-wduty').value:($('f-wgender').value===FEM?9.5:10),m=$('f-wmode').value;
   const sal=+$('f-wsalary').value||0,dl=+$('f-wdaily').value||0,hl=+$('f-whourly').value||0;
   const daily=m==='monthly'?sal/30:m==='daily'?dl:hl*std,hourly=m==='hourly'?hl:daily/std;
   const os=$('f-wot').value,ot=os==='auto'?hourly:os==='custom'?(+$('f-wotc').value||0):+os;
@@ -715,12 +745,25 @@ function wFields(){
   $('box-monthly').hidden=m!=='monthly';$('box-daily').hidden=m!=='daily';$('box-hourly').hidden=m!=='hourly';
   $('box-otc').hidden=$('f-wot').value!=='custom';
 }
+function readPhoto(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=()=>{const im=new Image();
+    im.onload=()=>{const S=256,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d'),m=Math.min(im.width,im.height);
+      x.fillStyle='#fff';x.fillRect(0,0,S,S);x.drawImage(im,(im.width-m)/2,(im.height-m)*0.3,m,m,0,0,S,S);
+      sheetCtx.photo=c.toDataURL('image/jpeg',0.72);const pv=$('w-photo-prev');if(pv){pv.src=sheetCtx.photo;pv.hidden=false}};
+    im.onerror=()=>toast('फोटो नहीं खुल सकी');im.src=fr.result};
+  fr.readAsDataURL(f);
+}
 function reprice(wid,from){const w=worker(wid);if(!w)return;db.attendance.forEach(a=>{if(a.workerId===wid&&a.date>=from){a.hourlyRate=baseHourly(w);a.otRate=w.otRate}})}
 function saveWorker(id){
   const name=$('f-wname').value.trim();if(!name)return ferr('मजदूर का नाम लिखें');
   const mode=$('f-wmode').value,gender=$('f-wgender').value,otSel=$('f-wot').value,auto=otSel==='auto',ot=auto?0:(otSel==='custom'?Number($('f-wotc').value)||0:Number(otSel));
   const old=id?db.workers.find(x=>x.id===id):null;
   const o={id:id||uid(),name,phone:$('f-wphone').value.trim(),gender,payMode:mode,salary:+$('f-wsalary').value||0,daily:+$('f-wdaily').value||0,hourly:+$('f-whourly').value||0,otRate:ot,otAuto:auto,dutyHours:+$('f-wduty').value||0,info:$('f-winfo').value.trim(),start:$('f-wstart').value,active:old?old.active:true};
+  const aad=($('f-waadhaar').value||'').replace(/\s+/g,'');
+  if(aad&&!/^\d{12}$/.test(aad))return ferr('आधार नंबर 12 अंकों का होना चाहिए');
+  Object.assign(o,{father:$('f-wfather').value.trim(),dob:$('f-wdob').value,address:$('f-waddress').value.trim(),aadhaar:aad,bankAcc:$('f-wbank').value.trim(),ifsc:$('f-wifsc').value.trim().toUpperCase(),emerName:$('f-wemn').value.trim(),emerPhone:$('f-wemp').value.trim(),photo:sheetCtx.photo||''});
   if(old&&old.demo)o.demo=true;
   if(mode==='monthly'&&o.salary<=0)return ferr('मासिक वेतन भरें');
   if(mode==='daily'&&o.daily<=0)return ferr('दैनिक मजदूरी भरें');
@@ -739,7 +782,7 @@ function renderLedger(){
   $('v-ledger').innerHTML=db.workers.length?`
   <div class="stats"><div class="stat"><span>कुल कमाई</span><b>${money(tot.earn)}</b></div><div class="stat"><span>कुल बाकी</span><b class="${tot.bal<0?'bad':''}">${money(tot.bal)}</b></div><div class="stat"><span>एडवांस</span><b>${money(tot.adv)}</b></div><div class="stat"><span>भुगतान</span><b>${money(tot.pay)}</b></div></div>
   <div class="sec"><span>मजदूर का खाता</span></div>
-  <div class="card">${rows.map(x=>`<div class="row"><div class="av${x.w.active?'':' off'}">${esc(initial(x.w.name))}</div><div class="mid"><div class="nm">${esc(x.w.name)}</div><div class="sub">कमाई ${money(x.b.earn)} · एडवांस ${money(x.b.adv)} · भुगतान ${money(x.b.pay)}</div></div><div class="end"><div class="amt ${x.b.bal<0?'bad':''}">${money(x.b.bal)}</div><button class="btn ghost sm" style="margin-top:4px" data-act="add-tx" data-w="${x.w.id}">लेन-देन</button></div></div>`).join('')}</div>
+  <div class="card">${rows.map(x=>`<div class="row"><div class="av${x.w.active?'':' off'}">${avIn(x.w)}</div><div class="mid"><div class="nm">${esc(x.w.name)}</div><div class="sub">कमाई ${money(x.b.earn)} · एडवांस ${money(x.b.adv)} · भुगतान ${money(x.b.pay)}</div></div><div class="end"><div class="amt ${x.b.bal<0?'bad':''}">${money(x.b.bal)}</div><button class="btn ghost sm" style="margin-top:4px" data-act="add-tx" data-w="${x.w.id}">लेन-देन</button></div></div>`).join('')}</div>
   <div class="sec"><span>लेन-देन सूची</span></div>
   ${tx.length?`<div class="card">${tx.map(t=>{const w=worker(t.workerId);return `<div class="row"><div class="mid"><div class="nm">${esc(w?w.name:'-')}</div><div class="chips"><span class="chip ${t.type==='advance'?'warn':'good'}">${t.type==='advance'?'एडवांस':'भुगतान'}</span><span class="sub">${dShort(t.date)} · ${esc(t.method||'')}${t.note?' · '+esc(t.note):''}</span></div></div><div class="end"><div class="amt">${money(t.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="transactions" data-id="${t.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">लेन-देन नहीं है।</div>`}`
   :`<div class="card empty"><div>पहले मजदूर जोड़ें, फिर उनका हिसाब यहाँ दिखेगा।</div><button class="btn" data-act="add-worker">मजदूर जोड़ें</button></div>`;
@@ -862,7 +905,8 @@ function renderCard(){
   const c=ui.cardW?cardData(ui.cardW,m):null;
   if(!c){out.push(db.workers.length?'<div class="card empty"><div>ऊपर किसी का नाम दबाएँ, उसकी पूरी कहानी यहाँ आ जाएगी।</div></div>':'');$('v-card').innerHTML=out.join('');return}
   const col=c.pct>=85?'good':c.pct>=60?'':'bad';
-  out.push(`<div class="card"><div class="row" style="border:0"><div class="av">${esc(initial(c.w.name))}</div><div class="mid"><div class="nm">${esc(c.w.name)}</div><div class="sub">${c.w.gender} · ${payLabel(c.w)} · ${monthLabel(m)}</div></div><div class="end"><div class="amt ${col}">${c.pct}%</div><div class="sub">हाजिरी</div></div></div></div>
+  out.push(`<div class="card"><div class="row" style="border:0"><div class="av">${avIn(c.w)}</div><div class="mid"><div class="nm">${esc(c.w.name)}</div><div class="sub">${c.w.gender} · ${payLabel(c.w)} · ${monthLabel(m)}</div></div><div class="end"><div class="amt ${col}">${c.pct}%</div><div class="sub">हाजिरी</div></div></div></div>
+  ${bioCard(c.w)}
   <div class="stats"><div class="stat"><span>काम के दिन</span><b>${hh(c.workDays)}</b></div><div class="stat"><span>कुल घंटे</span><b>${hh(c.hours)}</b></div><div class="stat"><span>OT घंटे</span><b>${hh(c.ot)}</b></div><div class="stat"><span>रात की शिफ्ट</span><b>${c.nights}</b></div></div>
   <div class="card"><h3>हाजिरी</h3>
     <div class="kv"><span>पूरा दिन</span><b>${c.full}</b></div><div class="kv"><span>आधा दिन</span><b>${c.half}</b></div>${c.extra?`<div class="kv"><span>अतिरिक्त काम</span><b>${c.extra}</b></div>`:''}
@@ -880,8 +924,70 @@ function renderCard(){
     <div class="kv"><span>अब तक का कुल बाकी (सभी महीने)</span><b class="${c.all.bal<0?'bad':''}">${money(c.all.bal)}</b></div></div>
   <div class="card"><h3>रोज़ का ब्यौरा</h3>${c.cs.length?`<div class="tw"><table class="compact"><thead><tr><th>तारीख</th><th>स्थिति</th><th class="n">घंटे</th><th class="n">OT</th><th class="n">राशि</th></tr></thead><tbody>${c.cs.map(x=>`<tr><td>${dShort(x.a.date)} ${wkd(x.a.date)}</td><td>${esc(x.a.status)}${x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''}</td><td class="n">${hh(x.c.hours)}</td><td class="n">${x.c.ot?hh(x.c.ot):'–'}</td><td class="n">${money(x.c.wage)}</td></tr>`).join('')}<tr class="sum"><td>कुल</td><td></td><td class="n">${hh(c.hours)}</td><td class="n">${hh(c.ot)}</td><td class="n">${money(c.earn)}</td></tr></tbody></table></div>`:'<div class="muted">इस महीने की हाजिरी दर्ज नहीं है।</div>'}</div>
   ${c.tx.length?`<div class="card"><h3>एडवांस / भुगतान</h3>${c.tx.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>`<div class="kv"><span>${dShort(x.date)} · ${x.type==='advance'?'एडवांस':'भुगतान'}${x.note?' · '+esc(x.note):''}</span><b>${money(x.amount)}</b></div>`).join('')}</div>`:''}
-  <div class="btns"><button class="btn" data-act="card-share">कार्ड भेजें / कॉपी</button><button class="btn ghost" data-act="card-pdf">PDF</button></div>`);
+  <div class="btns"><button class="btn" data-act="card-share">कार्ड भेजें / कॉपी</button><button class="btn ghost" data-act="card-pdf">PDF</button><button class="btn ghost" data-act="card-pdf" data-share="1">WhatsApp पर PDF</button></div>`);
   $('v-card').innerHTML=out.join('');
+}
+function ageOf(dob){if(!dob)return '';const d=new Date(dob+'T00:00:00'),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a>0&&a<100?a:''}
+function aadFmt(a,full){a=String(a||'');if(!a)return '';const g=a.replace(/(\d{4})(?=\d)/g,'$1 ');return full?g:'XXXX XXXX '+a.slice(-4)}
+function bioRows(w,inc){
+  const r=[['नाम',w.name],['पिता / पति का नाम',w.father],['लिंग',w.gender],['जन्मतिथि',w.dob?dShort(w.dob)+' '+new Date(w.dob+'T00:00:00').getFullYear()+(ageOf(w.dob)?' (उम्र '+ageOf(w.dob)+' वर्ष)':''):''],['मोबाइल नंबर',w.phone],['पता',w.address||w.info],['आपातकालीन संपर्क',[w.emerName,w.emerPhone].filter(Boolean).join(' – ')],['काम पर आने की तारीख',w.start?dShort(w.start)+' '+new Date(w.start+'T00:00:00').getFullYear():'']];
+  if(inc.aadhaar)r.push(['आधार नंबर',aadFmt(w.aadhaar,true)]);
+  if(inc.bank){r.push(['बैंक खाता नंबर',w.bankAcc]);r.push(['IFSC',w.ifsc])}
+  return r.filter(x=>x[1]);
+}
+function bioCard(w){
+  const rows=bioRows(w,{}).filter(x=>x[0]!=='नाम').concat(w.aadhaar?[['आधार नंबर',aadFmt(w.aadhaar,ui.showAad)]]:[]).concat(w.bankAcc?[['बैंक खाता',(ui.showAad?w.bankAcc:'XXXXXX'+String(w.bankAcc).slice(-4))+(w.ifsc?' · '+w.ifsc:'')]]:[]);
+  const has=rows.length>2||w.photo;
+  return `<div class="card"><h3>निजी जानकारी / बायोडाटा <span class="muted" style="font-weight:400">(सिर्फ आपके फोन में)</span></h3>
+  <div style="display:flex;gap:12px;align-items:flex-start">${w.photo?`<img src="${w.photo}" alt="फोटो" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:1px solid var(--line);flex:none">`:''}<div style="flex:1;min-width:0">${rows.map(x=>`<div class="kv"><span>${x[0]}</span><b style="text-align:right;overflow-wrap:anywhere;font-size:15px;font-family:var(--font-body)">${esc(x[1])}</b></div>`).join('')}</div></div>
+  ${has?'':'<div class="muted">अभी फोटो, पता, आधार आदि नहीं भरे हैं। "जानकारी भरें / बदलें" दबाएँ।</div>'}
+  <div class="btns" style="margin-top:10px"><button class="btn sm" data-act="bio-sheet" data-mode="pdf">बायोडाटा PDF</button><button class="btn sm" data-act="bio-sheet" data-mode="share">WhatsApp पर भेजें</button><button class="btn ghost sm" data-act="bio-sheet" data-mode="text">टेक्स्ट कॉपी</button></div>
+  <div class="btns" style="margin-top:8px"><button class="btn ghost sm" data-act="edit-worker" data-id="${w.id}">जानकारी भरें / बदलें</button>${(w.aadhaar||w.bankAcc)?`<button class="btn ghost sm" data-act="aad-toggle">${ui.showAad?'आधार/बैंक छुपाएँ':'आधार/बैंक पूरा दिखाएँ'}</button>`:''}</div></div>`;
+}
+function bioSheet(mode){
+  const w=worker(ui.cardW);if(!w)return;
+  sheetCtx={type:'bio'};
+  openSheet('बायोडाटा में क्या-क्या जाए?',`<div class="form">
+    <p class="hint" style="margin:0">नाम, पता, मोबाइल, फोटो आदि जाएँगे। नीचे की संवेदनशील जानकारी अपनी मर्जी से जोड़ें:</p>
+    <label class="chk"><input type="checkbox" id="f-binc-a"> आधार नंबर शामिल करें</label>
+    <label class="chk"><input type="checkbox" id="f-binc-b"> बैंक खाता और IFSC शामिल करें</label>
+    <div class="hint">जिसे भेज रहे हैं, उस पर भरोसा हो तभी आधार या बैंक की जानकारी जोड़ें।</div>
+    <button class="btn wide" data-act="bio-go" data-mode="${mode}">${mode==='share'?'WhatsApp पर भेजें':mode==='text'?'टेक्स्ट कॉपी करें':'PDF बनाएँ'}</button></div>`);
+}
+function bioText(w,inc){return ['बायोडाटा'].concat(bioRows(w,inc).map(x=>x[0]+': '+x[1])).join('\n')}
+async function bioGo(mode){
+  const w=worker(ui.cardW);if(!w)return;
+  const inc={aadhaar:$('f-binc-a').checked,bank:$('f-binc-b').checked};closeSheet();
+  if(mode==='text'){shareText(bioText(w,inc),'बायोडाटा');return}
+  const blob=await bioPdf(w,inc);
+  shareMode=mode==='share';savePdf(blob,'Biodata_'+asc(w.name)+'_'+today()+'.pdf');
+}
+async function bioPdf(w,inc){
+  const W=1240,H=1754,M=80,FONT='"Noto Sans Devanagari","Mukta","Hind","Nirmala UI","Segoe UI",Arial,sans-serif',cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,W,H);cx.textBaseline='alphabetic';
+  cx.fillStyle='#10302a';cx.font='700 54px '+FONT;cx.textAlign='center';cx.fillText('बायोडाटा',W/2,M+50);
+  cx.fillStyle='#555';cx.font='400 24px '+FONT;cx.fillText((db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),W/2,M+92);cx.textAlign='left';
+  cx.strokeStyle='#10302a';cx.lineWidth=4;cx.beginPath();cx.moveTo(M,M+118);cx.lineTo(W-M,M+118);cx.stroke();
+  const top=M+160,PW=270,PH=330,px=W-M-PW;
+  cx.strokeStyle='#999';cx.lineWidth=2;cx.strokeRect(px,top,PW,PH);
+  if(w.photo){await new Promise(r=>{const im=new Image();im.onload=()=>{cx.drawImage(im,px+4,top+4,PW-8,PH-8);r()};im.onerror=r;im.src=w.photo})}
+  else{cx.fillStyle='#aaa';cx.font='400 22px '+FONT;cx.textAlign='center';cx.fillText('फोटो',px+PW/2,top+PH/2);cx.textAlign='left'}
+  let y=top;const LW=300,maxV=px-M-LW-30;
+  const rows=bioRows(w,inc);
+  function wrap(t,mw,f){cx.font=f;const out=[];let line='';String(t).split(' ').forEach(wd=>{const test=line?line+' '+wd:wd;if(cx.measureText(test).width<=mw||!line)line=test;else{out.push(line);line=wd}});out.push(line);return out}
+  rows.forEach(r=>{
+    const ls=wrap(r[1],r[0]==='नाम'?maxV:Math.max(maxV,500),'600 30px '+FONT),h=ls.length*42+22;
+    cx.fillStyle='#555';cx.font='400 26px '+FONT;cx.fillText(r[0],M,y+34);
+    cx.fillStyle='#111';cx.font='600 30px '+FONT;ls.forEach((l,k)=>cx.fillText(': '+l,M+LW,y+34+k*42));
+    cx.strokeStyle='#e1e6e4';cx.lineWidth=1;cx.beginPath();cx.moveTo(M,y+h-4);cx.lineTo(y<top+PH?px-20:W-M,y+h-4);cx.stroke();
+    y+=h;
+  });
+  cx.fillStyle='#333';cx.font='400 26px '+FONT;
+  cx.fillText('मैं घोषणा करता / करती हूँ कि ऊपर दी गई जानकारी सही है।',M,H-300);
+  cx.strokeStyle='#333';cx.lineWidth=2;cx.beginPath();cx.moveTo(W-M-380,H-170);cx.lineTo(W-M,H-170);cx.stroke();
+  cx.font='400 24px '+FONT;cx.textAlign='center';cx.fillText('मजदूर के हस्ताक्षर',W-M-190,H-132);cx.textAlign='left';
+  cx.fillStyle='#777';cx.font='400 20px '+FONT;cx.fillText('बनाया: '+dShort(today()),M,H-60);
+  return pdfFromCanvases([cv],W,H);
 }
 function cardText(c){
   const L=[c.w.name+' ('+c.w.gender+') – '+monthLabel(c.m)];
@@ -938,10 +1044,10 @@ function renderKhata(){
   <div class="mstep"><button class="ibtn" data-act="k-prev" aria-label="पिछला महीना">${ic('back',18)}</button><span>${monthLabel(m)}</span><button class="ibtn" data-act="k-next" aria-label="अगला महीना">${ic('chev',18)}</button></div>
   <div class="stats"><div class="stat"><span>मुझे लेना (कुल)</span><b class="good">${money(lena)}</b></div><div class="stat"><span>मुझे देना (कुल)</span><b class="${dena>0?'bad':''}">${money(dena)}</b></div><div class="stat"><span>इस महीने खर्च</span><b>${money(spent)}</b></div><div class="stat"><span>इस महीने आए / गए</span><b style="font-size:15px">${money(inn)} / ${money(out)}</b></div></div>
   ${dues.length?`<div class="card"><h3>जल्दी देना / लेना है</h3>${dues.map(r=>`<div class="kv"><span>${esc(r.party)} · ${r.kind==='liya'?'मुझे देना':'मुझे लेना'} · ${dShort(r.due)}${r.due<today()?' (देर)':''}</span><b>${money(r.left)}</b></div>`).join('')}</div>`:''}
-  <div class="btns"><button class="btn" data-act="add-k">+ नई एंट्री</button><button class="btn ghost" data-act="k-pdf">PDF स्टेटमेंट</button></div>
+  <div class="btns"><button class="btn" data-act="add-k">+ नई एंट्री</button><button class="btn ghost" data-act="k-pdf">PDF स्टेटमेंट</button><button class="btn ghost" data-act="k-pdf" data-share="1">WhatsApp पर PDF भेजें</button></div>
   <div class="card"><h3>किसका कितना बाकी</h3>${bal.length?bal.map(b=>`<div class="row"><div class="mid"><div class="nm">${esc(b.name)}</div><div class="sub">${b.net>.005?'वह मुझे देगा':b.net<-.005?'मुझे उसे देना है':'हिसाब बराबर'}</div></div><div class="end"><div class="amt ${b.net>.005?'good':b.net<-.005?'bad':''}">${money(Math.abs(b.net))}</div></div><button class="ibtn" data-act="k-party" data-n="${esc(b.name)}" aria-label="खाता देखें">${ic('chev',18)}</button></div>`).join(''):'<div class="muted">किसी से लेन-देन दर्ज नहीं है।</div>'}</div>
   <div class="chiprow" role="group" aria-label="छाँटें">${F.map(f=>`<button class="pick${!ui.kParty&&ui.kFilter===f[0]?' on':''}" data-act="k-filter" data-f="${f[0]}">${f[1]}</button>`).join('')}</div>
-  ${ui.kParty?`<div class="card"><div class="kv"><span>खाता: <b>${esc(ui.kParty)}</b></span><b>${money(Math.abs((bal.find(b=>b.name===ui.kParty)||{net:0}).net))}</b></div><div class="btns" style="margin-top:8px"><button class="btn sm" data-act="k-settle" data-n="${esc(ui.kParty)}">हिसाब चुकता करें</button><button class="btn ghost sm" data-act="k-pdf">इसका PDF</button><button class="btn ghost sm" data-act="k-party" data-n="">सब देखें</button></div></div>`:''}
+  ${ui.kParty?`<div class="card"><div class="kv"><span>खाता: <b>${esc(ui.kParty)}</b></span><b>${money(Math.abs((bal.find(b=>b.name===ui.kParty)||{net:0}).net))}</b></div><div class="btns" style="margin-top:8px"><button class="btn sm" data-act="k-settle" data-n="${esc(ui.kParty)}">हिसाब चुकता करें</button><button class="btn ghost sm" data-act="k-pdf">इसका PDF</button><button class="btn ghost sm" data-act="k-pdf" data-share="1">WhatsApp पर भेजें</button><button class="btn ghost sm" data-act="k-party" data-n="">सब देखें</button></div></div>`:''}
   <div class="card">${list.length?list.map(kRow).join(''):'<div class="muted">कोई एंट्री नहीं है।</div>'}</div>
   <div class="muted" style="text-align:center">किसी एंट्री पर दबाकर बदल सकते हैं।${!ui.kParty&&['lena','dena','kaam'].includes(ui.kFilter)?' (यह सूची सभी महीनों की है)':''}</div>`;
 }
@@ -997,7 +1103,7 @@ function kPdf(){
     cols:[{h:'तारीख',w:.12},{h:'विवरण',w:.46},{h:'मिले',w:.13,r:1},{h:'गए',w:.13,r:1},{h:st.party?'बाकी':'चालू बाकी',w:.16,r:1}],
     rows:st.rows,total:['कुल','',nfmt(st.tin),nfmt(st.tout),''],
     extra:st.party?null:{title:'किसका कितना बाकी',cols:[{h:'नाम',w:.5},{h:'स्थिति',w:.3},{h:'राशि',w:.2,r:1}],rows:st.bal.map(b=>[b.name,b.net>.005?'मुझे लेना':b.net<-.005?'मुझे देना':'बराबर',nfmt(Math.abs(b.net))])}};
-  savePdf(stmtPdf(o),'Khata_'+(st.party?st.party.replace(/[^\wऀ-ॿ]+/g,'_'):ui.kMonth)+'.pdf');
+  savePdf(stmtPdf(o),'Khata_'+(st.party?asc(st.party)+'_'+today():ui.kMonth)+'.pdf');
 }
 
 /* PDF statement (offline, no libraries: pages are drawn on canvas and packed as JPEG into a PDF) */
@@ -1067,8 +1173,22 @@ function pdfFromCanvases(cvs,W,H){
   str('trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
   return new Blob(parts,{type:'application/pdf'});
 }
+const asc=n=>String(n||'').replace(/[^\w]+/g,'_').replace(/^_+|_+$/g,'')||'naam';
+let shareMode=false,nativeSharePdf=null;
+async function sharePdfFile(blob,name){
+  try{const f=new File([blob],name,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return true}}
+  catch(e){if(e&&e.name==='AbortError')return true}
+  return false;
+}
 function savePdf(blob,name){
+  const share=shareMode;shareMode=false;
   if(inFrame()){toast('यह पूर्वावलोकन है, PDF असली ऐप में सेव होगा');return}
+  if(share){
+    if(nativeSharePdf){nativeSharePdf(blob,name);return}
+    sharePdfFile(blob,name).then(ok=>{if(!ok){download(blob,name);toast('सीधा भेज नहीं सके। PDF Downloads में सेव हुआ, WhatsApp में अटैच करके भेजें')}});
+    return;
+  }
   download(blob,name);toast('PDF सेव हो गया: '+name);
 }
 
@@ -1107,7 +1227,7 @@ function renderSlip(){
   ${d.dsum.map(x=>`<tr><td>${x.l}</td><td></td><td></td><td class="n ${x.a?'bad':''}">${x.a?'−'+money(x.a):money(0)}</td></tr>`).join('')}
   <tr class="fin"><td>बाकी (अंतिम)</td><td></td><td></td><td class="n ${d.net<0?'bad':'good'}">${money(d.net)}</td></tr>
   </tbody></table></div>
-  <div class="btns" style="margin-top:10px"><button class="btn" data-act="slip-share">पर्ची भेजें / कॉपी</button><button class="btn ghost" data-act="slip-pdf">PDF</button><button class="btn ghost" data-act="add-ded">कटौती जोड़ें</button></div></div>
+  <div class="btns" style="margin-top:10px"><button class="btn" data-act="slip-share">पर्ची भेजें / कॉपी</button><button class="btn ghost" data-act="slip-pdf">PDF</button><button class="btn ghost" data-act="slip-pdf" data-share="1">WhatsApp पर PDF</button><button class="btn ghost" data-act="add-ded">कटौती जोड़ें</button></div></div>
   <div class="card"><h3>कटौती की एंट्री</h3>${d.ded.length?d.ded.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="row"><div class="mid"><div class="nm">${dedLabel(x.type)}</div><div class="sub">${dShort(x.date)}${x.note?' · '+esc(x.note):''}</div></div><div class="end"><div class="amt">${money(x.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="deductions" data-id="${x.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join(''):'<div class="muted">इस अवधि में कोई कटौती नहीं जोड़ी गई। AD, PF/ESI, बैंक या Wastage की रकम "कटौती जोड़ें" से भरें।</div>'}</div>`;
 }
 function slipPdf(){
@@ -1123,7 +1243,7 @@ function cardPdf(){
   savePdf(stmtPdf({title:'मजदूर रिपोर्ट कार्ड – '+c.w.name+' ('+c.w.gender+')',owner:(db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),sub:monthLabel(c.m),
     summary:[['हाजिरी',c.full+' पूरा, '+c.half+' आधा, '+c.absent+' अनुपस्थित = '+c.pct+'%'],['कुल घंटे / OT घंटे',hh(c.hours)+' / '+hh(c.ot)],['रात की शिफ्ट',c.nights+' ('+money(c.nightAmt)+')'],['कुल कमाई',money(c.earn)],['एडवांस + भुगतान',money(c.adv+c.pay)],['इस महीने का बाकी',money(c.net)],['अब तक का कुल बाकी',money(c.all.bal)]],
     cols:[{h:'तारीख',w:.2},{h:'स्थिति',w:.34},{h:'घंटे',w:.14,r:1},{h:'OT',w:.12,r:1},{h:'राशि',w:.2,r:1}],
-    rows:c.cs.map(x=>[dShort(x.a.date),x.a.status+(x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''),hh(x.c.hours),x.c.ot?hh(x.c.ot):'–',nfmt(Math.round(x.c.wage))]),total:['कुल','',hh(c.hours),hh(c.ot),nfmt(Math.round(c.earn))]}),'Card_'+c.w.name.replace(/[^\w\u0900-\u097F]+/g,'_')+'_'+c.m+'.pdf');
+    rows:c.cs.map(x=>[dShort(x.a.date),x.a.status+(x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''),hh(x.c.hours),x.c.ot?hh(x.c.ot):'–',nfmt(Math.round(x.c.wage))]),total:['कुल','',hh(c.hours),hh(c.ot),nfmt(Math.round(c.earn))]}),'Card_'+asc(c.w.name)+'_'+c.m+'.pdf');
 }
 function slipText(){
   const d=slipData(ui.slStart,ui.slEnd),L=[];
@@ -1336,6 +1456,8 @@ function fillSettings(){
   const s=db.settings;
   $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';
   $('restoreErr').hidden=true;
+  $('pin-note').textContent=s.pinHash?'PIN चालू है: ऐप खोलने पर और 1 मिनट बाहर रहने के बाद PIN माँगेगा। यह सिर्फ दूसरों से आँख बचाने के लिए है।':'PIN लगाने पर ऐप खोलते ही 4 से 6 अंक का PIN माँगेगा, ताकि मजदूरों की निजी जानकारी और हिसाब कोई और न देख सके।';
+  $('pin-rm').hidden=!s.pinHash;
 }
 function saveSettings(){
   Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||''});
@@ -1397,7 +1519,7 @@ function dueBanner(){
 }
 function monthData(m){
   const inM=r=>r.date&&r.date.slice(0,7)===m;
-  return{app:'maa-ganga-labour',version:2,month:m,savedAt:new Date().toISOString(),workers:db.workers,attendance:db.attendance.filter(inM),production:db.production.filter(inM),expenses:db.expenses.filter(inM),transactions:db.transactions.filter(inM),outside:db.outside.filter(inM),deductions:db.deductions.filter(inM),personal:db.personal.filter(inM),settings:{title:db.settings.title,brand:db.settings.brand,owner:db.settings.owner,phone:db.settings.phone,items:db.settings.items}};
+  return{app:'maa-ganga-labour',version:2,month:m,savedAt:new Date().toISOString(),workers:db.workers.map(w=>{const o=Object.assign({},w);['aadhaar','bankAcc','ifsc','photo'].forEach(k=>delete o[k]);return o}),attendance:db.attendance.filter(inM),production:db.production.filter(inM),expenses:db.expenses.filter(inM),transactions:db.transactions.filter(inM),outside:db.outside.filter(inM),deductions:db.deductions.filter(inM),personal:db.personal.filter(inM),settings:{title:db.settings.title,brand:db.settings.brand,owner:db.settings.owner,phone:db.settings.phone,items:db.settings.items}};
 }
 async function saveMonth(m,share){
   if(!/^\d{4}-\d{2}$/.test(m))return;
@@ -1433,6 +1555,49 @@ if(window.addEventListener){
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEv=e;$('install-card').hidden=false});
   window.addEventListener('appinstalled',()=>{installEv=null;$('install-card').hidden=true});
 }
+
+/* app lock (PIN) */
+async function hashPin(p){
+  const t='mlk-v1:'+p;
+  try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}
+  let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'x'+h;
+}
+function showLock(){const l=$('lock');if(!l)return;l.hidden=false;$('lock-pin').value='';$('lock-err').hidden=true;document.body.classList.add('noscroll');setTimeout(()=>{try{$('lock-pin').focus()}catch(e){}},50)}
+async function lockTry(){
+  const v=$('lock-pin').value;
+  if(v&&await hashPin(v)===db.settings.pinHash){$('lock').hidden=true;document.body.classList.remove('noscroll');return}
+  $('lock-err').textContent='PIN गलत है';$('lock-err').hidden=false;$('lock-pin').value='';
+}
+function lockForgot(){
+  confirmSheet({title:'PIN भूल गए?',msg:'PIN हटाने के लिए ऐप का सारा डेटा इस फोन से मिटाना पड़ेगा। अगर आपके पास बैकअप फाइल है तो बाद में "बैकअप वापस लाएँ" से सब वापस आ जाएगा। क्या मिटाकर आगे बढ़ें?',danger:true,ok:'हाँ, मिटाएँ',run:()=>{db=fresh();persist();$('lock').hidden=true;document.body.classList.remove('noscroll');toast('डेटा मिटा दिया गया');go('home');renderHeader()}});
+}
+function pinSheet(){
+  sheetCtx={type:'pin'};
+  openSheet('PIN लगाएँ',`<div class="form"><div class="fld"><label class="lbl" for="f-pin1">नया PIN (4 से 6 अंक)</label><input id="f-pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+  <div class="fld"><label class="lbl" for="f-pin2">PIN दोबारा लिखें</label><input id="f-pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+  <div class="hint">PIN याद रखें। भूल गए तो डेटा मिटाकर ही खुलेगा, इसलिए पहले बैकअप ज़रूर रखें।</div>
+  <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="pin-save">सेव करें</button></div>`);
+}
+async function pinSave(){
+  const a=$('f-pin1').value,b=$('f-pin2').value;
+  if(!/^\d{4,6}$/.test(a))return ferr('PIN 4 से 6 अंकों का हो');
+  if(a!==b)return ferr('दोनों PIN एक जैसे नहीं हैं');
+  db.settings.pinHash=await hashPin(a);closeSheet();toast('PIN चालू हो गया');save();
+}
+function pinRemoveSheet(){
+  sheetCtx={type:'pinrm'};
+  openSheet('PIN हटाएँ',`<div class="form"><div class="fld"><label class="lbl" for="f-pin0">अभी का PIN</label><input id="f-pin0" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div><div class="err" id="formErr" hidden></div><button class="btn wide" data-act="pin-remove-go">PIN हटाएँ</button></div>`);
+}
+async function pinRemoveGo(){
+  if(await hashPin($('f-pin0').value)!==db.settings.pinHash)return ferr('PIN गलत है');
+  delete db.settings.pinHash;closeSheet();toast('PIN हटा दिया');save();
+}
+$('lock-pin').addEventListener('keydown',e=>{if(e.key==='Enter')lockTry()});
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')hiddenAt=Date.now();
+  else if(db.settings.pinHash&&hiddenAt&&Date.now()-hiddenAt>60000)showLock();
+});
 
 /* events */
 function fabAction(){const a=FAB[ui.view];if(a)act(a,$('fab'))}
@@ -1474,6 +1639,16 @@ function act(a,el){
     case 'month-share':saveMonth(d.m,true);break;
     case 'snooze':ui.snooze=true;renderHome();break;
     case 'items':itemsSheet();break;
+    case 'photo-del':sheetCtx.photo='';{const im=$('w-photo-prev');if(im){im.hidden=true;im.removeAttribute('src')}}break;
+    case 'aad-toggle':ui.showAad=!ui.showAad;renderCard();break;
+    case 'bio-sheet':bioSheet(d.mode);break;
+    case 'bio-go':bioGo(d.mode);break;
+    case 'pin-set':pinSheet();break;
+    case 'pin-save':pinSave();break;
+    case 'pin-remove':pinRemoveSheet();break;
+    case 'pin-remove-go':pinRemoveGo();break;
+    case 'lock-go':lockTry();break;
+    case 'lock-forgot':lockForgot();break;
     case 'add-k':kSheet('',ui.kParty?{party:ui.kParty}:null);break;
     case 'edit-k':kSheet(d.id);break;
     case 'save-k':saveK();break;
@@ -1482,9 +1657,9 @@ function act(a,el){
     case 'k-filter':ui.kFilter=d.f;ui.kParty='';renderKhata();break;
     case 'k-party':ui.kParty=d.n||'';renderKhata();break;
     case 'k-settle':{const b=kBal().find(x=>x.name===d.n);if(b)kSheet('',{party:b.name,kind:b.net>0?'wapas_mila':'wapas_diya',amount:Math.abs(b.net),purpose:'हिसाब चुकता'});break}
-    case 'k-pdf':kPdf();break;
-    case 'slip-pdf':slipPdf();break;
-    case 'card-pdf':cardPdf();break;
+    case 'k-pdf':shareMode=d.share==='1';kPdf();break;
+    case 'slip-pdf':shareMode=d.share==='1';slipPdf();break;
+    case 'card-pdf':shareMode=d.share==='1';cardPdf();break;
     case 'bulk':bulkSheet();break;
     case 'bulk-save':bulkSave();break;
     case 'open-card':ui.cardW=d.id;go('card');break;
@@ -1519,6 +1694,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('layer').firstChild)closeSheet()});
 $('layer').addEventListener('change',e=>{
   const id=e.target.id;
+  if(id==='f-wphoto')readPhoto(e.target);
   if(id==='f-wmode'||id==='f-wot')wFields();
   if(id.indexOf('f-w')===0)wPrev();
   if(id==='f-aworker'&&['day','both'].includes($('f-ashift').value)&&!ABS.includes($('f-astatus').value))attDefaults();
@@ -1537,6 +1713,7 @@ $('restoreFile').addEventListener('change',e=>{
   const r=new FileReader();r.onload=()=>{$('restoreText').value=String(r.result||'')};r.readAsText(f);
 });
 
+if(db.settings.pinHash)showLock();
 go('home');
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 })();
