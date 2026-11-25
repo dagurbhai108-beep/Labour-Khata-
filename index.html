@@ -525,7 +525,14 @@ function renderHeader(){
   document.querySelectorAll('.tab').forEach(t=>{const on=t.dataset.tab===TABOF(v);t.classList.toggle('on',on);if(on)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current')});
   $('fab').hidden=!FAB[v];
 }
-function go(v){
+const MAIN_V=['home','attendance','workers','ledger','more'];
+let navStack=['home'];
+function go(v,fromBack){
+  if(!fromBack){
+    if(v==='home')navStack=['home'];
+    else if(MAIN_V.includes(v))navStack=['home',v];
+    else if(navStack[navStack.length-1]!==v){navStack.push(v);if(navStack.length>30)navStack.splice(1,1)}
+  }
   ui.view=v;
   document.querySelectorAll('main > section').forEach(s=>{s.hidden=s.id!=='v-'+v});
   window.scrollTo(0,0);
@@ -1593,6 +1600,27 @@ async function pinRemoveGo(){
   delete db.settings.pinHash;closeSheet();toast('PIN हटा दिया');save();
 }
 $('lock-pin').addEventListener('keydown',e=>{if(e.key==='Enter')lockTry()});
+/* बैक बटन: पिछली स्क्रीन पर जाए, ऐप एकदम बंद न हो */
+let exitArmed=false,guardOn=false;
+function appBack(){
+  const lk=$('lock');if(lk&&!lk.hidden)return 'stay';
+  if($('layer').firstChild){closeSheet();return 'stay'}
+  if(navStack.length>1){navStack.pop();go(navStack[navStack.length-1],true);return 'stay'}
+  if(ui.view!=='home'){go('home');return 'stay'}
+  if(exitArmed)return 'exit';
+  exitArmed=true;toast('बाहर निकलने के लिए एक बार और Back दबाएँ');setTimeout(()=>{exitArmed=false},2200);return 'stay';
+}
+function armGuard(){
+  if(guardOn)return;guardOn=true;
+  try{history.replaceState({root:1},'');history.pushState({guard:1},'')}catch(e){guardOn=false}
+}
+['pointerdown','keydown','touchstart'].forEach(t=>document.addEventListener(t,armGuard,{passive:true}));
+window.addEventListener('popstate',()=>{
+  if(!guardOn)return;
+  const r=appBack();
+  if(r==='exit'){guardOn=false;history.back();return}
+  try{history.pushState({guard:1},'')}catch(e){}
+});
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden')hiddenAt=Date.now();
@@ -1689,6 +1717,7 @@ function act(a,el){
 }
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act],[data-go]');if(!el)return;
+  if(el.id==='backBtn'){appBack();return}
   if(el.dataset.act)act(el.dataset.act,el);else go(el.dataset.go);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('layer').firstChild)closeSheet()});
