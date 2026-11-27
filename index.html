@@ -260,6 +260,8 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
         <button class="mi" data-go="khata"><div class="ci" data-ic="rupee"></div><span>मेरा निजी खाता (लेन-देन)</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="card"><div class="ci" data-ic="users"></div><span>मजदूर रिपोर्ट कार्ड</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="slip"><div class="ci" data-ic="book"></div><span>पर्ची / हिसाब</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-go="ostate"><div class="ci" data-ic="users"></div><span>बाहर की लेबर (दूसरे राज्य की)</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-go="lent"><div class="ci" data-ic="rupee"></div><span>दूसरे ठेकेदार को दी हुई लेबर</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="outside"><div class="ci" data-ic="users"></div><span>बाहरी (नकद) लेबर</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="expenses"><div class="ci" data-ic="receipt"></div><span>अन्य खर्च</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="reports"><div class="ci" data-ic="chart"></div><span>रिपोर्ट</span><i data-ic="chev" data-s="20"></i></button>
@@ -289,6 +291,9 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <section id="v-outside" class="page gut" hidden></section>
     <section id="v-card" class="page gut" hidden></section>
     <section id="v-khata" class="page gut" hidden></section>
+    <section id="v-ostate" class="page gut" hidden></section>
+    <section id="v-lent" class="page gut" hidden></section>
+    <section id="v-osw" class="page gut" hidden></section>
 
     <section id="v-reports" class="page gut" hidden>
       <div class="card form">
@@ -326,6 +331,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
       <div class="card form"><h3>ऐप लॉक (PIN)</h3>
         <p class="hint" style="margin:0" id="pin-note"></p>
         <div class="btns"><button class="btn" data-act="pin-set">PIN लगाएँ / बदलें</button><button class="btn ghost" data-act="pin-remove" id="pin-rm" hidden>PIN हटाएँ</button></div></div>
+      <div class="card form"><h3>PDF फाइल का नाम</h3><p class="hint" style="margin:0">PDF का नाम "वर्कर_का_नाम_महीना_साल.pdf" बनता है, जैसे रमेश_कुमार_नवंबर_2026.pdf। अगर आपके फोन में हिंदी नाम की जगह सिर्फ "download" दिखे, तो नीचे वाला डिब्बा टिक करें।</p><label class="chk"><input type="checkbox" id="s-pdfascii" data-act="pdf-ascii"> PDF का नाम अंग्रेजी अक्षरों में रखें</label></div>
       <div class="card form" id="install-card" hidden><h3>ऐप इंस्टॉल करें</h3>
         <p class="hint" style="margin:0">होम स्क्रीन पर आइकन के साथ, पूरी स्क्रीन में खुलने वाला ऐप।</p>
         <button class="btn wide" data-act="install">इंस्टॉल करें</button></div>
@@ -421,7 +427,7 @@ const DEFAULT_ITEMS=[
   {key:'b252',name:'252 पीस बंडल',rate:12,active:true},
   {key:'khilona',name:'खिलौना (हर पाउच)',rate:2,active:true,extra:true}
 ];
-const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
+const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],osw:[],osatt:[],osexp:[],osleave:[],oscpay:[],lent:[],lentpay:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
 function migrateProd(p){
   if(p.q)return p;
   const n280=Number(p.n280)||0,n500=Number(p.n500)||0,r280=Number(p.r280)||0,r500=Number(p.r500)||0,k=n280+n500;
@@ -432,7 +438,7 @@ function migrateProd(p){
 }
 function norm(d){
   const f=fresh();
-  ['workers','attendance','production','expenses','transactions','outside','deductions','personal'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
+  ['workers','attendance','production','expenses','transactions','outside','deductions','personal','osw','osatt','osexp','osleave','oscpay','lent','lentpay'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
   d.settings=Object.assign(f.settings,d.settings||{});
   if(!Array.isArray(d.settings.items)||!d.settings.items.length)d.settings.items=f.settings.items;
   d.production.forEach(migrateProd);
@@ -443,7 +449,7 @@ var storeWarn=false;
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(db));storeWarn=false}catch(e){if(!storeWarn){storeWarn=true;toast('चेतावनी: फोन में जगह नहीं मिली, डेटा सेव नहीं हो पा रहा! अभी बैकअप डाउनलोड करें')}}}
 
 /* calculations (same rules as the original app) */
-const worker=id=>db.workers.find(w=>w.id===id);
+const worker=id=>db.workers.find(w=>w.id===id)||(db.osw&&db.osw.find(w=>w.id===id));
 const stdHours=w=>(w&&Number(w.dutyHours)>0)?Number(w.dutyHours):(w&&w.gender===FEM?9.5:10);
 const otRateOf=w=>Number(w&&w.otRate)||0;
 const dailyOf=w=>w.payMode==='monthly'?(Number(w.salary)||0)/30:w.payMode==='daily'?(Number(w.daily)||0):(Number(w.hourly)||0)*stdHours(w);
@@ -511,10 +517,10 @@ function download(blob,name){const a=document.createElement('a'),u=URL.createObj
 function save(){persist();renderView();renderHeader()}
 
 /* navigation */
-const TITLES={home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता'};
-const SUB=['production','expenses','reports','settings','outside','slip','card','khata'];
+const TITLES={home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता',ostate:'बाहर की लेबर',osw:'वर्कर का हिसाब',lent:'दी हुई लेबर'};
+const SUB=['production','expenses','reports','settings','outside','slip','card','khata','ostate','osw','lent'];
 const TABOF=v=>SUB.includes(v)?'more':v;
-const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k'};
+const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k',ostate:'os-add-w',lent:'add-lent'};
 function renderHeader(){
   const v=ui.view,s=db.settings;
   $('appTitle').textContent=v==='home'?(s.title||'मेरा लेबर खाता'):TITLES[v];
@@ -542,7 +548,7 @@ function go(v,fromBack){
   renderView();renderHeader();
 }
 function renderView(){
-  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,more:()=>{},settings:renderMonths})[ui.view]();
+  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,ostate:renderOstate,osw:renderOsw,lent:renderLent,more:()=>{},settings:renderMonths})[ui.view]();
 }
 
 /* home */
@@ -558,6 +564,7 @@ function renderHome(){
   const prod=sum(db.production.filter(p=>p.date===t),prodTotal),exp=sum(db.expenses.filter(e=>e.date===t),e=>e.amount),outT=sum(db.outside.filter(r=>r.kind==='work'&&r.date===t),r=>r.count*r.rate),left=prod-s.wages-outT-exp,msm=labourSummary(t.slice(0,8)+'01',t);
   const owed=db.workers.map(w=>({w,b:balanceOf(w).bal})).filter(x=>x.b>.005).sort((a,b)=>b.b-a.b).slice(0,4);
   const allProd=sum(db.production,prodTotal),allOwn=sum(db.attendance,a=>calcAttendance(a).wage),allOut=sum(db.outside.filter(r=>r.kind==='work'),r=>r.count*r.rate),allExp=sum(db.expenses,e=>e.amount);
+  const dedSum=k=>sum(db.deductions.filter(d=>d.type===k),d=>d.amount),gotAd=dedSum('ad')+dedSum('bank'),dedAll=sum(db.deductions,d=>d.amount),dueMe=allProd-dedAll;
   const hasDemo=db.workers.some(w=>w.demo)||db.attendance.some(x=>x.demo);
   $('v-home').innerHTML=`
   ${dueBanner()}${hasDemo?`<div class="banner"><p>नमूना डेटा दिख रहा है। अपना काम शुरू करने से पहले इसे हटा दें।</p><button class="btn sm" data-act="remove-demo">नमूना हटाएँ</button></div>`:''}
@@ -570,6 +577,12 @@ function renderHome(){
     <div class="kv total"><span>बचत (उत्पादन − लेबर)</span><b class="${allProd-allOwn-allOut<0?'bad':'good'}">${money(allProd-allOwn-allOut)}</b></div>
     <div class="kv"><span>अन्य खर्च</span><b>${money(allExp)}</b></div>
     <div class="kv"><span>खर्च भी घटाकर बचत</span><b class="${allProd-allOwn-allOut-allExp<0?'bad':'good'}">${money(allProd-allOwn-allOut-allExp)}</b></div></div>
+  <div class="card"><h3>उत्पादन का पैसा: कितना मिला, कितना बाकी</h3>
+    <div class="kv"><span>कुल उत्पादन</span><b>${money(allProd)}</b></div>
+    <div class="kv"><span>अब तक मिल चुका (AD + बैंक)</span><b>${money(gotAd)}</b></div>
+    <div class="kv"><span>PF / ESI और Wastage कटा</span><b>${money(dedAll-gotAd)}</b></div>
+    <div class="kv total"><span>अभी मिलना बाकी</span><b class="${dueMe<0?'bad':'good'}">${money(dueMe)}</b></div>
+    <div class="muted" style="margin-top:6px">अभी मिलना बाकी = कुल उत्पादन − सारी कटौती (AD, PF/ESI, बैंक, Wastage)। कटौती "पर्ची / हिसाब" में जोड़ी जाती है।</div></div>
   <div class="qa-row">
     <button class="qa" data-act="open-att"><span class="ci">${ic('cal')}</span>हाजिरी</button>
     <button class="qa" data-act="add-prod"><span class="ci">${ic('box')}</span>उत्पादन</button>
@@ -589,10 +602,17 @@ function renderHome(){
     <div class="kv"><span>बाहरी (नकद) लेबर</span><b>${money(msm.outAmt)}</b></div>
     <div class="kv total"><span>कुल लेबर खर्च</span><b>${money(msm.ownAmt+msm.outAmt)}</b></div>
     <div style="margin-top:8px"><button class="btn ghost sm" data-go="outside">पूरा गणित देखें</button></div></div>
+  ${osHomeCard()}
+  ${lentHomeCard()}
   <div class="card"><h3>पिछले 7 दिन की मजदूरी</h3>${chartHtml()}</div>
   <div class="card"><h3>बकाया मजदूरी</h3>${owed.length?owed.map(x=>`<div class="row"><div class="av">${avIn(x.w)}</div><div class="mid"><div class="nm">${esc(x.w.name)}</div><div class="sub">${payLabel(x.w)}</div></div><div class="end"><div class="amt">${money(x.b)}</div></div></div>`).join('')+`<div style="margin-top:8px"><button class="btn ghost sm" data-go="ledger">पूरा हिसाब देखें</button></div>`:'<div class="muted">अभी किसी का बकाया नहीं है।</div>'}</div>`;
 }
 
+function osHomeCard(){
+  if(!db.osw.length)return `<div class="card"><h3>बाहर की लेबर (दूसरे राज्य की)</h3><div class="muted">नाम, आधार, ठेकेदार, रहना-खाना और पूरा हिसाब एक जगह।</div><div style="margin-top:8px"><button class="btn ghost sm" data-go="ostate">शुरू करें</button></div></div>`;
+  const D=osDash(today().slice(0,7));
+  return `<div class="card"><h3>बाहर की लेबर: इस महीने</h3><div class="kv"><span>कुल खर्च (${D.workers} वर्कर)</span><b>${money(D.total)}</b></div><div class="kv"><span>दे चुके</span><b>${money(D.given)}</b></div><div class="kv total"><span>अभी बाकी</span><b class="${D.pending>.005?'bad':'good'}">${money(D.pending)}</b></div><div style="margin-top:8px"><button class="btn ghost sm" data-go="ostate">पूरा हिसाब देखें</button></div></div>`;
+}
 /* attendance */
 const STATUS_CHIP={'पूरा दिन':'good','आधा दिन':'warn','अनुपस्थित':'bad','छुट्टी':'','अतिरिक्त काम':'acc'};
 const shiftName=s=>s==='both'?'दिन+रात':s==='night'?'रात':'दिन';
@@ -1149,13 +1169,14 @@ function stmtPdf(o){
   }
   np();
   cx.fillStyle='#10302a';cx.font=F(40,1);cx.fillText(o.owner||'',M,y+40);y+=60;
+  if(o.head){let z=88;cx.font=F(z,1);while(z>40&&cx.measureText(o.head).width>CW){z-=4;cx.font=F(z,1)}cx.fillStyle='#111';cx.fillText(o.head,M,y+z);y+=z+14;if(o.month){cx.fillStyle='#10302a';cx.font=F(46,1);cx.fillText(o.month,M,y+46);y+=66}}
   cx.fillStyle='#111';cx.font=F(32,1);cx.fillText(o.title,M,y+32);y+=46;
   cx.fillStyle='#555';cx.font=F(24);cx.fillText(o.sub||'',M,y+24);cx.textAlign='right';cx.fillText('बनाया: '+dShort(today()),W-M,y+24);cx.textAlign='left';y+=44;
   cx.strokeStyle='#10302a';cx.lineWidth=3;cx.beginPath();cx.moveTo(M,y);cx.lineTo(W-M,y);cx.stroke();y+=18;
   (o.summary||[]).forEach(kv=>{cx.fillStyle='#333';cx.font=F(26);cx.fillText(kv[0],M,y+30);cx.fillStyle='#111';cx.font=F(26,1);cx.textAlign='right';cx.fillText(kv[1],W-M,y+30);cx.textAlign='left';y+=42});
   y+=20;
   table(o.cols,o.rows,o.total);
-  if(o.extra){y+=36;if(y+120>H-M)np();cx.fillStyle='#10302a';cx.font=F(28,1);cx.fillText(o.extra.title,M,y+28);y+=44;table(o.extra.cols,o.extra.rows)}
+  (o.extras||(o.extra?[o.extra]:[])).forEach(ex=>{y+=36;if(y+120>H-M)np();cx.fillStyle='#10302a';cx.font=F(28,1);cx.fillText(ex.title,M,y+28);y+=44;table(ex.cols,ex.rows,ex.total)});
   pages.forEach((p,i)=>{const c=p.getContext('2d');c.fillStyle='#777';c.font=F(20);c.textAlign='center';c.fillText('पेज '+(i+1)+' / '+pages.length+'  ·  '+(db.settings.title||''),W/2,H-30)});
   return pdfFromCanvases(pages,W,H);
 }
@@ -1247,10 +1268,12 @@ function slipPdf(){
 }
 function cardPdf(){
   const c=ui.cardW?cardData(ui.cardW,ui.cardMonth):null;if(!c)return;
-  savePdf(stmtPdf({title:'मजदूर रिपोर्ट कार्ड – '+c.w.name+' ('+c.w.gender+')',owner:(db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),sub:monthLabel(c.m),
-    summary:[['हाजिरी',c.full+' पूरा, '+c.half+' आधा, '+c.absent+' अनुपस्थित = '+c.pct+'%'],['कुल घंटे / OT घंटे',hh(c.hours)+' / '+hh(c.ot)],['रात की शिफ्ट',c.nights+' ('+money(c.nightAmt)+')'],['कुल कमाई',money(c.earn)],['एडवांस + भुगतान',money(c.adv+c.pay)],['इस महीने का बाकी',money(c.net)],['अब तक का कुल बाकी',money(c.all.bal)]],
+  const tx=c.tx.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  savePdf(stmtPdf({head:c.w.name,month:monthLabel(c.m),title:'मजदूर रिपोर्ट कार्ड ('+c.w.gender+')',owner:(db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),sub:payLabel(c.w),
+    summary:[['ड्यूटी',hh(c.workDays)+' दिन ('+c.full+' पूरा, '+c.half+' आधा, '+c.absent+' अनुपस्थित) = '+c.pct+'%'],['कुल घंटे',hh(c.hours)],['OT',hh(c.ot)+' घंटे = '+money(c.otAmt)],['रात की शिफ्ट',c.nights+' = '+money(c.nightAmt)],['कुल कमाई',money(c.earn)],['घटाया: एडवांस',money(c.adv)],['घटाया: भुगतान',money(c.pay)],['बची हुई सैलरी (इस महीने)',money(c.net)],['अब तक का कुल बाकी',money(c.all.bal)]],
     cols:[{h:'तारीख',w:.2},{h:'स्थिति',w:.34},{h:'घंटे',w:.14,r:1},{h:'OT',w:.12,r:1},{h:'राशि',w:.2,r:1}],
-    rows:c.cs.map(x=>[dShort(x.a.date),x.a.status+(x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''),hh(x.c.hours),x.c.ot?hh(x.c.ot):'–',nfmt(Math.round(x.c.wage))]),total:['कुल','',hh(c.hours),hh(c.ot),nfmt(Math.round(c.earn))]}),'Card_'+asc(c.w.name)+'_'+c.m+'.pdf');
+    rows:c.cs.map(x=>[dShort(x.a.date),x.a.status+(x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''),hh(x.c.hours),x.c.ot?hh(x.c.ot):'–',nfmt(Math.round(x.c.wage))]),total:['कुल','',hh(c.hours),hh(c.ot),nfmt(Math.round(c.earn))],
+    extras:[{title:'एडवांस और भुगतान (तारीख के साथ)',cols:[{h:'तारीख',w:.18},{h:'विवरण',w:.46},{h:'प्रकार',w:.16},{h:'राशि',w:.2,r:1}],rows:tx.map(x=>[dShort(x.date),x.note||'–',x.type==='advance'?'एडवांस':'भुगतान',nfmt(Math.round(x.amount))])}]}),pdfName(c.w.name,c.m));
 }
 function slipText(){
   const d=slipData(ui.slStart,ui.slEnd),L=[];
@@ -1416,9 +1439,9 @@ function saveExp(){
 }
 
 /* delete */
-const ARR_NAME={attendance:'हाजिरी',production:'उत्पादन',expenses:'खर्च',transactions:'लेन-देन',outside:'एंट्री (साथ में दिया नकद भुगतान भी हटेगा)',deductions:'कटौती',personal:'एंट्री'};
+const ARR_NAME={attendance:'हाजिरी',production:'उत्पादन',expenses:'खर्च',transactions:'लेन-देन',outside:'एंट्री (साथ में दिया नकद भुगतान भी हटेगा)',deductions:'कटौती',personal:'एंट्री',osatt:'हाजिरी',osexp:'एंट्री',osleave:'छुट्टी की एंट्री',oscpay:'भुगतान',lent:'दी हुई लेबर की एंट्री (साथ में मिला पैसा भी हटेगा)',lentpay:'मिला हुआ पैसा'};
 function delSheet(arr,id){
-  confirmSheet({title:'रिकॉर्ड हटाएँ?',msg:'यह '+(ARR_NAME[arr]||'रिकॉर्ड')+' हटा दिया जाएगा।',ok:'हटाएँ',danger:true,run:()=>{db[arr]=db[arr].filter(x=>x.id!==id&&!(arr==='outside'&&x.ref===id));toast('हटा दिया');save()}});
+  confirmSheet({title:'रिकॉर्ड हटाएँ?',msg:'यह '+(ARR_NAME[arr]||'रिकॉर्ड')+' हटा दिया जाएगा।',ok:'हटाएँ',danger:true,run:()=>{db[arr]=db[arr].filter(x=>x.id!==id&&!(arr==='outside'&&x.ref===id));if(arr==='lent')db.lentpay=db.lentpay.filter(p=>p.ref!==id);toast('हटा दिया');save()}});
 }
 
 /* reports */
@@ -1464,7 +1487,7 @@ function fillSettings(){
   $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';
   $('restoreErr').hidden=true;
   $('pin-note').textContent=s.pinHash?'PIN चालू है: ऐप खोलने पर और 1 मिनट बाहर रहने के बाद PIN माँगेगा। यह सिर्फ दूसरों से आँख बचाने के लिए है।':'PIN लगाने पर ऐप खोलते ही 4 से 6 अंक का PIN माँगेगा, ताकि मजदूरों की निजी जानकारी और हिसाब कोई और न देख सके।';
-  $('pin-rm').hidden=!s.pinHash;
+  $('pin-rm').hidden=!s.pinHash;$('s-pdfascii').checked=!!s.pdfAscii;
 }
 function saveSettings(){
   Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||''});
@@ -1501,7 +1524,7 @@ function removeDemo(){
 }
 
 /* month files, reminders, storage */
-const DATA_KEYS=['attendance','production','expenses','transactions','outside','deductions','personal'];
+const DATA_KEYS=['attendance','production','expenses','transactions','outside','deductions','personal','osatt','osexp','osleave','oscpay','lent','lentpay'];
 let installEv=null;
 function inFrame(){try{return window.top!==window.self}catch(e){return true}}
 function monthLabel(m){return /^\d{4}-\d{2}$/.test(m)?new Date(m+'-01T00:00:00').toLocaleDateString('hi-IN',{month:'long',year:'numeric'}):''}
@@ -1526,7 +1549,7 @@ function dueBanner(){
 }
 function monthData(m){
   const inM=r=>r.date&&r.date.slice(0,7)===m;
-  return{app:'maa-ganga-labour',version:2,month:m,savedAt:new Date().toISOString(),workers:db.workers.map(w=>{const o=Object.assign({},w);['aadhaar','bankAcc','ifsc','photo'].forEach(k=>delete o[k]);return o}),attendance:db.attendance.filter(inM),production:db.production.filter(inM),expenses:db.expenses.filter(inM),transactions:db.transactions.filter(inM),outside:db.outside.filter(inM),deductions:db.deductions.filter(inM),personal:db.personal.filter(inM),settings:{title:db.settings.title,brand:db.settings.brand,owner:db.settings.owner,phone:db.settings.phone,items:db.settings.items}};
+  return{app:'maa-ganga-labour',version:2,month:m,savedAt:new Date().toISOString(),workers:db.workers.map(w=>{const o=Object.assign({},w);['aadhaar','bankAcc','ifsc','photo'].forEach(k=>delete o[k]);return o}),osw:db.osw.map(w=>{const o=Object.assign({},w);['aadhaar','aadhaarPhoto','bankAcc','ifsc','photo'].forEach(k=>delete o[k]);return o}),attendance:db.attendance.filter(inM),production:db.production.filter(inM),expenses:db.expenses.filter(inM),transactions:db.transactions.filter(inM),outside:db.outside.filter(inM),deductions:db.deductions.filter(inM),personal:db.personal.filter(inM),osatt:db.osatt.filter(inM),osexp:db.osexp.filter(inM),osleave:db.osleave.filter(inM),oscpay:db.oscpay.filter(inM),lent:db.lent.filter(inM),lentpay:db.lentpay.filter(inM),settings:{title:db.settings.title,brand:db.settings.brand,owner:db.settings.owner,phone:db.settings.phone,items:db.settings.items}};
 }
 async function saveMonth(m,share){
   if(!/^\d{4}-\d{2}$/.test(m))return;
@@ -1544,10 +1567,11 @@ async function saveMonth(m,share){
   save();
 }
 function mergeMonth(x){
-  const same={attendance:(a,b)=>a.id===b.id||(a.date===b.date&&a.workerId===b.workerId),production:(a,b)=>a.id===b.id||a.date===b.date};
+  const same={osatt:(a,b)=>a.id===b.id||(a.date===b.date&&a.workerId===b.workerId),attendance:(a,b)=>a.id===b.id||(a.date===b.date&&a.workerId===b.workerId),production:(a,b)=>a.id===b.id||a.date===b.date};
   (x.production||[]).forEach(migrateProd);
   ((x.settings&&x.settings.items)||[]).forEach(it=>{if(!db.settings.items.some(q=>q.key===it.key))db.settings.items.push(it)});
   x.workers.forEach(w=>{if(!db.workers.some(q=>q.id===w.id))db.workers.push(w)});
+  (x.osw||[]).forEach(w=>{if(!db.osw.some(q=>q.id===w.id))db.osw.push(w)});
   DATA_KEYS.forEach(k=>{const eq=same[k]||((a,b)=>a.id===b.id);(x[k]||[]).forEach(r=>{const i=db[k].findIndex(q=>eq(q,r));if(i>=0)db[k][i]=r;else db[k].push(r)})});
 }
 function renderMonths(){
@@ -1626,6 +1650,648 @@ document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden')hiddenAt=Date.now();
   else if(db.settings.pinHash&&hiddenAt&&Date.now()-hiddenAt>60000)showLock();
 });
+
+/* PDF नाम */
+function pdfName(name,m){
+  const d=new Date(m+'-01T00:00:00'),mn=d.toLocaleDateString('hi-IN',{month:'long'}),yr=d.getFullYear();
+  if(db.settings.pdfAscii)return asc(name)+'_'+m+'.pdf';
+  const n=String(name||'').trim().replace(/[\\\/:*?"<>|.]+/g,'').replace(/\s+/g,'_')||'मजदूर';
+  return n+'_'+mn+'_'+yr+'.pdf';
+}
+/* ===== दूसरे ठेकेदार को दी हुई लेबर ===== */
+ui.lentMonth=today().slice(0,7);ui.lentCon='';
+const LENT_DUTY={full:'पूरा दिन',half:'आधा दिन',night:'रात की ड्यूटी',both:'दिन + रात',other:'अन्य'};
+function lentCons(){return Array.from(new Set(db.lent.map(r=>r.contractor).concat(db.lentpay.map(p=>p.contractor)).filter(Boolean))).sort()}
+/* एक ठेकेदार का हिसाब: मिला हुआ पैसा पुरानी एंट्री से भरता जाता है */
+function lentConData(name){
+  const ents=db.lent.filter(r=>r.contractor===name).sort((a,b)=>a.date.localeCompare(b.date)||String(a.id).localeCompare(String(b.id)));
+  const pays=db.lentpay.filter(p=>p.contractor===name);
+  let pool=sum(pays,p=>p.amount);const got=sum(pays,p=>p.amount);
+  const rows=ents.map(e=>{const a=Math.min(pool,e.amount);pool-=a;return{e,paid:a,left:e.amount-a}});
+  const total=sum(ents,e=>e.amount);
+  return{name,rows,pays,total,got,due:total-got,advance:Math.max(0,got-total),days:ents.length};
+}
+function lentAll(){const cs=lentCons().map(lentConData);return{cs,total:sum(cs,c=>c.total),got:sum(cs,c=>Math.min(c.got,c.total)),due:sum(cs,c=>Math.max(0,c.due)),adv:sum(cs,c=>c.advance)}}
+function lentChip(r){return r.left<=.005?'<span class="chip good">पैसा मिल गया</span>':r.paid>.005?`<span class="chip warn">कुछ मिला ${money(r.paid)}</span>`:'<span class="chip bad">पैसा बाकी</span>'}
+function lentAttChip(e){
+  if(!e.workerId)return '';
+  const a=db.attendance.find(x=>x.workerId===e.workerId&&x.date===e.date);
+  return a?`<span class="chip">मेरी हाजिरी: ${esc(a.status)}</span>`:'<span class="chip warn">मेरी हाजिरी नहीं लगी</span>';
+}
+function lentHomeCard(){
+  const A=lentAll();
+  if(!db.lent.length)return `<div class="card"><h3>दूसरे ठेकेदार को दी हुई लेबर</h3><div class="muted">कब किसको अपनी लेबर दी और उसका पैसा आया या नहीं, यह यहाँ लिखें।</div><div style="margin-top:8px"><button class="btn ghost sm" data-go="lent">शुरू करें</button></div></div>`;
+  return `<div class="card"><h3>दी हुई लेबर का पैसा</h3><div class="kv"><span>कुल रकम बनी</span><b>${money(A.total)}</b></div><div class="kv"><span>पैसा मिल चुका</span><b>${money(A.got)}</b></div><div class="kv total"><span>अभी मिलना बाकी</span><b class="${A.due>.005?'bad':'good'}">${money(A.due)}</b></div><div style="margin-top:8px"><button class="btn ghost sm" data-go="lent">पूरा हिसाब देखें</button></div></div>`;
+}
+function renderLent(){
+  const m=ui.lentMonth,rg=monthRange(m),A=lentAll(),cons=lentCons();
+  if(ui.lentCon&&!cons.includes(ui.lentCon))ui.lentCon='';
+  const sel=ui.lentCon;
+  const inM=r=>r.date>=rg.s&&r.date<=rg.e;
+  const view=(sel?[lentConData(sel)]:A.cs);
+  const mRows=[];view.forEach(c=>c.rows.forEach(r=>{if(inM(r.e))mRows.push(r)}));
+  mRows.sort((a,b)=>b.e.date.localeCompare(a.e.date));
+  const mAmt=sum(mRows,r=>r.e.amount),mGot=sum(mRows,r=>r.paid);
+  const mPays=[];view.forEach(c=>c.pays.forEach(p=>{if(inM(p))mPays.push(p)}));mPays.sort((a,b)=>b.date.localeCompare(a.date));
+  let h=`<div class="mstep"><button class="ibtn" data-act="lent-prev" aria-label="पिछला महीना">${ic('back',18)}</button><span>${monthLabel(m)}</span><button class="ibtn" data-act="lent-next" aria-label="अगला महीना">${ic('chev',18)}</button></div>
+  <div class="stats"><div class="stat"><span>इस महीने की रकम</span><b>${money(mAmt)}</b></div><div class="stat"><span>इसमें से मिला</span><b>${money(mGot)}</b></div><div class="stat"><span>इस महीने का बाकी</span><b class="${mAmt-mGot>.005?'bad':''}">${money(mAmt-mGot)}</b></div><div class="stat"><span>सारा बाकी (अब तक)</span><b class="${(sel?Math.max(0,view[0].due):A.due)>.005?'bad':''}">${money(sel?Math.max(0,view[0].due):A.due)}</b></div></div>
+  <div class="btns"><button class="btn" data-act="add-lent">+ लेबर दी</button><button class="btn ghost" data-act="lent-pay"${sel?' data-n="'+esc(sel)+'"':''}>पैसा मिला</button></div>`;
+  if(cons.length)h+=`<div class="chiprow" style="margin:10px 0"><button class="pick${!sel?' on':''}" data-act="lent-con" data-n="" aria-pressed="${!sel}">सभी</button>${cons.map(n=>`<button class="pick${sel===n?' on':''}" data-act="lent-con" data-n="${esc(n)}" aria-pressed="${sel===n}">${esc(n)}</button>`).join('')}</div>`;
+  if(!db.lent.length&&!db.lentpay.length){
+    h+=`<div class="card empty"><div>जब कोई दूसरा ठेकेदार आपकी लेबर से काम कराए, तो यहाँ दर्ज करें कि किसको, किस दिन, कितनी रकम पर लेबर दी।</div><button class="btn" data-act="add-lent">+ लेबर दी</button></div>`;
+  }else{
+    h+=`<div class="card"><h3>ठेकेदार का हिसाब (अब तक)</h3>${view.map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="nm" style="font-weight:700">${esc(c.name)}</div><div class="kv"><span>कुल ${c.days} एंट्री की रकम</span><b>${money(c.total)}</b></div><div class="kv"><span>पैसा मिला</span><b>${money(c.got)}</b></div><div class="kv total"><span>${c.due<-.005?'ज्यादा मिला (एडवांस)':'अभी मिलना बाकी'}</span><b class="${c.due>.005?'bad':'good'}">${money(Math.abs(c.due))}</b></div><div class="btns" style="margin-top:6px"><button class="btn sm" data-act="lent-pay" data-n="${esc(c.name)}">पैसा मिला</button><button class="btn ghost sm" data-act="lent-pdf" data-n="${esc(c.name)}">महीने का PDF</button><button class="btn ghost sm" data-act="lent-pdf" data-share="1" data-n="${esc(c.name)}">WhatsApp पर PDF</button></div></div>`).join('')}</div>`;
+    h+=`<div class="card"><h3>इस महीने कब किसको लेबर दी</h3>${mRows.length?mRows.map(r=>{const w=worker(r.e.workerId);return `<div class="row"><div class="mid"><div class="nm">${esc(w?w.name:(r.e.workerName||'वर्कर'))}</div><div class="chips"><span class="chip acc">${esc(r.e.contractor)}</span><span class="chip">${esc(r.e.duty||'')}</span>${lentChip(r)}</div><div class="chips">${lentAttChip(r.e)}</div><div class="sub">${dShort(r.e.date)}${r.e.note?' · '+esc(r.e.note):''}</div></div><div class="end"><div class="amt">${money(r.e.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="lent" data-id="${r.e.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join(''):'<div class="muted">इस महीने कोई एंट्री नहीं है।</div>'}</div>`;
+    h+=`<div class="card"><h3>इस महीने मिला हुआ पैसा</h3>${mPays.length?mPays.map(p=>`<div class="row"><div class="mid"><div class="nm">${esc(p.contractor)}</div><div class="sub">${dShort(p.date)} · ${esc(p.method||'')}${p.note?' · '+esc(p.note):''}</div></div><div class="end"><div class="amt good">${money(p.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="lentpay" data-id="${p.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join(''):'<div class="muted">इस महीने कोई भुगतान नहीं मिला।</div>'}</div>`;
+  }
+  $('v-lent').innerHTML=h;
+}
+function lentSheet(){
+  sheetCtx={type:'lent'};
+  const ws=db.workers.filter(w=>w.active);
+  const d=today();
+  openSheet('दूसरे ठेकेदार को लेबर दी',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="y-date">तारीख</label><input id="y-date" type="date" value="${d}"></div>
+    <div class="fld"><label class="lbl" for="y-con">ठेकेदार का नाम</label><input id="y-con" list="dl-lcon" autocomplete="off" placeholder="नाम लिखें"><datalist id="dl-lcon">${lentCons().map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="y-duty">ड्यूटी</label><select id="y-duty">${Object.keys(LENT_DUTY).map(k=>`<option value="${k}">${LENT_DUTY[k]}</option>`).join('')}</select></div>
+    <div class="fld"><label class="lbl" for="y-rate">रकम ₹ (हर वर्कर की)</label><input id="y-rate" type="number" min="0" step=".01" inputmode="decimal" placeholder="जैसे 450"></div></div>
+    <div class="fld"><span class="lbl">किन-किन वर्करों को दिया (दबाकर चुनें)</span><div id="y-ws">${ws.length?ws.map(w=>{const a=db.attendance.find(x=>x.workerId===w.id&&x.date===d);return `<label class="row" style="cursor:pointer"><input type="checkbox" class="y-w" value="${w.id}" style="width:22px;height:22px;flex:none"><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${a?'हाजिरी लगी: '+esc(a.status):'हाजिरी अभी नहीं लगी'}</div></div></label>`}).join(''):'<div class="muted">पहले मजदूर जोड़ें।</div>'}</div></div>
+    <label class="row" style="cursor:pointer"><input type="checkbox" id="y-att" checked style="width:22px;height:22px;flex:none"><div class="mid"><div class="nm">मेरे यहाँ की हाजिरी भी लगा दो</div><div class="sub">जिनकी उस दिन हाजिरी नहीं लगी है, उनकी लग जाएगी</div></div></label>
+    <div class="fld"><label class="lbl" for="y-paid">पैसा</label><select id="y-paid"><option value="due">अभी नहीं मिला (बाकी)</option><option value="cash">नकद मिल गया</option><option value="upi">UPI / बैंक से मिल गया</option></select></div>
+    <div class="fld"><label class="lbl" for="y-note">विवरण</label><input id="y-note" placeholder="वैकल्पिक, जैसे कौन सा काम"></div>
+    <div class="preview" id="y-prev"></div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="save-lent">सेव करें</button></div>`,()=>{
+      const prev=()=>{const n=document.querySelectorAll('.y-w:checked').length,r=+$('y-rate').value||0;$('y-prev').innerHTML='कुल रकम <b>'+money(n*r)+'</b> ('+n+' वर्कर × '+money(r)+')'};
+      const fill=()=>{const k=$('y-con').value.trim()+'|'+$('y-duty').value,r=(db.settings.lentRates||{})[k];if(r&&!$('y-rate').value)$('y-rate').value=r;prev()};
+      const dayChip=()=>{const dt=$('y-date').value;document.querySelectorAll('.y-w').forEach(c=>{const a=db.attendance.find(x=>x.workerId===c.value&&x.date===dt),s=c.closest('label').querySelector('.sub');if(s)s.textContent=a?'हाजिरी लगी: '+a.status:'हाजिरी अभी नहीं लगी'})};
+      ['y-con','y-duty'].forEach(id=>$(id).addEventListener('change',()=>{$('y-rate').value='';fill()}));
+      $('y-rate').addEventListener('input',prev);$('y-rate').addEventListener('focus',e=>e.target.select());$('y-date').addEventListener('change',dayChip);
+      document.querySelectorAll('.y-w').forEach(c=>c.addEventListener('change',prev));prev();
+    });
+}
+function lentMarkAtt(w,date,duty){
+  if(db.attendance.some(x=>x.workerId===w.id&&x.date===date))return false;
+  const ti=defIn(w);
+  const mk=o=>putAttendance(Object.assign({workerId:w.id,date,inT:ti,outT:'19:00',in2:'',out2:''},o));
+  if(duty==='full')mk({status:'पूरा दिन',shift:'day'});
+  else if(duty==='half')mk({status:'आधा दिन',shift:'day',outT:'14:00'});
+  else if(duty==='night')mk({status:'पूरा दिन',shift:'night',inT:'19:00',outT:'03:00'});
+  else if(duty==='both')mk({status:'पूरा दिन',shift:'both',in2:'19:00',out2:'03:00'});
+  else return false;
+  return true;
+}
+function saveLent(){
+  const date=$('y-date').value,con=$('y-con').value.trim(),duty=$('y-duty').value,rate=+$('y-rate').value;
+  const ids=Array.from(document.querySelectorAll('.y-w:checked')).map(c=>c.value);
+  if(!con)return ferr('ठेकेदार का नाम लिखें');
+  if(!date)return ferr('तारीख चुनें');
+  if(!ids.length)return ferr('कम से कम एक वर्कर चुनें');
+  if(!(rate>0))return ferr('रकम भरें');
+  const paid=$('y-paid').value,mark=$('y-att').checked;let marked=0,dup=0;
+  ids.forEach(id=>{
+    const w=worker(id);if(!w)return;
+    if(db.lent.some(r=>r.workerId===id&&r.date===date&&r.contractor===con&&r.duty===LENT_DUTY[duty]))dup++;
+    const eid=uid();
+    db.lent.push({id:eid,date,contractor:con,workerId:id,workerName:w.name,duty:LENT_DUTY[duty],rate,amount:rate,note:$('y-note').value.trim()});
+    if(paid!=='due')db.lentpay.push({id:uid(),date,contractor:con,amount:rate,method:paid==='cash'?'नकद':'UPI / बैंक',note:'लेबर देते समय मिला',ref:eid});
+    if(mark&&lentMarkAtt(w,date,duty))marked++;
+  });
+  db.settings.lentRates=db.settings.lentRates||{};db.settings.lentRates[con+'|'+duty]=rate;
+  ui.lentMonth=date.slice(0,7);
+  closeSheet();toast(ids.length+' वर्कर की एंट्री जुड़ गई'+(marked?' · '+marked+' की हाजिरी लगी':'')+(dup?' (कुछ एंट्री पहले से थीं, देख लें)':''));save();
+}
+function lentPaySheet(name){
+  sheetCtx={type:'lentpay'};
+  openSheet('ठेकेदार से पैसा मिला',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="y-pdate">तारीख</label><input id="y-pdate" type="date" value="${today()}"></div>
+    <div class="fld"><label class="lbl" for="y-pcon">ठेकेदार का नाम</label><input id="y-pcon" list="dl-lcon2" autocomplete="off" value="${esc(name||'')}" placeholder="नाम लिखें"><datalist id="dl-lcon2">${lentCons().map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="y-pamt">कितना मिला ₹</label><input id="y-pamt" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></div>
+    <div class="fld"><label class="lbl" for="y-pm">तरीका</label><select id="y-pm"><option>नकद</option><option>UPI</option><option>बैंक</option></select></div></div>
+    <div class="preview" id="y-pdue"></div>
+    <div class="fld"><label class="lbl" for="y-pnote">विवरण</label><input id="y-pnote" placeholder="वैकल्पिक"></div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="save-lentpay">सेव करें</button></div>`,()=>{
+      const sh=()=>{const n=$('y-pcon').value.trim(),b=$('y-pdue');if(!b)return;if(!n||!lentCons().includes(n)){b.innerHTML='';return}const c=lentConData(n);b.innerHTML='अभी मिलना बाकी <b>'+money(Math.max(0,c.due))+'</b>'};
+      $('y-pcon').addEventListener('input',sh);sh();
+    });
+}
+function saveLentPay(){
+  const con=$('y-pcon').value.trim(),amount=+$('y-pamt').value,date=$('y-pdate').value;
+  if(!con)return ferr('ठेकेदार का नाम लिखें');
+  if(!(amount>0)||!date)return ferr('तारीख और सही रकम भरें');
+  db.lentpay.push({id:uid(),date,contractor:con,amount,method:$('y-pm').value,note:$('y-pnote').value.trim()});
+  ui.lentMonth=date.slice(0,7);
+  closeSheet();toast('पैसा मिलना दर्ज हो गया');save();
+}
+function lentPdf(name){
+  const m=ui.lentMonth,rg=monthRange(m),c=lentConData(name);
+  const inM=d=>d>=rg.s&&d<=rg.e;
+  const rows=c.rows.filter(r=>inM(r.e.date)).map(r=>{const w=worker(r.e.workerId);return[dShort(r.e.date),(w?w.name:r.e.workerName||'वर्कर')+(r.e.note?' · '+r.e.note:''),r.e.duty||'',nfmt(Math.round(r.e.amount)),r.left<=.005?'मिल गया':r.paid>.005?'कुछ मिला':'बाकी']});
+  const mAmt=sum(c.rows.filter(r=>inM(r.e.date)),r=>r.e.amount),pays=c.pays.filter(p=>inM(p.date));
+  savePdf(stmtPdf({head:name,month:monthLabel(m),title:'दी हुई लेबर का हिसाब',owner:(db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),sub:'ठेकेदार: '+name,
+    summary:[['इस महीने की रकम',money(mAmt)],['इस महीने मिला',money(sum(pays,p=>p.amount))],['अब तक कुल रकम',money(c.total)],['अब तक कुल मिला',money(c.got)],['अभी मिलना बाकी',money(c.due)]],
+    cols:[{h:'तारीख',w:.16},{h:'वर्कर',w:.38},{h:'ड्यूटी',w:.18},{h:'रकम',w:.14,r:1},{h:'स्थिति',w:.14}],rows,total:['इस महीने कुल','','',nfmt(Math.round(mAmt)),''],
+    extras:[{title:'मिला हुआ पैसा (तारीख के साथ)',cols:[{h:'तारीख',w:.2},{h:'विवरण',w:.46},{h:'तरीका',w:.18},{h:'रकम',w:.16,r:1}],rows:pays.map(p=>[dShort(p.date),p.note||'–',p.method||'',nfmt(Math.round(p.amount))])}]}),pdfName(name,m));
+}
+function lentAct(a,d){
+  switch(a){
+    case 'add-lent':lentSheet();return true;
+    case 'save-lent':saveLent();return true;
+    case 'lent-pay':lentPaySheet(d.n||ui.lentCon);return true;
+    case 'save-lentpay':saveLentPay();return true;
+    case 'lent-con':ui.lentCon=d.n||'';renderLent();return true;
+    case 'lent-prev':ui.lentMonth=addDays(ui.lentMonth+'-01',-1).slice(0,7);renderLent();return true;
+    case 'lent-next':ui.lentMonth=addDays(ui.lentMonth+'-01',32).slice(0,7);renderLent();return true;
+    case 'lent-pdf':shareMode=d.share==='1';lentPdf(d.n);return true;
+  }
+  return false;
+}
+
+/* ===== बाहर की लेबर (दूसरे राज्य की) ===== */
+const OS_ITEMS=['कंबल','बर्तन','गैस','पंखा','गद्दा','बाल्टी','चूल्हा','तकिया'];
+const OS_REASONS=['दवाई','डॉक्टर','तेल-शैम्पू','गुटखा-बीड़ी','आने का किराया','जॉइनिंग एडवांस','मोबाइल रिचार्ज','कपड़े','अन्य'];
+const osW=id=>db.osw.find(w=>w.id===id);
+ui.osMonth=today().slice(0,7);ui.osW='';ui.osTab='w';ui.osDate=today();ui.osCon='';
+const osMoney=x=>x.kind==='exp'||x.kind==='adv'||x.kind==='share';
+const osKindName={exp:'फुटकर खर्च',adv:'एडवांस',share:'साझा खर्च',pay:'सैलरी भुगतान',hold:'सिक्योरिटी रोकी',holdret:'सिक्योरिटी वापस'};
+function osNight(w){return Number(w.nightRate)>0?Number(w.nightRate):(dailyOf(w)||NIGHT_M)}
+function osPutAtt(o){
+  const w=osW(o.workerId);if(!w)return;
+  const old=db.osatt.find(x=>x.date===o.date&&x.workerId===o.workerId);
+  const a={id:old?old.id:uid(),date:o.date,workerId:o.workerId,status:o.status,shift:o.shift,in:o.inT,out:o.outT,in2:o.in2||'',out2:o.out2||'',hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:osNight(w)};
+  if(old)Object.assign(old,a);else db.osatt.push(a);
+}
+function osCalc(w,m){
+  const rg=monthRange(m),t=today();
+  const last=(t<rg.e&&t>=rg.s)?t:rg.e;
+  const from=(w.start&&w.start>rg.s)?w.start:rg.s;
+  const to=(w.left&&w.left<last)?w.left:last;
+  let camp=0;
+  if(rg.s<=t&&to>=from){
+    camp=daysBetween(from,to)+1;
+    db.osleave.forEach(l=>{
+      if(l.workerId!==w.id)return;
+      const a=l.from>from?l.from:from,e=l.to?addDays(l.to,-1):'9999-12-31',b=e<to?e:to;
+      if(b>=a)camp-=daysBetween(a,b)+1;
+    });
+  }
+  camp=Math.max(0,camp);
+  const recs=db.osatt.filter(a=>a.workerId===w.id&&a.date>=rg.s&&a.date<=rg.e).sort((a,b)=>a.date.localeCompare(b.date));
+  const cs=recs.map(a=>({a,c:calcAttendance(a)}));
+  const cnt=s=>recs.filter(a=>a.status===s).length;
+  const full=cnt('पूरा दिन'),half=cnt('आधा दिन'),extra=cnt('अतिरिक्त काम'),absent=cnt('अनुपस्थित'),leave=cnt('छुट्टी');
+  const workDays=full+extra+half*.5;
+  const nights=recs.filter(a=>!ABS.includes(a.status)&&(a.shift==='night'||a.shift==='both')).length;
+  const earn=sum(cs,x=>x.c.wage),otAmt=sum(cs,x=>x.c.otWage||0),ot=sum(cs,x=>x.c.ot),hours=sum(cs,x=>x.c.hours),nightAmt=sum(cs,x=>x.c.nightWage||0);
+  const ents=db.osexp.filter(x=>x.workerId===w.id&&x.date>=rg.s&&x.date<=rg.e).sort((a,b)=>a.date.localeCompare(b.date));
+  const cut=sum(ents.filter(x=>osMoney(x)&&x.mode==='cut'),x=>x.amount);
+  const ownE=sum(ents.filter(x=>osMoney(x)&&x.mode!=='cut'),x=>x.amount);
+  const pay=sum(ents.filter(x=>x.kind==='pay'),x=>x.amount);
+  const holdNet=sum(ents.filter(x=>x.kind==='hold'),x=>x.amount)-sum(ents.filter(x=>x.kind==='holdret'),x=>x.amount);
+  const comm=w.commMode==='month'?((camp>0||recs.length)?(Number(w.comm)||0):0):(Number(w.comm)||0)*workDays;
+  const room=(Number(w.room)||0)*camp,food=(Number(w.food)||0)*camp;
+  const net=earn-cut-holdNet,toGive=net-pay,total=earn+comm+room+food+ownE;
+  return{w,m,rg,recs,cs,ents,camp,full,half,extra,absent,leave,workDays,nights,earn,otAmt,ot,hours,nightAmt,cut,ownE,pay,holdNet,comm,room,food,net,toGive,total,perDay:workDays>0?total/workDays:0,live:camp>0||recs.length>0||ents.length>0};
+}
+function osMonthsOf(w){const out=[],cur=today().slice(0,7);let m=(w.start||today()).slice(0,7);const e=w.left?w.left.slice(0,7):cur;let g=0;while(m<=e&&g++<240){out.push(m);m=addDays(m+'-01',32).slice(0,7)}return out}
+function osAll(w){
+  const att=db.osatt.filter(a=>a.workerId===w.id),ents=db.osexp.filter(x=>x.workerId===w.id);
+  const earn=sum(att,a=>calcAttendance(a).wage),cut=sum(ents.filter(x=>osMoney(x)&&x.mode==='cut'),x=>x.amount),pay=sum(ents.filter(x=>x.kind==='pay'),x=>x.amount);
+  const held=sum(ents.filter(x=>x.kind==='hold'),x=>x.amount)-sum(ents.filter(x=>x.kind==='holdret'),x=>x.amount);
+  const cs=osMonthsOf(w).map(m=>osCalc(w,m));
+  return{earn,cut,pay,held,bal:earn-cut-pay,comm:sum(cs,c=>c.comm),room:sum(cs,c=>c.room),food:sum(cs,c=>c.food),own:sum(ents.filter(x=>osMoney(x)&&x.mode!=='cut'),x=>x.amount),days:sum(cs,c=>c.workDays)};
+}
+function osCons(){return Array.from(new Set(db.osw.map(w=>(w.contractor||'').trim()).concat(db.oscpay.map(p=>p.contractor)).filter(Boolean))).sort()}
+function osConData(name,m){
+  const ws=db.osw.filter(w=>(w.contractor||'').trim()===name);
+  const cm=ws.map(w=>osCalc(w,m)),live=cm.filter(c=>c.live);
+  const comm=sum(live,c=>c.comm),paid=sum(db.oscpay.filter(p=>p.contractor===name&&p.date.slice(0,7)===m),p=>p.amount);
+  const allComm=sum(ws,w=>osAll(w).comm),allPaid=sum(db.oscpay.filter(p=>p.contractor===name),p=>p.amount);
+  const ph=(ws.find(w=>w.conPhone)||{}).conPhone||'';
+  return{name,ws,live,comm,paid,due:comm-paid,allComm,allPaid,allDue:allComm-allPaid,phone:ph,active:ws.filter(w=>!w.left).length};
+}
+function osDash(m){
+  const cs=db.osw.map(w=>osCalc(w,m)).filter(c=>c.live);
+  const cpaid=sum(db.oscpay.filter(p=>p.date.slice(0,7)===m),p=>p.amount),comm=sum(cs,c=>c.comm);
+  const total=sum(cs,c=>c.total);
+  const given=sum(cs,c=>c.pay+c.cut+c.ownE+c.room+c.food)+cpaid;
+  const pending=sum(cs,c=>c.earn-c.cut-c.pay)+(comm-cpaid);
+  return{cs,total,given,pending,earn:sum(cs,c=>c.earn),comm,room:sum(cs,c=>c.room),food:sum(cs,c=>c.food),own:sum(cs,c=>c.ownE),cut:sum(cs,c=>c.cut),hold:sum(cs,c=>c.holdNet),conDue:comm-cpaid,workers:cs.length};
+}
+const osStatusChip=s=>STATUS_CHIP[s]||'';
+function osRow(w,c){
+  return `<div class="row rec" data-act="os-open" data-id="${w.id}"><div class="av${w.left?' off':''}">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${esc(w.contractor||'ठेकेदार नहीं')} · ${payLabel(w)}</div><div class="chips"><span class="chip good">${hh(c.workDays)} दिन</span>${c.ot>0?`<span class="chip acc">OT ${hh(c.ot)} घं</span>`:''}${c.holdNet>0?`<span class="chip warn">होल्ड ${money(c.holdNet)}</span>`:''}${osOnLeave(w,today())?'<span class="chip">गाँव में</span>':''}</div></div><div class="end"><div class="amt ${c.toGive<0?'bad':''}">${money(c.toGive)}</div><div class="sub">हाथ में बाकी</div><div class="sub">कुल लागत ${money(c.total)}</div></div></div>`;
+}
+function osOnLeave(w,d){return db.osleave.some(l=>l.workerId===w.id&&l.from<=d&&(!l.to||l.to>d))}
+function renderOstate(){
+  const m=ui.osMonth,D=osDash(m),act=db.osw.filter(w=>!w.left),left=db.osw.filter(w=>w.left);
+  const tab=(k,l)=>`<button class="pick${ui.osTab===k?' on':''}" data-act="os-tab" data-t="${k}" aria-pressed="${ui.osTab===k}">${l}</button>`;
+  let h=`<div class="mstep"><button class="ibtn" data-act="os-prev" aria-label="पिछला महीना">${ic('back',18)}</button><span>${monthLabel(m)}</span><button class="ibtn" data-act="os-next" aria-label="अगला महीना">${ic('chev',18)}</button></div>
+  <div class="stats"><div class="stat"><span>कुल खर्च (इस महीने)</span><b>${money(D.total)}</b></div><div class="stat"><span>दे चुके</span><b>${money(D.given)}</b></div><div class="stat"><span>अभी बाकी</span><b class="${D.pending>.005?'bad':''}">${money(D.pending)}</b></div><div class="stat"><span>ठेकेदारों का बाकी</span><b class="${D.conDue>.005?'bad':''}">${money(D.conDue)}</b></div></div>
+  <div class="card"><h3>खर्च किसमें गया (${D.workers} वर्कर)</h3>
+    <div class="kv"><span>वर्करों की कमाई (मजदूरी + OT + रात)</span><b>${money(D.earn)}</b></div>
+    <div class="kv"><span>ठेकेदार का कमीशन</span><b>${money(D.comm)}</b></div>
+    <div class="kv"><span>रहने का खर्च</span><b>${money(D.room)}</b></div>
+    <div class="kv"><span>खाने का खर्च</span><b>${money(D.food)}</b></div>
+    <div class="kv"><span>मेरा खर्च (सैलरी से नहीं कटा)</span><b>${money(D.own)}</b></div>
+    <div class="kv total"><span>कुल लागत</span><b>${money(D.total)}</b></div>
+    <div class="kv"><span>सैलरी से कटा (एडवांस / फुटकर)</span><b>${money(D.cut)}</b></div>
+    <div class="kv"><span>सिक्योरिटी रोकी हुई (इस महीने)</span><b>${money(D.hold)}</b></div></div>
+  <div class="btns"><button class="btn" data-act="os-add-w">+ नया वर्कर</button><button class="btn ghost" data-act="os-att">हाजिरी</button><button class="btn ghost" data-act="os-exp">खर्च / एडवांस</button><button class="btn ghost" data-act="os-share">कमरा / राशन बाँटें</button><button class="btn ghost" data-act="os-cpay">ठेकेदार को भुगतान</button></div>`;
+  const d=ui.osDate,pend=act.filter(w=>!db.osatt.some(a=>a.workerId===w.id&&a.date===d)&&(!w.start||w.start<=d));
+  h+=`<div class="card"><h3>हाजिरी बाकी</h3><div class="fld"><label class="lbl" for="os-date">तारीख</label><input id="os-date" type="date" value="${d}"></div>${pend.length?pend.map(w=>osOnLeave(w,d)?`<div class="row"><div class="av off">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">गाँव गया हुआ है</div></div></div>`:`<div class="row"><div class="av">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${defIn(w)} से 19:00</div></div><div class="quick"><button class="btn sm" data-act="os-q" data-w="${w.id}" data-s="p">पूरा दिन</button><button class="btn ghost sm" data-act="os-q" data-w="${w.id}" data-s="a">गैर-हाजिर</button><button class="ibtn" data-act="os-att" data-w="${w.id}" aria-label="विवरण भरें">${ic('edit',18)}</button></div></div>`).join(''):`<div class="muted">${act.length?'इस तारीख की सबकी हाजिरी लग चुकी है।':'अभी कोई वर्कर नहीं जोड़ा गया है।'}</div>`}</div>`;
+  h+=`<div class="chiprow" style="margin:10px 0">${tab('w','वर्कर ('+act.length+')')}${tab('c','ठेकेदार')}${tab('l','पुराने वर्कर ('+left.length+')')}</div>`;
+  if(ui.osTab==='w'){
+    h+=act.length?`<div class="card">${act.map(w=>osRow(w,osCalc(w,m))).join('')}</div>`:`<div class="card empty"><div>बाहर की लेबर का पहला वर्कर जोड़ें।</div><button class="btn" data-act="os-add-w">+ नया वर्कर</button></div>`;
+  }else if(ui.osTab==='l'){
+    h+=left.length?`<div class="card">${left.map(w=>{const a=osAll(w);return `<div class="row rec" data-act="os-open" data-id="${w.id}"><div class="av off">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${esc(w.contractor||'')} · गए: ${dShort(w.left)}</div></div><div class="end"><div class="amt">${money(a.earn+a.comm+a.room+a.food+a.own)}</div><div class="sub">कुल लागत</div></div></div>`}).join('')}</div><div class="muted">पुराने वर्करों का पूरा हिसाब सुरक्षित है। नाम दबाकर देखें।</div>`:'<div class="card empty">अभी कोई पुराना वर्कर नहीं है। "फाइनल हिसाब" करने पर वर्कर यहाँ आ जाता है।</div>';
+  }else{
+    const cons=osCons();
+    if(!cons.length)h+='<div class="card empty">वर्कर जोड़ते समय ठेकेदार का नाम भरें, फिर यहाँ उसका हिसाब दिखेगा।</div>';
+    else{
+      if(!cons.includes(ui.osCon))ui.osCon=cons[0];
+      h+=`<div class="chiprow">${cons.map(n=>`<button class="pick${ui.osCon===n?' on':''}" data-act="os-con" data-n="${esc(n)}" aria-pressed="${ui.osCon===n}">${esc(n)}</button>`).join('')}</div>`;
+      const c=osConData(ui.osCon,m);
+      h+=`<div class="card"><h3>${esc(c.name)}${c.phone?' · '+esc(c.phone):''}</h3>
+      <div class="kv"><span>अभी काम पर कितने बंदे</span><b>${c.active}</b></div>
+      <div class="kv"><span>इस महीने काम किया</span><b>${c.live.length}</b></div>
+      <div class="kv"><span>इस महीने का कमीशन</span><b>${money(c.comm)}</b></div>
+      <div class="kv"><span>इस महीने दिया</span><b>${money(c.paid)}</b></div>
+      <div class="kv total"><span>इस महीने का बाकी</span><b class="${c.due>.005?'bad':'good'}">${money(c.due)}</b></div>
+      <div class="kv"><span>अब तक का कुल कमीशन</span><b>${money(c.allComm)}</b></div>
+      <div class="kv"><span>अब तक कुल दिया</span><b>${money(c.allPaid)}</b></div>
+      <div class="kv total"><span>अब तक का कुल बाकी</span><b class="${c.allDue>.005?'bad':'good'}">${money(c.allDue)}</b></div>
+      <div class="btns" style="margin-top:8px"><button class="btn sm" data-act="os-cpay" data-n="${esc(c.name)}">भुगतान दर्ज करें</button></div></div>
+      <div class="card"><h3>इसके बंदे</h3>${c.ws.length?c.ws.map(w=>{const x=osCalc(w,m);return `<div class="row rec" data-act="os-open" data-id="${w.id}"><div class="av${w.left?' off':''}">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${w.left?'पुराना वर्कर':'काम पर'} · कमीशन ${money(x.comm)}</div></div><div class="end"><div class="sub">${hh(x.workDays)} दिन</div></div></div>`}).join(''):'<div class="muted">कोई वर्कर नहीं।</div>'}</div>
+      <div class="card"><h3>भुगतान की एंट्री</h3>${db.oscpay.filter(p=>p.contractor===c.name).sort((a,b)=>b.date.localeCompare(a.date)).map(p=>`<div class="row"><div class="mid"><div class="nm">${dShort(p.date)} · ${esc(p.method||'')}</div><div class="sub">${esc(p.note||'')}</div></div><div class="end"><div class="amt good">${money(p.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="oscpay" data-id="${p.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join('')||'<div class="muted">अभी कोई भुगतान दर्ज नहीं।</div>'}</div>`;
+    }
+  }
+  $('v-ostate').innerHTML=h;
+}
+/* वर्कर का पन्ना */
+function renderOsw(){
+  const w=osW(ui.osW);if(!w){$('v-osw').innerHTML='<div class="card empty">वर्कर नहीं मिला।</div>';return}
+  const m=ui.osMonth,c=osCalc(w,m),all=osAll(w);
+  const items=(w.items||[]);
+  const rows=[['मोबाइल',w.phone],['गाँव / पता',w.address],['पिता / पति का नाम',w.father],['ठेकेदार',w.contractor+(w.conPhone?' · '+w.conPhone:'')],['काम पर आए',w.start?dShort(w.start)+' '+w.start.slice(0,4):''],['आधार नंबर',w.aadhaar?aadFmt(w.aadhaar,ui.showAad):'']].filter(x=>x[1]);
+  let h=`<div class="card"><div style="display:flex;gap:12px;align-items:flex-start">${w.photo?`<img src="${w.photo}" alt="फोटो" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:1px solid var(--line);flex:none">`:`<div class="av" style="width:64px;height:64px;font-size:26px;flex:none">${esc(initial(w.name))}</div>`}<div style="flex:1;min-width:0"><div class="nm" style="font-size:20px;font-weight:800">${esc(w.name)}</div><div class="sub">${w.gender} · ${payLabel(w)} · OT ${w.otAuto===false?money(otRateOf(w))+'/घं (तय)':money(otPerHour(w))+'/घं (अपने-आप)'} · रात ${money(osNight(w))}${w.nightRate>0?' (तय)':' (अपने-आप)'}</div>${w.left?`<div class="chip warn" style="margin-top:6px">पुराना वर्कर · गए ${dShort(w.left)}</div>`:''}</div></div>
+  ${rows.map(x=>`<div class="kv"><span>${x[0]}</span><b style="text-align:right;overflow-wrap:anywhere;font-size:15px;font-family:var(--font-body)">${esc(x[1])}</b></div>`).join('')}
+  <div class="kv"><span>दिए गए सामान</span><b style="text-align:right;overflow-wrap:anywhere;font-size:15px;font-family:var(--font-body)">${items.length?esc(items.join(', ')):'कुछ नहीं'}</b></div>
+  ${w.aadhaarPhoto&&ui.showAad?`<img src="${w.aadhaarPhoto}" alt="आधार फोटो" style="width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px">`:''}
+  <div class="btns" style="margin-top:10px"><button class="btn ghost sm" data-act="os-edit-w" data-id="${w.id}">जानकारी बदलें</button>${(w.aadhaar||w.aadhaarPhoto)?`<button class="btn ghost sm" data-act="aad-toggle2">${ui.showAad?'आधार छुपाएँ':'आधार दिखाएँ'}</button>`:''}<button class="btn ghost sm" data-act="os-bio" data-id="${w.id}">बायोडाटा PDF</button></div>
+  <div class="muted" style="margin-top:6px">यह जानकारी सिर्फ आपके फोन में रहती है।</div></div>
+  <div class="mstep"><button class="ibtn" data-act="os-prev" aria-label="पिछला महीना">${ic('back',18)}</button><span>${monthLabel(m)}</span><button class="ibtn" data-act="os-next" aria-label="अगला महीना">${ic('chev',18)}</button></div>
+  <div class="stats"><div class="stat"><span>काम के दिन</span><b>${hh(c.workDays)}</b></div><div class="stat"><span>कुल घंटे</span><b>${hh(c.hours)}</b></div><div class="stat"><span>OT घंटे</span><b>${hh(c.ot)}</b></div><div class="stat"><span>रात की शिफ्ट</span><b>${c.nights}</b></div></div>
+  <div class="card"><h3>हाथ में कितनी सैलरी देनी है</h3>
+    <div class="kv"><span>दिन की मजदूरी (OT छोड़कर)</span><b>${money(c.earn-c.otAmt-c.nightAmt)}</b></div>
+    <div class="kv"><span>OT की राशि (${hh(c.ot)} घंटे)</span><b>${money(c.otAmt)}</b></div>
+    <div class="kv"><span>रात की राशि (${c.nights} रात)</span><b>${money(c.nightAmt)}</b></div>
+    <div class="kv total"><span>कुल कमाई</span><b>${money(c.earn)}</b></div>
+    <div class="kv"><span>घटाएँ: सैलरी से कटा (एडवांस / फुटकर / साझा)</span><b>${money(c.cut)}</b></div>
+    <div class="kv"><span>घटाएँ: सिक्योरिटी रोकी (इस महीने)</span><b>${money(c.holdNet)}</b></div>
+    <div class="kv total"><span>हाथ में देना (Net Payable)</span><b class="${c.net<0?'bad':'good'}">${money(c.net)}</b></div>
+    <div class="kv"><span>घटाएँ: सैलरी भुगतान किया</span><b>${money(c.pay)}</b></div>
+    <div class="kv total"><span>अभी देना बाकी</span><b class="${c.toGive<0?'bad':'good'}">${money(c.toGive)}</b></div>
+    <div class="kv"><span>सिक्योरिटी अब तक रोकी हुई (कुल)</span><b>${money(all.held)}</b></div></div>
+  <div class="card"><h3>मुझे यह वर्कर कितने का पड़ा</h3>
+    <div class="kv"><span>कमाई (सैलरी + OT + रात)</span><b>${money(c.earn)}</b></div>
+    <div class="kv"><span>ठेकेदार का कमीशन${w.commMode==='month'?' (महीने का तय)':' (प्रति दिन × '+hh(c.workDays)+')'}</span><b>${money(c.comm)}</b></div>
+    <div class="kv"><span>रहने का खर्च (${c.camp} दिन)</span><b>${money(c.room)}</b></div>
+    <div class="kv"><span>खाने का खर्च (${c.camp} दिन)</span><b>${money(c.food)}</b></div>
+    <div class="kv"><span>मेरा खर्च</span><b>${money(c.ownE)}</b></div>
+    <div class="kv total"><span>कुल लागत (Total Cost)</span><b>${money(c.total)}</b></div>
+    <div class="kv total"><span>एक दिन की असली लागत (Per Day Cost)</span><b>${c.workDays>0?money(c.perDay):'–'}</b></div>
+    <div class="muted" style="margin-top:6px">एक दिन की लागत = कुल लागत ÷ काम के दिन (आधा दिन = 0.5)। गाँव की छुट्टी के दिनों का रहना-खाना नहीं जुड़ता।</div></div>
+  <div class="btns"><button class="btn" data-act="os-att" data-w="${w.id}">+ हाजिरी</button><button class="btn ghost" data-act="os-exp" data-w="${w.id}">खर्च / एडवांस / भुगतान</button><button class="btn ghost" data-act="os-hold" data-w="${w.id}">सिक्योरिटी होल्ड</button><button class="btn ghost" data-act="os-leave" data-w="${w.id}">गाँव जाना / वापसी</button></div>
+  <div class="card"><h3>रोज़ की हाजिरी</h3>${c.cs.length?`<div class="tw"><table class="compact"><thead><tr><th>तारीख</th><th>स्थिति</th><th class="n">घंटे</th><th class="n">OT</th><th class="n">राशि</th><th></th></tr></thead><tbody>${c.cs.map(x=>`<tr data-act="os-att-edit" data-id="${x.a.id}"><td>${dShort(x.a.date)} ${wkd(x.a.date)}</td><td>${esc(x.a.status)}${x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''}</td><td class="n">${hh(x.c.hours)}</td><td class="n">${x.c.ot?hh(x.c.ot):'–'}</td><td class="n">${money(x.c.wage)}</td><td><button class="ibtn bad" data-act="del" data-arr="osatt" data-id="${x.a.id}" aria-label="हटाएँ">${ic('trash',16)}</button></td></tr>`).join('')}<tr class="sum"><td>कुल</td><td></td><td class="n">${hh(c.hours)}</td><td class="n">${hh(c.ot)}</td><td class="n">${money(c.earn)}</td><td></td></tr></tbody></table></div>`:'<div class="muted">इस महीने की हाजिरी दर्ज नहीं है।</div>'}</div>
+  <div class="card"><h3>खर्चे, एडवांस और भुगतान</h3>${c.ents.length?c.ents.map(x=>`<div class="row"><div class="mid"><div class="nm">${esc(x.reason||osKindName[x.kind])}</div><div class="chips"><span class="chip ${x.kind==='pay'?'good':x.kind==='hold'?'warn':'acc'}">${osKindName[x.kind]}${x.what==='room'?' · कमरा':x.what==='ration'?' · राशन':''}</span>${osMoney(x)?`<span class="chip ${x.mode==='cut'?'bad':''}">${x.mode==='cut'?'सैलरी से कटा':'मेरा खर्च'}</span>`:''}<span class="sub">${dShort(x.date)}${x.pay?' · '+esc(x.pay):''}${x.to?' · '+esc(x.to):''}</span></div></div><div class="end"><div class="amt">${money(x.amount)}</div></div><button class="ibtn bad" data-act="os-del" data-arr="osexp" data-id="${x.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join(''):'<div class="muted">इस महीने कोई खर्च या भुगतान दर्ज नहीं।</div>'}</div>
+  <div class="card"><h3>गाँव जाना / लंबी छुट्टी</h3>${db.osleave.filter(l=>l.workerId===w.id).sort((a,b)=>b.from.localeCompare(a.from)).map(l=>`<div class="row"><div class="mid"><div class="nm">${dShort(l.from)} से ${l.to?dShort(l.to):'अभी तक'}</div><div class="sub">${l.to?daysBetween(l.from,l.to)+' दिन गाँव में':'अभी गाँव में है'}${l.note?' · '+esc(l.note):''}</div></div>${l.to?'':`<button class="btn sm" data-act="os-back" data-id="${l.id}">वापस आया</button>`}<button class="ibtn bad" data-act="del" data-arr="osleave" data-id="${l.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join('')||'<div class="muted">कोई रिकॉर्ड नहीं।</div>'}<div class="muted" style="margin-top:6px">इन दिनों का रहना-खाना और कमीशन नहीं जुड़ता। सैलरी हाजिरी से ही बनती है।</div></div>
+  <div class="card"><h3>अब तक का कुल (सभी महीने)</h3>
+    <div class="kv"><span>कुल कमाई</span><b>${money(all.earn)}</b></div><div class="kv"><span>सैलरी से कटा</span><b>${money(all.cut)}</b></div><div class="kv"><span>भुगतान किया</span><b>${money(all.pay)}</b></div>
+    <div class="kv total"><span>कुल देना बाकी</span><b class="${all.bal<0?'bad':'good'}">${money(all.bal)}</b></div>
+    <div class="kv"><span>कुल लागत (अब तक)</span><b>${money(all.earn+all.comm+all.room+all.food+all.own)}</b></div></div>
+  <div class="btns"><button class="btn" data-act="os-pdf">महीने का PDF</button><button class="btn ghost" data-act="os-pdf" data-share="1">WhatsApp पर PDF</button><button class="btn ghost" data-act="os-text">टेक्स्ट कॉपी</button>${w.left?`<button class="btn ghost" data-act="os-reopen" data-id="${w.id}">फिर काम पर लें</button>`:`<button class="btn bad" data-act="os-final" data-id="${w.id}">फाइनल हिसाब</button>`}</div>
+  ${w.final?`<div class="card"><h3>फाइनल हिसाब (${dShort(w.final.date)})</h3><div class="kv"><span>कुल देना था</span><b>${money(w.final.payable)}</b></div><div class="kv"><span>सिक्योरिटी वापस जुड़ी</span><b>${money(w.final.held)}</b></div><div class="kv"><span>दिया</span><b>${money(w.final.paid)}</b></div></div>`:''}`;
+  $('v-osw').innerHTML=h;
+}
+/* शीट: वर्कर */
+function osWorkerSheet(id){
+  const w=id?osW(id):null;
+  sheetCtx={type:'osw',photo:(w&&w.photo)||'',aph:(w&&w.aadhaarPhoto)||'',items:(w&&w.items||[]).slice()};
+  const mode=w?w.payMode:'monthly',otSel=!w?'auto':(w.otAuto!==false?'auto':'custom');
+  openSheet(w?'वर्कर की जानकारी बदलें':'नया वर्कर (बाहर की लेबर)',`<div class="form">
+    <div class="fld"><label class="lbl" for="x-name">वर्कर का नाम *</label><input id="x-name" value="${esc(w?w.name:'')}" autocomplete="off"></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-phone">मोबाइल नंबर</label><input id="x-phone" type="tel" inputmode="numeric" maxlength="15" value="${esc(w?w.phone||'':'')}"></div>
+    <div class="fld"><label class="lbl" for="x-gender">लिंग</label><select id="x-gender"><option${!w||w.gender!==FEM?' selected':''}>पुरुष</option><option${w&&w.gender===FEM?' selected':''}>महिला</option></select></div></div>
+    <div class="fld"><label class="lbl" for="x-addr">गाँव का पता</label><input id="x-addr" value="${esc(w?w.address||'':'')}" placeholder="गाँव, जिला, राज्य"></div>
+    <div class="fld"><label class="lbl" for="x-father">पिता / पति का नाम</label><input id="x-father" value="${esc(w?w.father||'':'')}"></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-con">ठेकेदार का नाम</label><input id="x-con" list="dl-oscon" value="${esc(w?w.contractor||'':'')}" autocomplete="off"><datalist id="dl-oscon">${osCons().map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
+    <div class="fld"><label class="lbl" for="x-conph">ठेकेदार का नंबर</label><input id="x-conph" type="tel" inputmode="numeric" maxlength="15" value="${esc(w?w.conPhone||'':'')}"></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-start">काम पर आने की तारीख</label><input id="x-start" type="date" value="${w&&w.start?w.start:today()}"></div>
+    <div class="fld"><label class="lbl" for="x-duty">ड्यूटी के घंटे</label><input id="x-duty" type="number" min="0" max="24" step=".25" inputmode="decimal" value="${w&&w.dutyHours?w.dutyHours:''}" placeholder="खाली = पुरुष 10, महिला 9.5"></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-mode">मजदूरी का प्रकार</label><select id="x-mode"><option value="monthly"${mode==='monthly'?' selected':''}>मासिक वेतन</option><option value="daily"${mode==='daily'?' selected':''}>दैनिक मजदूरी</option><option value="hourly"${mode==='hourly'?' selected':''}>घंटे के हिसाब से</option></select></div>
+    <div class="fld" id="x-bm"><label class="lbl" for="x-sal">मासिक वेतन ₹</label><input id="x-sal" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.salary?w.salary:''}"></div>
+    <div class="fld" id="x-bd"><label class="lbl" for="x-day">दैनिक मजदूरी ₹</label><input id="x-day" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.daily?w.daily:''}"></div>
+    <div class="fld" id="x-bh"><label class="lbl" for="x-hr">सामान्य ₹/घंटा</label><input id="x-hr" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.hourly?w.hourly:''}"></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-ot">OT का रेट</label><select id="x-ot"><option value="auto"${otSel==='auto'?' selected':''}>वेतन के हिसाब से (अपने-आप)</option><option value="custom"${otSel==='custom'?' selected':''}>अपना तय रेट</option></select></div>
+    <div class="fld" id="x-bot"><label class="lbl" for="x-otc">OT रेट ₹ प्रति घंटा</label><input id="x-otc" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.otAuto===false?(w.otRate||''):''}"></div></div>
+    <div class="fld"><label class="lbl" for="x-night">रात की शिफ्ट का रेट ₹ (खाली = एक दिन की मजदूरी के बराबर)</label><input id="x-night" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.nightRate?w.nightRate:''}" placeholder="अपने-आप"></div>
+    <div class="preview" id="x-prev"></div>
+    <div class="sec"><span>फिक्स खर्चे (हर वर्कर के खाते में जुड़ेंगे)</span></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-comm">ठेकेदार का कमीशन ₹</label><input id="x-comm" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.comm?w.comm:''}"></div>
+    <div class="fld"><label class="lbl" for="x-cmode">कमीशन कैसे लगे</label><select id="x-cmode"><option value="day"${!w||w.commMode!=='month'?' selected':''}>प्रति दिन (काम के दिन × रकम)</option><option value="month"${w&&w.commMode==='month'?' selected':''}>पूरे महीने का तय</option></select></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-room">रहने का खर्च ₹ प्रति दिन</label><input id="x-room" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.room?w.room:''}"></div>
+    <div class="fld"><label class="lbl" for="x-food">खाने का खर्च ₹ प्रति दिन</label><input id="x-food" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.food?w.food:''}"></div></div>
+    <div class="fld"><span class="lbl">दिए गए सामान</span><div class="chiprow">${OS_ITEMS.map(i=>`<button type="button" class="pick${sheetCtx.items.includes(i)?' on':''}" data-act="os-item" data-i="${i}">${i}</button>`).join('')}</div><input id="x-items" style="margin-top:8px" value="${esc(sheetCtx.items.filter(i=>!OS_ITEMS.includes(i)).join(', '))}" placeholder="और कुछ दिया हो तो लिखें (कॉमा से अलग)"></div>
+    <details class="fld it" style="padding:0"><summary style="padding:12px;font-weight:700;cursor:pointer">फोटो और आधार (सिर्फ आपके फोन में)</summary><div class="form" style="padding:0 12px 12px">
+      <div class="fld"><label class="lbl" for="x-photo">वर्कर की फोटो</label><input id="x-photo" type="file" accept="image/*"><img id="x-photo-prev" alt="" ${w&&w.photo?`src="${w.photo}"`:'hidden'} style="width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line);margin-top:8px"></div>
+      <div class="fld"><label class="lbl" for="x-aad">आधार नंबर (12 अंक)</label><input id="x-aad" inputmode="numeric" maxlength="14" value="${esc(w?w.aadhaar||'':'')}"></div>
+      <div class="fld"><label class="lbl" for="x-aadph">आधार कार्ड की फोटो</label><input id="x-aadph" type="file" accept="image/*"><img id="x-aadph-prev" alt="" ${w&&w.aadhaarPhoto?`src="${w.aadhaarPhoto}"`:'hidden'} style="width:100%;max-width:260px;border-radius:10px;border:1px solid var(--line);margin-top:8px"></div>
+    </div></details>
+    ${w?`<label class="chk"><input type="checkbox" id="x-re" checked> इस महीने की हाजिरी में भी नया रेट लगाएँ</label>`:''}
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="os-save-w" data-id="${id||''}">वर्कर सेव करें</button></div>`,()=>{osWUi();osWPrev()});
+}
+function osWUi(){const m=$('x-mode').value;$('x-bm').hidden=m!=='monthly';$('x-bd').hidden=m!=='daily';$('x-bh').hidden=m!=='hourly';$('x-bot').hidden=$('x-ot').value!=='custom'}
+function osTmp(){
+  const g=$('x-gender').value,std=+$('x-duty').value>0?+$('x-duty').value:(g===FEM?9.5:10),m=$('x-mode').value;
+  const sal=+$('x-sal').value||0,dl=+$('x-day').value||0,hl=+$('x-hr').value||0;
+  const daily=m==='monthly'?sal/30:m==='daily'?dl:hl*std,hourly=m==='hourly'?hl:daily/std;
+  return{daily,hourly,std,ot:$('x-ot').value==='custom'?(+$('x-otc').value||0):hourly,night:(+$('x-night').value>0)?+$('x-night').value:daily,otAuto:$('x-ot').value!=='custom',nAuto:!(+$('x-night').value>0)};
+}
+function osWPrev(){
+  const b=$('x-prev');if(!b)return;const t=osTmp();
+  if(t.daily<=0){b.textContent='वेतन भरते ही दैनिक भत्ता, OT और रात का रेट यहाँ दिखेगा।';return}
+  b.innerHTML=`दैनिक भत्ता <b>${money(t.daily)}</b> (${hh(t.std)} घंटे) · घंटे का <b>${money(t.hourly)}</b><br>OT: <b>${money(t.ot)}</b> प्रति घंटा${t.otAuto?' (अपने-आप)':' (तय)'}<br>रात की शिफ्ट: <b>${money(t.night)}</b>${t.nAuto?' (अपने-आप)':' (तय)'}`;
+}
+function osReadImg(inp,key,prevId,box,q){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=()=>{const im=new Image();im.onload=()=>{
+    const c=document.createElement('canvas'),x=c.getContext('2d');
+    if(box==='sq'){const S=256,m=Math.min(im.width,im.height);c.width=c.height=S;x.fillStyle='#fff';x.fillRect(0,0,S,S);x.drawImage(im,(im.width-m)/2,(im.height-m)*.3,m,m,0,0,S,S)}
+    else{const k=Math.min(1,900/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height)}
+    sheetCtx[key]=c.toDataURL('image/jpeg',q);const pv=$(prevId);if(pv){pv.src=sheetCtx[key];pv.hidden=false}};
+    im.onerror=()=>toast('फोटो नहीं खुल सकी');im.src=fr.result};
+  fr.readAsDataURL(f);
+}
+function osSaveW(id){
+  const name=$('x-name').value.trim();if(!name)return ferr('वर्कर का नाम लिखें');
+  const mode=$('x-mode').value,gender=$('x-gender').value,auto=$('x-ot').value!=='custom';
+  const aad=($('x-aad').value||'').replace(/\s+/g,'');if(aad&&!/^\d{12}$/.test(aad))return ferr('आधार नंबर 12 अंकों का होना चाहिए');
+  const o={id:id||uid(),name,phone:$('x-phone').value.trim(),gender,address:$('x-addr').value.trim(),father:$('x-father').value.trim(),contractor:$('x-con').value.trim(),conPhone:$('x-conph').value.trim(),start:$('x-start').value||today(),dutyHours:+$('x-duty').value||0,payMode:mode,salary:+$('x-sal').value||0,daily:+$('x-day').value||0,hourly:+$('x-hr').value||0,otAuto:auto,otRate:auto?0:(+$('x-otc').value||0),nightRate:+$('x-night').value||0,comm:+$('x-comm').value||0,commMode:$('x-cmode').value,room:+$('x-room').value||0,food:+$('x-food').value||0,aadhaar:aad,photo:sheetCtx.photo||'',aadhaarPhoto:sheetCtx.aph||''};
+  if(mode==='monthly'&&o.salary<=0)return ferr('मासिक वेतन भरें');
+  if(mode==='daily'&&o.daily<=0)return ferr('दैनिक मजदूरी भरें');
+  if(mode==='hourly'&&o.hourly<=0)return ferr('घंटे की मजदूरी भरें');
+  const extra=($('x-items').value||'').split(/[,،]/).map(s=>s.trim()).filter(Boolean);
+  o.items=sheetCtx.items.filter(i=>OS_ITEMS.includes(i)).concat(extra);
+  const old=id?osW(id):null;if(old){o.left=old.left;o.final=old.final}
+  const i=db.osw.findIndex(x=>x.id===o.id);if(i>=0)db.osw[i]=o;else db.osw.push(o);
+  if(old&&$('x-re')&&$('x-re').checked){const s=today().slice(0,8)+'01';db.osatt.forEach(a=>{if(a.workerId===o.id&&a.date>=s){a.hourlyRate=baseHourly(o);a.otRate=o.otRate;a.nightRate=osNight(o)}})}
+  ui.osW=o.id;closeSheet();toast('वर्कर सेव हो गया');save();
+}
+/* शीट: हाजिरी */
+function osAttSheet(o){
+  const act=db.osw.filter(w=>!w.left),rec=o.rec||null;
+  if(!act.length&&!rec){toast('पहले वर्कर जोड़ें');return}
+  const wid=rec?rec.workerId:(o.workerId||ui.osW&&osW(ui.osW)&&!osW(ui.osW).left&&ui.osW||act[0].id),date=rec?rec.date:(o.date||ui.osDate);
+  const list=act.slice();if(rec){const rw=osW(rec.workerId);if(rw&&rw.left)list.push(rw)}
+  const status=rec?rec.status:'पूरा दिन',shift=rec?rec.shift:'day',off=ABS.includes(status),w0=osW(wid);
+  sheetCtx={type:'osatt'};
+  openSheet(rec?'हाजिरी बदलें':'हाजिरी दर्ज करें',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="x-adate">तारीख</label><input id="x-adate" type="date" value="${date}"></div>
+    <div class="fld"><label class="lbl" for="x-aw">वर्कर</label><select id="x-aw">${list.map(w=>`<option value="${w.id}"${w.id===wid?' selected':''}>${esc(w.name)}</option>`).join('')}</select></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-ash">शिफ्ट</label><select id="x-ash"><option value="day"${shift==='day'?' selected':''}>दिन</option><option value="night"${shift==='night'?' selected':''}>रात (7 PM–3 AM)</option><option value="both"${shift==='both'?' selected':''}>दिन + रात</option></select></div>
+    <div class="fld"><label class="lbl" for="x-ast">स्थिति</label><select id="x-ast">${['पूरा दिन','आधा दिन','अनुपस्थित','छुट्टी','अतिरिक्त काम'].map(s=>`<option${s===status?' selected':''}>${s}</option>`).join('')}</select></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-ain">आने का समय</label><input id="x-ain" type="time" value="${rec?rec.in:defIn(w0)}"${off?' disabled':''}></div>
+    <div class="fld"><label class="lbl" for="x-aout">जाने का समय</label><input id="x-aout" type="time" value="${rec?rec.out:'19:00'}"${off?' disabled':''}></div></div>
+    <div class="fld" id="x-bx"><span class="lbl">एक्स्ट्रा समय (OT) जोड़ें</span><div class="chiprow"><button type="button" class="pick" data-act="os-extra" data-h="0">सामान्य</button><button type="button" class="pick" data-act="os-extra" data-h="0.5">+ आधा घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="1">+ 1 घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="2">+ 2 घंटे</button></div></div>
+    <div class="g2" id="x-bn" hidden><div class="fld"><label class="lbl" for="x-ain2">रात: आने का समय</label><input id="x-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div><div class="fld"><label class="lbl" for="x-aout2">रात: जाने का समय</label><input id="x-aout2" type="time" value="${rec&&rec.out2?rec.out2:'03:00'}"></div></div>
+    <div class="preview" id="x-aprev"></div>
+    <div class="hint">ड्यूटी से ज्यादा रुकने पर OT अपने-आप जुड़ता है। रात की शिफ्ट का रेट वर्कर की जानकारी में तय किया हुआ (या एक दिन की मजदूरी) लगता है।</div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="os-save-att">हाजिरी सेव करें</button></div>`,()=>{osAttUi();osAttPrev()});
+}
+function osAttUi(){const sh=$('x-ash').value,off=ABS.includes($('x-ast').value);$('x-bn').hidden=sh!=='both';$('x-bx').hidden=sh==='night'||off;['x-ain','x-aout','x-ain2','x-aout2'].forEach(i=>{$(i).disabled=off})}
+function osAttDefaults(){const w=osW($('x-aw').value),n=$('x-ash').value==='night';$('x-ain').value=n?'19:00':defIn(w);$('x-aout').value=n?'03:00':'19:00';$('x-ain2').value='19:00';$('x-aout2').value='03:00'}
+function osAttPrev(){
+  const b=$('x-aprev');if(!b)return;const w=osW($('x-aw').value);if(!w){b.textContent='पहले वर्कर चुनें';return}
+  const st=$('x-ast').value,sh=$('x-ash').value;
+  if(ABS.includes(st)){b.innerHTML='इस दिन की मजदूरी <b>'+money(0)+'</b>';return}
+  const c=calcAttendance({workerId:w.id,status:st,shift:sh,in:$('x-ain').value,out:$('x-aout').value,in2:$('x-ain2').value,out2:$('x-aout2').value,hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:osNight(w)});
+  if(sh==='night'){b.innerHTML=`रात की राशि <b>${money(c.wage)}</b> · ${hh(c.hours)} घंटे`;return}
+  b.innerHTML=`सामान्य <b>${hh(Math.min(c.dayHours,stdHours(w)))} घं</b> = ${money(c.regWage)}`+(c.ot>0?`<br>OT <b>${hh(c.ot)} घं</b> × ${money(c.otPer)} = <b>${money(c.otWage)}</b>`:'')+(sh==='both'?`<br>रात की राशि <b>${money(c.nightWage)}</b>`:'')+`<br>कुल <b>${money(c.wage)}</b>`;
+}
+function osSaveAtt(){
+  const wid=$('x-aw').value,date=$('x-adate').value,status=$('x-ast').value,shift=$('x-ash').value,inT=$('x-ain').value,outT=$('x-aout').value,in2=shift==='both'?$('x-ain2').value:'',out2=shift==='both'?$('x-aout2').value:'';
+  if(!wid||!date)return ferr('तारीख और वर्कर चुनें');
+  if(!ABS.includes(status)&&(!inT||!outT||(shift==='both'&&(!in2||!out2))))return ferr('आने और जाने का समय भरें');
+  osPutAtt({workerId:wid,date,status,shift,inT,outT,in2,out2});ui.osDate=date;closeSheet();toast('हाजिरी सेव हो गई');save();
+}
+function osQuick(wid,s){
+  const w=osW(wid);if(!w)return;const off=s==='a';
+  osPutAtt({workerId:wid,date:ui.osDate,status:off?'अनुपस्थित':'पूरा दिन',shift:'day',inT:off?'':defIn(w),outT:off?'':'19:00'});
+  toast(w.name+(off?': गैर-हाजिर':': पूरा दिन'));save();
+}
+/* शीट: खर्च / एडवांस / भुगतान */
+function osWorkerSelect(id,sel,all){return `<select id="${id}">${db.osw.filter(w=>all||!w.left).map(w=>`<option value="${w.id}"${w.id===sel?' selected':''}>${esc(w.name)}</option>`).join('')}</select>`}
+function osExpSheet(wid){
+  if(!db.osw.some(w=>!w.left)){toast('पहले वर्कर जोड़ें');return}
+  const sel=wid||(ui.osW&&osW(ui.osW)&&!osW(ui.osW).left?ui.osW:db.osw.find(w=>!w.left).id);
+  sheetCtx={type:'osexp',mode:'cut'};
+  openSheet('खर्च / एडवांस / भुगतान',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="x-edate">तारीख</label><input id="x-edate" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-ew">वर्कर</label>${osWorkerSelect('x-ew',sel)}</div></div>
+    <div class="fld"><label class="lbl" for="x-ekind">क्या है</label><select id="x-ekind"><option value="exp">फुटकर खर्च (दवाई, तेल, किराया…)</option><option value="adv">एडवांस / जॉइनिंग एडवांस</option><option value="pay">सैलरी का भुगतान (हाथ में दिया)</option></select></div>
+    <div class="fld"><label class="lbl" for="x-ereason">वजह</label><input id="x-ereason" list="dl-osr" autocomplete="off" placeholder="जैसे दवाई"><datalist id="dl-osr">${OS_REASONS.map(r=>`<option value="${r}">`).join('')}</datalist></div>
+    <div class="fld"><label class="lbl" for="x-eamt">रकम ₹</label><input id="x-eamt" type="number" min="0" step=".01" inputmode="decimal"></div>
+    <div class="fld" id="x-emodebox"><span class="lbl">यह खर्च किसके खाते में</span><div class="g2"><button type="button" class="pick on" id="x-m-cut" data-act="os-mode" data-md="cut">सैलरी से काटो</button><button type="button" class="pick" id="x-m-own" data-act="os-mode" data-md="own">मेरा खर्च</button></div><div class="hint" id="x-mhint">वर्कर की सैलरी से कटेगा।</div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-epay">पेमेंट का तरीका</label><select id="x-epay"><option>Cash</option><option>Online (UPI / PhonePe)</option></select></div><div class="fld"><label class="lbl" for="x-eto">किसको दिया</label><input id="x-eto" placeholder="नाम (वैकल्पिक)"></div></div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="os-save-exp">सेव करें</button></div>`,()=>osExpUi());
+}
+function osExpUi(){const k=$('x-ekind').value;$('x-emodebox').hidden=k==='pay';if(k==='adv'&&!sheetCtx.mTouched)osMode('cut',true)}
+function osMode(md,quiet){
+  sheetCtx.mode=md;if(!quiet)sheetCtx.mTouched=true;
+  $('x-m-cut').classList.toggle('on',md==='cut');$('x-m-own').classList.toggle('on',md==='own');
+  const h=$('x-mhint');if(h)h.textContent=md==='cut'?'वर्कर की सैलरी से कटेगा।':'सिर्फ आपकी कुल लागत में जुड़ेगा, सैलरी से नहीं कटेगा।';
+}
+function osSaveExp(){
+  const amount=+$('x-eamt').value,kind=$('x-ekind').value,date=$('x-edate').value,wid=$('x-ew').value;
+  if(!(amount>0)||!date||!wid)return ferr('तारीख, वर्कर और सही रकम भरें');
+  db.osexp.push({id:uid(),date,workerId:wid,kind,reason:$('x-ereason').value.trim()||osKindName[kind],amount,mode:kind==='pay'?'':sheetCtx.mode,pay:$('x-epay').value,to:$('x-eto').value.trim()});
+  closeSheet();toast('सेव हो गया');save();
+}
+/* साझा खर्च */
+function osShareSheet(){
+  const act=db.osw.filter(w=>!w.left);if(!act.length){toast('पहले वर्कर जोड़ें');return}
+  sheetCtx={type:'osshare',mode:'own'};
+  openSheet('कमरा / राशन का बंटवारा',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="x-sdate">तारीख</label><input id="x-sdate" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-swhat">क्या बाँटना है</label><select id="x-swhat"><option value="room">कमरे का किराया</option><option value="ration">राशन का बिल</option></select></div></div>
+    <div class="fld"><label class="lbl" for="x-samt">कुल रकम ₹</label><input id="x-samt" type="number" min="0" step=".01" inputmode="decimal"></div>
+    <div class="fld"><span class="lbl">किन वर्करों में बाँटना है</span>${act.map(w=>`<label class="chk"><input type="checkbox" class="x-sw" value="${w.id}" checked> ${esc(w.name)}</label>`).join('')}</div>
+    <div class="fld"><span class="lbl">यह खर्च किसके खाते में</span><div class="g2"><button type="button" class="pick" id="x-m-cut" data-act="os-mode" data-md="cut">सैलरी से काटो</button><button type="button" class="pick on" id="x-m-own" data-act="os-mode" data-md="own">मेरा खर्च</button></div><div class="hint" id="x-mhint">सिर्फ आपकी कुल लागत में जुड़ेगा, सैलरी से नहीं कटेगा।</div></div>
+    <div class="preview" id="x-sprev"></div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="os-save-share">बराबर बाँट दें</button></div>`,()=>osSharePrev());
+}
+function osSharePrev(){const b=$('x-sprev');if(!b)return;const n=document.querySelectorAll('.x-sw:checked').length,a=+$('x-samt').value||0;b.innerHTML=n?`${n} वर्कर × <b>${money(Math.round(a/n*100)/100)}</b> = ${money(a)}`:'कम से कम एक वर्कर चुनें';}
+function osSaveShare(){
+  const a=+$('x-samt').value,date=$('x-sdate').value,ids=Array.from(document.querySelectorAll('.x-sw:checked')).map(x=>x.value),what=$('x-swhat').value;
+  if(!(a>0)||!date)return ferr('तारीख और सही रकम भरें');if(!ids.length)return ferr('कम से कम एक वर्कर चुनें');
+  const each=Math.floor(a/ids.length*100)/100,gid=uid();let used=0;
+  ids.forEach((id,i)=>{const amt=i===ids.length-1?Math.round((a-used)*100)/100:each;used+=each;db.osexp.push({id:uid(),date,workerId:id,kind:'share',what,sharedId:gid,reason:(what==='room'?'कमरे का किराया':'राशन')+' (कुल '+money(a)+' ÷ '+ids.length+')',amount:amt,mode:sheetCtx.mode,pay:'',to:''})});
+  closeSheet();toast('बराबर बाँट दिया');save();
+}
+/* होल्ड, छुट्टी, ठेकेदार भुगतान */
+function osHoldSheet(wid){
+  if(!db.osw.length){toast('पहले वर्कर जोड़ें');return}
+  const sel=wid||ui.osW||db.osw[0].id;sheetCtx={type:'oshold'};
+  openSheet('सिक्योरिटी होल्ड',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="x-hdate">तारीख</label><input id="x-hdate" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-hw">वर्कर</label>${osWorkerSelect('x-hw',sel,true)}</div></div>
+    <div class="fld"><label class="lbl" for="x-hkind">क्या करना है</label><select id="x-hkind"><option value="hold">सैलरी से सिक्योरिटी रोकें</option><option value="holdret">रोकी हुई सिक्योरिटी वापस दें</option></select></div>
+    <div class="fld"><label class="lbl" for="x-hamt">रकम ₹</label><input id="x-hamt" type="number" min="0" step=".01" inputmode="decimal"></div>
+    <div class="fld"><label class="lbl" for="x-hnote">विवरण</label><input id="x-hnote" placeholder="वैकल्पिक"></div>
+    <div class="hint">रोकी हुई रकम अलग दिखती है और हाथ में देने वाली सैलरी से घटती है। फाइनल हिसाब में पूरी रकम वापस जुड़ जाती है।</div>
+    <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="os-save-hold">सेव करें</button></div>`);
+}
+function osSaveHold(){
+  const amount=+$('x-hamt').value,date=$('x-hdate').value,wid=$('x-hw').value,kind=$('x-hkind').value;
+  if(!(amount>0)||!date)return ferr('तारीख और सही रकम भरें');
+  db.osexp.push({id:uid(),date,workerId:wid,kind,reason:$('x-hnote').value.trim()||osKindName[kind],amount,mode:'',pay:'',to:''});
+  closeSheet();toast('सेव हो गया');save();
+}
+function osLeaveSheet(wid){
+  if(!db.osw.length){toast('पहले वर्कर जोड़ें');return}
+  const sel=wid||ui.osW||db.osw[0].id;sheetCtx={type:'osleave'};
+  openSheet('गाँव जाना / लंबी छुट्टी',`<div class="form">
+    <div class="fld"><label class="lbl" for="x-lw">वर्कर</label>${osWorkerSelect('x-lw',sel)}</div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-lfrom">गाँव गया (तारीख)</label><input id="x-lfrom" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-lto">वापस आया (खाली = अभी गाँव में)</label><input id="x-lto" type="date"></div></div>
+    <div class="fld"><label class="lbl" for="x-lnote">वजह</label><input id="x-lnote" placeholder="वैकल्पिक"></div>
+    <div class="hint">इन दिनों का रहना-खाना और कमीशन नहीं जुड़ेगा।</div>
+    <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="os-save-leave">सेव करें</button></div>`);
+}
+function osSaveLeave(){
+  const from=$('x-lfrom').value,to=$('x-lto').value,wid=$('x-lw').value;
+  if(!from)return ferr('गाँव जाने की तारीख भरें');if(to&&to<=from)return ferr('वापसी की तारीख बाद की होनी चाहिए');
+  db.osleave.push({id:uid(),workerId:wid,from,to,date:from,note:$('x-lnote').value.trim()});closeSheet();toast('सेव हो गया');save();
+}
+function osCpaySheet(name){
+  const cons=osCons();if(!cons.length){toast('पहले वर्कर में ठेकेदार का नाम भरें');return}
+  sheetCtx={type:'oscpay'};
+  openSheet('ठेकेदार को भुगतान',`<div class="form">
+    <div class="g2"><div class="fld"><label class="lbl" for="x-cdate">तारीख</label><input id="x-cdate" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-cn">ठेकेदार</label><select id="x-cn">${cons.map(n=>`<option${n===(name||ui.osCon)?' selected':''}>${esc(n)}</option>`).join('')}</select></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-camt">रकम ₹</label><input id="x-camt" type="number" min="0" step=".01" inputmode="decimal"></div><div class="fld"><label class="lbl" for="x-cm">तरीका</label><select id="x-cm"><option>Cash</option><option>Online (UPI / PhonePe)</option></select></div></div>
+    <div class="fld"><label class="lbl" for="x-cnote">विवरण</label><input id="x-cnote" placeholder="वैकल्पिक"></div>
+    <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="os-save-cpay">सेव करें</button></div>`);
+}
+function osSaveCpay(){
+  const a=+$('x-camt').value,d=$('x-cdate').value;if(!(a>0)||!d)return ferr('तारीख और सही रकम भरें');
+  db.oscpay.push({id:uid(),date:d,contractor:$('x-cn').value,amount:a,method:$('x-cm').value,note:$('x-cnote').value.trim()});ui.osCon=$('x-cn').value;closeSheet();toast('सेव हो गया');save();
+}
+/* फाइनल हिसाब */
+function osFinalSheet(id){
+  const w=osW(id);if(!w)return;const a=osAll(w);
+  sheetCtx={type:'osfinal',id,bal:a.bal};
+  openSheet('फाइनल हिसाब – '+w.name,`<div class="form">
+    <div class="card" style="margin:0"><div class="kv"><span>कुल कमाई</span><b>${money(a.earn)}</b></div><div class="kv"><span>सैलरी से कटा</span><b>${money(a.cut)}</b></div><div class="kv"><span>अब तक भुगतान किया</span><b>${money(a.pay)}</b></div>
+    <div class="kv total"><span>हाथ में देना बाकी (सिक्योरिटी सहित)</span><b>${money(a.bal)}</b></div>
+    <div class="kv"><span>इसमें सिक्योरिटी की रकम जुड़ी है</span><b>${money(a.held)}</b></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-fdate">काम छोड़ने की तारीख</label><input id="x-fdate" type="date" value="${today()}"></div><div class="fld"><label class="lbl" for="x-fpaid">अभी कितना दिया ₹</label><input id="x-fpaid" type="number" min="0" step=".01" inputmode="decimal" value="${a.bal>0?Math.round(a.bal*100)/100:0}"></div></div>
+    <div class="hint">सेव करने पर वर्कर "पुराने वर्कर" में चला जाएगा। उसका सारा हिसाब सुरक्षित रहेगा, कुछ डिलीट नहीं होगा। सिक्योरिटी अपने-आप वापस जुड़ जाएगी।</div>
+    <div class="err" id="formErr" hidden></div><button class="btn wide bad" data-act="os-final-go">फाइनल हिसाब पक्का करें</button></div>`);
+}
+function osFinalGo(){
+  const w=osW(sheetCtx.id);if(!w)return;const date=$('x-fdate').value,paid=+$('x-fpaid').value||0;
+  if(!date)return ferr('तारीख भरें');
+  const a=osAll(w);
+  if(a.held>.005)db.osexp.push({id:uid(),date,workerId:w.id,kind:'holdret',reason:'फाइनल हिसाब में वापस',amount:a.held,mode:'',pay:'',to:''});
+  if(paid>0)db.osexp.push({id:uid(),date,workerId:w.id,kind:'pay',reason:'फाइनल भुगतान',amount:paid,mode:'',pay:'Cash',to:''});
+  w.left=date;w.final={date,payable:a.bal,held:a.held,paid};
+  closeSheet();toast('फाइनल हिसाब हो गया। वर्कर पुराने वर्करों में गया');ui.osTab='l';save();
+}
+/* PDF और टेक्स्ट (वर्कर के लिए) */
+function osPdf(){
+  const w=osW(ui.osW);if(!w)return;const c=osCalc(w,ui.osMonth);
+  const wEnts=c.ents.filter(x=>!osMoney(x)||x.mode==='cut');
+  const rowsE=wEnts.map(x=>[dShort(x.date),(x.reason||osKindName[x.kind])+(x.to?' ('+x.to+')':''),osKindName[x.kind]+(x.pay?' · '+x.pay:''),(x.kind==='pay'||x.kind==='holdret'?'+':'−')+nfmt(Math.round(x.amount))]);
+  const cutAmt=sum(wEnts.filter(x=>osMoney(x)),x=>x.amount);
+  savePdf(stmtPdf({head:w.name,month:monthLabel(c.m),title:'मासिक हिसाब',owner:(db.settings.owner||'')+(db.settings.brand?' · '+db.settings.brand:''),sub:w.gender+' · '+payLabel(w),
+    summary:[['ड्यूटी',hh(c.workDays)+' दिन ('+c.full+' पूरा, '+c.half+' आधा, '+c.absent+' अनुपस्थित)'],['कुल घंटे',hh(c.hours)],['OT',hh(c.ot)+' घंटे = '+money(c.otAmt)],['रात की शिफ्ट',c.nights+' = '+money(c.nightAmt)],['कुल कमाई',money(c.earn)],['घटाया: खर्च / एडवांस',money(cutAmt)],['घटाया: सिक्योरिटी',money(c.holdNet)],['हाथ में देना',money(c.net)],['दिया गया',money(c.pay)],['बची हुई सैलरी',money(c.toGive)]],
+    cols:[{h:'तारीख',w:.2},{h:'स्थिति',w:.34},{h:'घंटे',w:.14,r:1},{h:'OT',w:.12,r:1},{h:'राशि',w:.2,r:1}],
+    rows:c.cs.map(x=>[dShort(x.a.date),x.a.status+(x.a.shift==='night'?' · रात':x.a.shift==='both'?' · दिन+रात':''),hh(x.c.hours),x.c.ot?hh(x.c.ot):'–',nfmt(Math.round(x.c.wage))]),total:['कुल','',hh(c.hours),hh(c.ot),nfmt(Math.round(c.earn))],
+    extras:[{title:'खर्चे, एडवांस और भुगतान (तारीख के साथ)',cols:[{h:'तारीख',w:.16},{h:'वजह',w:.38},{h:'प्रकार',w:.26},{h:'राशि',w:.2,r:1}],rows:rowsE}]}),pdfName(w.name,c.m));
+}
+function osText(){
+  const w=osW(ui.osW);if(!w)return;const c=osCalc(w,ui.osMonth),L=[w.name+' – '+monthLabel(c.m)];
+  L.push('ड्यूटी: '+hh(c.workDays)+' दिन | घंटे: '+hh(c.hours)+' | OT: '+hh(c.ot)+' घंटे ('+money(c.otAmt)+') | रात: '+c.nights);
+  L.push('कुल कमाई: '+money(c.earn));
+  c.ents.filter(x=>x.mode==='cut'||x.kind==='pay'||x.kind==='hold'||x.kind==='holdret').forEach(x=>L.push(dShort(x.date)+' '+(x.reason||osKindName[x.kind])+': '+(x.kind==='pay'||x.kind==='holdret'?'+':'−')+money(x.amount)));
+  L.push('हाथ में देना: '+money(c.net)+' | दिया: '+money(c.pay)+' | बाकी: '+money(c.toGive));
+  shareText(L.join('\n'),'वर्कर का हिसाब');
+}
+async function osBioPdf(id){
+  const w=osW(id);if(!w)return;
+  const blob=await bioPdf(Object.assign({},w,{info:w.address}),{aadhaar:false,bank:false});
+  shareMode=false;savePdf(blob,pdfName(w.name+'_बायोडाटा',today().slice(0,7)));
+}
+function osDelSheet(arr,id){
+  const r=db[arr].find(x=>x.id===id);if(!r)return;
+  const grp=r.sharedId?db[arr].filter(x=>x.sharedId===r.sharedId).length:1;
+  confirmSheet({title:'रिकॉर्ड हटाएँ?',msg:grp>1?'यह बंटवारा सभी '+grp+' वर्करों से हट जाएगा।':'यह एंट्री हटा दी जाएगी।',ok:'हटाएँ',danger:true,run:()=>{db[arr]=db[arr].filter(x=>r.sharedId?x.sharedId!==r.sharedId:x.id!==id);toast('हटा दिया');save()}});
+}
+function osAct(a,d){
+  switch(a){
+    case 'os-add-w':osWorkerSheet();return true;
+    case 'os-edit-w':osWorkerSheet(d.id);return true;
+    case 'os-save-w':osSaveW(d.id);return true;
+    case 'os-open':ui.osW=d.id;go('osw');return true;
+    case 'os-tab':ui.osTab=d.t;renderOstate();return true;
+    case 'os-con':ui.osCon=d.n;renderOstate();return true;
+    case 'os-prev':ui.osMonth=addDays(ui.osMonth+'-01',-1).slice(0,7);renderView();return true;
+    case 'os-next':ui.osMonth=addDays(ui.osMonth+'-01',32).slice(0,7);renderView();return true;
+    case 'os-att':osAttSheet({workerId:d.w,date:ui.osDate});return true;
+    case 'os-att-edit':{const r=db.osatt.find(x=>x.id===d.id);if(r)osAttSheet({rec:r});return true}
+    case 'os-save-att':osSaveAtt();return true;
+    case 'os-q':osQuick(d.w,d.s);return true;
+    case 'os-extra':{const w=osW($('x-aw').value);if(!w)return true;const i=$('x-ain').value||defIn(w);$('x-ain').value=i;$('x-aout').value=addHours(i,stdHours(w)+Number(d.h));osAttPrev();return true}
+    case 'os-exp':osExpSheet(d.w);return true;
+    case 'os-mode':osMode(d.md);return true;
+    case 'os-save-exp':osSaveExp();return true;
+    case 'os-share':osShareSheet();return true;
+    case 'os-save-share':osSaveShare();return true;
+    case 'os-hold':osHoldSheet(d.w);return true;
+    case 'os-save-hold':osSaveHold();return true;
+    case 'os-leave':osLeaveSheet(d.w);return true;
+    case 'os-save-leave':osSaveLeave();return true;
+    case 'os-back':{const l=db.osleave.find(x=>x.id===d.id);if(l){l.to=today();toast('वापसी दर्ज हुई');save()}return true}
+    case 'os-cpay':osCpaySheet(d.n);return true;
+    case 'os-save-cpay':osSaveCpay();return true;
+    case 'os-final':osFinalSheet(d.id);return true;
+    case 'os-final-go':osFinalGo();return true;
+    case 'os-reopen':{const w=osW(d.id);if(w)confirmSheet({title:'फिर काम पर लें?',msg:w.name+' फिर चालू वर्करों में आ जाएगा।',ok:'हाँ',run:()=>{delete w.left;ui.osTab='w';toast('फिर चालू किया');save()}});return true}
+    case 'os-pdf':shareMode=d.share==='1';osPdf();return true;
+    case 'os-text':osText();return true;
+    case 'os-bio':osBioPdf(d.id);return true;
+    case 'os-item':{const i=d.i,s=sheetCtx.items;const k=s.indexOf(i);if(k>=0)s.splice(k,1);else s.push(i);document.querySelectorAll('[data-act="os-item"]').forEach(b=>b.classList.toggle('on',s.includes(b.dataset.i)));return true}
+    case 'os-del':osDelSheet(d.arr,d.id);return true;
+    case 'aad-toggle2':ui.showAad=!ui.showAad;renderOsw();return true;
+  }
+  return false;
+}
+function osOnEvent(e){
+  const id=e.target.id||'';
+  if(id==='x-photo')osReadImg(e.target,'photo','x-photo-prev','sq',.72);
+  if(id==='x-aadph')osReadImg(e.target,'aph','x-aadph-prev','full',.6);
+  if(id==='x-mode'||id==='x-ot')osWUi();
+  if(['x-name','x-mode','x-ot','x-gender','x-duty','x-sal','x-day','x-hr','x-otc','x-night'].includes(id))osWPrev();
+  if(id==='x-aw'&&['day','both'].includes($('x-ash').value)&&!ABS.includes($('x-ast').value))osAttDefaults();
+  if(id==='x-ash'){if(!ABS.includes($('x-ast').value))osAttDefaults();osAttUi()}
+  if(id==='x-ast'){const off=ABS.includes($('x-ast').value);if(off){['x-ain','x-aout','x-ain2','x-aout2'].forEach(i=>$(i).value='')}else osAttDefaults();osAttUi()}
+  if(id.indexOf('x-a')===0)osAttPrev();
+  if(id==='x-ekind')osExpUi();
+  if(id==='x-samt'||(e.target.classList&&e.target.classList.contains('x-sw')))osSharePrev();
+}
 
 /* events */
 function fabAction(){const a=FAB[ui.view];if(a)act(a,$('fab'))}
@@ -1713,6 +2379,8 @@ function act(a,el){
     case 'save-settings':saveSettings();break;
     case 'copy-text':(async()=>{const t=$('f-text');if(await copyText(t.value))toast('कॉपी हो गया');else{t.select();toast('चुना गया, अब कॉपी करें')}})();break;
     case 'select-text':$('f-text').select();break;
+    case 'pdf-ascii':db.settings.pdfAscii=!!el.checked;persist();toast(el.checked?'PDF का नाम अंग्रेजी में रहेगा':'PDF का नाम हिंदी में रहेगा');break;
+    default:if(!lentAct(a,d))osAct(a,d);
   }
 }
 document.addEventListener('click',e=>{
@@ -1722,7 +2390,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('layer').firstChild)closeSheet()});
 $('layer').addEventListener('change',e=>{
-  const id=e.target.id;
+  const id=e.target.id;osOnEvent(e);
   if(id==='f-wphoto')readPhoto(e.target);
   if(id==='f-wmode'||id==='f-wot')wFields();
   if(id.indexOf('f-w')===0)wPrev();
@@ -1733,7 +2401,8 @@ $('layer').addEventListener('change',e=>{
   if(id==='f-pdate')prodFill(e.target.value);
   if(id==='f-ogender'||id==='f-oshift'){outRateFill();outPreview()}
 });
-$('layer').addEventListener('input',e=>{const id=e.target.id;if(id.indexOf('f-w')===0)wPrev();if(id.indexOf('f-a')===0)attPreview();if(id.indexOf('f-p')===0&&id!=='f-pdate')prodPreview();if(id.indexOf('f-o')===0)outPreview()});
+$('layer').addEventListener('input',e=>{const id=e.target.id;if(!(e.target.type==='file'))osOnEvent(e);if(id.indexOf('f-w')===0)wPrev();if(id.indexOf('f-a')===0)attPreview();if(id.indexOf('f-p')===0&&id!=='f-pdate')prodPreview();if(id.indexOf('f-o')===0)outPreview()});
+$('v-ostate').addEventListener('change',e=>{if(e.target.id==='os-date'&&e.target.value){ui.osDate=e.target.value;renderOstate()}});
 $('att-date').addEventListener('change',e=>{if(e.target.value){ui.attDate=e.target.value;renderAttendance()}});
 ['r-start','r-end','r-worker'].forEach(id=>$(id).addEventListener('change',()=>{ui.repStart=$('r-start').value;ui.repEnd=$('r-end').value;ui.repWorker=$('r-worker').value;renderReports()}));
 ['sl-start','sl-end'].forEach(id=>$(id).addEventListener('change',()=>{ui.slStart=$('sl-start').value;ui.slEnd=$('sl-end').value;renderSlip()}));
