@@ -349,6 +349,8 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <section id="v-khata" class="page gut" hidden></section>
     <section id="v-ostate" class="page gut" hidden></section>
     <section id="v-lent" class="page gut" hidden></section>
+    <section id="v-bio" class="page gut" hidden></section>
+    <section id="v-biod" class="page gut" hidden></section>
     <section id="v-osw" class="page gut" hidden></section>
 
     <section id="v-reports" class="page gut" hidden>
@@ -488,7 +490,7 @@ const DEFAULT_ITEMS=[
   {key:'b252',name:'252 पीस बंडल',rate:12,active:true},
   {key:'khilona',name:'खिलौना (हर पाउच)',rate:2,active:true,extra:true}
 ];
-const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],osw:[],osatt:[],osexp:[],osleave:[],oscpay:[],lent:[],lentpay:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
+const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],osw:[],osatt:[],osexp:[],osleave:[],oscpay:[],lent:[],lentpay:[],bio:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
 function migrateProd(p){
   if(p.q)return p;
   const n280=Number(p.n280)||0,n500=Number(p.n500)||0,r280=Number(p.r280)||0,r500=Number(p.r500)||0,k=n280+n500;
@@ -499,7 +501,7 @@ function migrateProd(p){
 }
 function norm(d){
   const f=fresh();
-  ['workers','attendance','production','expenses','transactions','outside','deductions','personal','osw','osatt','osexp','osleave','oscpay','lent','lentpay'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
+  ['workers','attendance','production','expenses','transactions','outside','deductions','personal','osw','osatt','osexp','osleave','oscpay','lent','lentpay','bio'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
   d.settings=Object.assign(f.settings,d.settings||{});
   if(!Array.isArray(d.settings.items)||!d.settings.items.length)d.settings.items=f.settings.items;
   d.production.forEach(migrateProd);
@@ -598,10 +600,10 @@ function download(blob,name){const a=document.createElement('a'),u=URL.createObj
 function save(){persist();renderView();renderHeader()}
 
 /* navigation */
-const TITLES={home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता',ostate:'बाहर की लेबर',osw:'वर्कर का हिसाब',lent:'दी हुई लेबर'};
-const SUB=['production','expenses','reports','settings','outside','slip','card','khata','ostate','osw','lent'];
+const TITLES={bio:'बायोडाटा फोल्डर',biod:'बायोडाटा',home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता',ostate:'बाहर की लेबर',osw:'वर्कर का हिसाब',lent:'दी हुई लेबर'};
+const SUB=['production','expenses','reports','settings','outside','slip','card','khata','ostate','osw','lent','bio','biod'];
 const TABOF=v=>SUB.includes(v)?'more':v;
-const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k',ostate:'os-add-w',lent:'add-lent'};
+const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k',ostate:'os-add-w',lent:'add-lent',bio:'add-bio'};
 function renderHeader(){
   const v=ui.view,s=db.settings;
   $('appTitle').textContent=v==='home'?(s.title||'मेरा लेबर खाता'):TITLES[v];
@@ -629,7 +631,7 @@ function go(v,fromBack){
   renderView();renderHeader();
 }
 function renderView(){
-  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,ostate:renderOstate,osw:renderOsw,lent:renderLent,more:()=>{},settings:renderMonths})[ui.view]();
+  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,ostate:renderOstate,osw:renderOsw,lent:renderLent,bio:renderBio,biod:renderBiod,more:()=>{},settings:renderMonths})[ui.view]();
 }
 
 /* home */
@@ -651,6 +653,7 @@ function renderHome(){
   ${dueBanner()}${hasDemo?`<div class="banner"><p>नमूना डेटा दिख रहा है। अपना काम शुरू करने से पहले इसे हटा दें।</p><button class="btn sm" data-act="remove-demo">नमूना हटाएँ</button></div>`:''}
   <div class="hero"><div class="date">${dfmt(t,{weekday:'long',day:'numeric',month:'long'})}</div><div class="lbl2">आज की मजदूरी</div><div class="big">${money(s.wages)}</div>
     <div class="hs-row"><div class="hs"><b>${s.present}</b><span>उपस्थित</span></div><div class="hs"><b>${s.absent}</b><span>अनुपस्थित</span></div><div class="hs"><b>${hh(s.hours)}</b><span>घंटे</span></div><div class="hs"><b>${hh(s.ot)}</b><span>OT घंटे</span></div></div></div>
+  ${bioHomeCard()}
   ${ydayCard()}
   <div class="card"><h3>अब तक का कुल हिसाब</h3>
     <div class="kv"><span>कुल उत्पादन</span><b>${money(allProd)}</b></div>
@@ -736,7 +739,7 @@ async function pickContacts(t){
   try{r=await navigator.contacts.select(['name','tel','icon'],{multiple:true})}
   catch(e){try{r=await navigator.contacts.select(['name','tel'],{multiple:true})}catch(e2){toast('फोन-बुक की अनुमति नहीं मिली');return}}
   if(!r||!r.length){return}
-  const have=new Set([].concat(db.workers,db.osw||[]).map(w=>phClean(w.phone)).filter(Boolean));
+  const have=new Set((t==='b'?db.bio:[].concat(db.workers,db.osw||[])).map(w=>phClean(w.phone)).filter(Boolean));
   const list=[];let dup=0;
   for(const c of r){
     const name=((c.name&&c.name[0])||'').trim(),tel=phClean(c.tel&&c.tel[0]);
@@ -749,12 +752,23 @@ async function pickContacts(t){
   if(dup)toast(dup+' नाम पहले से ऐप में हैं, छोड़ दिए');
   pend={t,list};pendNext();
 }
+async function pickPhone(t){
+  if(!(navigator.contacts&&navigator.contacts.select)){toast('इस फोन में फोन-बुक नहीं खुल सकी। ऐप को Chrome (Android) में खोलिए');return}
+  let r;
+  try{r=await navigator.contacts.select(['name','tel'],{multiple:false})}catch(e){toast('फोन-बुक की अनुमति नहीं मिली');return}
+  if(!r||!r.length)return;
+  const c=r[0],tel=phClean(c.tel&&c.tel[0]);
+  const e=$(t==='x'?'x-phone':t==='b'?'b-phone':'f-wphone');
+  if(!tel){toast('इस नाम के साथ नंबर नहीं मिला');return}
+  if(e)e.value=tel;
+  toast('नंबर भर गया: '+((c.name&&c.name[0])||'')+' · '+tel);
+}
 function pendNext(){
   if(!pend||!pend.list.length){pend=null;pendUse=false;return}
   pend.cur=pend.list.shift();pendUse=true;
-  if(pend.t==='x')osWorkerSheet('');else workerSheet('');
+  if(pend.t==='x')osWorkerSheet('');else if(pend.t==='b')bioFormSheet('');else workerSheet('');
 }
-const pendBox=(w,t)=>w?'':`<div class="fld"><button type="button" class="btn ghost" data-act="pick-contact" data-t="${t}">📇 फोन-बुक से चुनें</button>${pendUse&&pend&&pend.cur?`<div class="hint">फोन-बुक से: <b>${esc(pend.cur.name)}</b>${pend.list.length?' · अभी '+pend.list.length+' और बाकी हैं (इसे सेव करते ही अगला खुलेगा)':''}</div>`:''}</div>`;
+const pendBox=(w,t)=>w?`<div class="fld"><button type="button" class="btn ghost" data-act="pick-phone" data-t="${t}">📇 फोन-बुक से इसका नंबर लें</button></div>`:`<div class="fld"><button type="button" class="btn ghost" data-act="pick-contact" data-t="${t}">📇 फोन-बुक से चुनें</button>${pendUse&&pend&&pend.cur?`<div class="hint">फोन-बुक से: <b>${esc(pend.cur.name)}</b>${pend.list.length?' · अभी '+pend.list.length+' और बाकी हैं (इसे सेव करते ही अगला खुलेगा)':''}</div>`:''}</div>`;
 
 /* आधार: फोटो और QR */
 async function qrScan(src){
@@ -791,7 +805,7 @@ async function aadParse(raw){
 }
 async function aadFill(raw,p){
   const d=await aadParse(raw);if(!d||!d.name){toast('QR मिला पर आधार का नहीं लगता');return false}
-  const I=p==='x'?{n:'x-name',f:'x-father',d:'',a:'x-addr',g:'x-gender',u:'x-aad'}:{n:'f-wname',f:'f-wfather',d:'f-wdob',a:'f-waddress',g:'f-wgender',u:'f-waadhaar'};
+  const I=p==='x'?{n:'x-name',f:'x-father',d:'',a:'x-addr',g:'x-gender',u:'x-aad'}:p==='b'?{n:'b-name',f:'b-father',d:'b-dob',a:'b-addr',g:'b-gender',u:'b-aad'}:{n:'f-wname',f:'f-wfather',d:'f-wdob',a:'f-waddress',g:'f-wgender',u:'f-waadhaar'};
   const done=[],put=(id,v,lbl)=>{const e=id&&$(id);if(e&&v&&!String(e.value).trim()){e.value=v;done.push(lbl)}};
   put(I.n,d.name,'नाम');put(I.f,d.father,'पिता/पति');put(I.d,d.dob,'जन्मतिथि');put(I.a,d.address,'पता');
   if(d.uid&&/^\d{12}$/.test(d.uid))put(I.u,d.uid,'आधार नंबर');
@@ -821,7 +835,7 @@ async function qrFillBtn(p){
 }
 function storeUsed(){try{return JSON.stringify(db).length}catch(e){return 0}}
 const aadBlock=(w,p)=>{
-  const k1=p==='x'?'x-aadph':'f-aadf',k2=p==='x'?'x-aadb':'f-aadb',s1=p==='x'?(w&&w.aadhaarPhoto):(w&&w.aadFront),s2=p==='x'?(w&&w.aadhaarBack):(w&&w.aadBack);
+  const k1=p==='x'?'x-aadph':p==='b'?'b-aadf':'f-aadf',k2=p==='x'?'x-aadb':p==='b'?'b-aadb':'f-aadb',s1=p==='x'?(w&&w.aadhaarPhoto):(w&&w.aadFront),s2=p==='x'?(w&&w.aadhaarBack):(w&&w.aadBack);
   const im=(id,src)=>`<img id="${id}-prev" alt="" ${src?`src="${src}"`:'hidden'} style="width:100%;border-radius:10px;border:1px solid var(--line);margin-top:6px">`;
   return `<div class="fld"><span class="lbl">आधार कार्ड की फोटो (आगे और पीछे)</span>
     <label class="lbl" for="${k1}" style="margin-top:6px">आगे की तरफ़</label><input id="${k1}" type="file" accept="image/*">${im(k1,s1)}
@@ -829,6 +843,104 @@ const aadBlock=(w,p)=>{
     <button type="button" class="btn ghost sm" style="margin-top:10px" data-act="qr-fill" data-p="${p}">📷 आधार के QR से नाम-पता भरें</button>
     <div class="hint" id="qr-msg">फोटो चुनते ही अगर कार्ड का QR साफ़ दिखा तो नाम, पिता का नाम, पता अपने-आप भर जाएगा।</div></div>`;
 };
+
+/* ===== बायोडाटा फोल्डर (अलग) ===== */
+const BIO_ST={working:'काम पर',left:'छोड़ चुके',recall:'दोबारा बुलाना है'};
+const bioRec=id=>(db.bio||[]).find(b=>b.id===id);
+function linkedOf(b){if(!b||!b.link)return null;const k=b.link.slice(0,2),id=b.link.slice(2);return k==='w:'?db.workers.find(w=>w.id===id):k==='x:'?(db.osw||[]).find(w=>w.id===id):null}
+function bioFull(b){const w=Object.assign({},b),l=linkedOf(b);if(l){if(!w.aadFront)w.aadFront=l.aadFront||l.aadhaarPhoto||'';if(!w.aadBack)w.aadBack=l.aadBack||l.aadhaarBack||'';if(!w.photo)w.photo=l.photo||''}return w}
+function bioHomeCard(){
+  const n=db.bio.length,c=k=>db.bio.filter(b=>b.status===k).length;
+  return `<div class="card" style="margin-top:12px;border-left:6px solid #7c3aed"><h3>📁 बायोडाटा फोल्डर</h3>
+  ${n?`<div class="kv"><span>कुल बायोडाटा</span><b>${n}</b></div><div class="kv"><span>काम पर / छोड़ चुके / दोबारा बुलाना</span><b>${c('working')} / ${c('left')} / ${c('recall')}</b></div>`:'<div class="muted">सबका नाम, नंबर, फोटो, आधार और पूरी जानकारी एक जगह। फोन-बुक से भी जोड़ सकते हैं।</div>'}
+  <div class="btns" style="margin-top:8px"><button class="btn sm" data-go="bio">📁 फोल्डर खोलें</button><button class="btn ghost sm" data-act="add-bio">➕ नया जोड़ें</button></div></div>`;
+}
+function bioRowsHtml(){
+  const q=(ui.bioQ||'').trim().toLowerCase(),f=ui.bioF||'all';
+  const L=db.bio.filter(b=>(f==='all'||b.status===f)&&(!q||(b.name||'').toLowerCase().includes(q)||String(b.phone||'').includes(q)||(b.address||'').toLowerCase().includes(q))).sort((a,b)=>(a.name||'').localeCompare(b.name||'','hi'));
+  if(!L.length)return '<div class="card empty">'+(db.bio.length?'कोई नाम नहीं मिला।':'अभी बायोडाटा फोल्डर खाली है। ऊपर के बटन से जोड़िए।')+'</div>';
+  return '<div class="card">'+L.map(b=>{const p=phClean(b.phone),l=linkedOf(b);return `<div class="row"><div class="av${b.status==='left'?' off':''}" data-act="bio-open" data-id="${b.id}">${b.photo?`<img src="${b.photo}" alt="">`:esc(initial(b.name))}</div><div class="mid" data-act="bio-open" data-id="${b.id}"><div class="nm">${esc(b.name)}</div><div class="chips"><span class="chip ${b.status==='working'?'good':b.status==='recall'?'warn':''}">${BIO_ST[b.status]||'काम पर'}</span>${l?'<span class="chip acc">हिसाब जुड़ा</span>':''}</div>${b.phone?`<div class="sub">${esc(b.phone)}</div>`:''}${b.address?`<div class="sub">${esc(b.address).slice(0,60)}</div>`:''}</div>${p.length===10?`<div class="actions"><a class="ibtn" href="tel:${p}" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center" aria-label="कॉल">📞</a><a class="ibtn" href="${waLink(b.phone)}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center" aria-label="WhatsApp">💬</a></div>`:''}</div>`}).join('')+'</div>';
+}
+function renderBio(){
+  const f=ui.bioF||'all',c=k=>db.bio.filter(b=>b.status===k).length;
+  const chip=(k,t)=>`<button class="pick${f===k?' on':''}" data-act="bio-f" data-f="${k}" aria-pressed="${f===k}">${t}</button>`;
+  $('v-bio').innerHTML=`<div class="btns" style="margin-bottom:10px"><button class="btn sm" data-act="pick-contact" data-t="b">📇 फोन-बुक से जोड़ें</button><button class="btn ghost sm" data-act="add-bio">➕ हाथ से जोड़ें</button><button class="btn ghost sm" data-act="bio-import">⬇ अपने मजदूर यहाँ लाएँ</button></div>
+  <div class="fld"><input id="bio-q" type="search" placeholder="नाम, नंबर या पता खोजें" value="${esc(ui.bioQ||'')}" autocomplete="off"></div>
+  <div class="chiprow" style="margin-bottom:10px">${chip('all','सब ('+db.bio.length+')')}${chip('working','काम पर ('+c('working')+')')}${chip('left','छोड़ चुके ('+c('left')+')')}${chip('recall','दोबारा बुलाना ('+c('recall')+')')}</div>
+  <div id="bio-list">${bioRowsHtml()}</div>
+  ${(()=>{const u=storeUsed();return u>2500000?`<div class="muted" style="margin-top:8px">फोन में ऐप की जगह: ${(u/1e6).toFixed(1)} MB / करीब 5 MB</div>`:''})()}`;
+}
+function renderBiod(){
+  const b=bioRec(ui.bioId);if(!b){$('v-biod').innerHTML='<div class="card empty">बायोडाटा नहीं मिला।</div>';return}
+  const l=linkedOf(b),w=bioFull(b),p=phClean(b.phone);
+  const rows=bioRows(Object.assign({},b),{}).filter(x=>x[0]!=='नाम');
+  if(b.aadhaar)rows.push(['आधार नंबर',aadFmt(b.aadhaar,ui.showAad)]);
+  if(b.note)rows.push(['टिप्पणी',b.note]);
+  let rc='';
+  if(l&&db.workers.includes(l)){
+    let c=null;try{c=cardData(l.id,ui.cardMonth||today().slice(0,7))}catch(e){}
+    rc=`<div class="card"><h3>रिपोर्ट कार्ड · ${esc(l.name)}${c?' · '+monthLabel(c.m||ui.cardMonth||today().slice(0,7)):''}</h3>${c?`<div class="kv"><span>हाजिरी</span><b>${c.pct}%</b></div><div class="kv"><span>काम के दिन / घंटे</span><b>${hh(c.workDays)} / ${hh(c.hours)}</b></div><div class="kv"><span>OT घंटे</span><b>${hh(c.ot)}</b></div><div class="kv"><span>रात की शिफ्ट</span><b>${c.nights}</b></div><div class="kv"><span>इस महीने की कमाई</span><b>${money(c.earn)}</b></div><div class="kv total"><span>अब तक का कुल बाकी</span><b class="${c.all.bal<0?'bad':''}">${money(c.all.bal)}</b></div>`:''}<div class="btns" style="margin-top:8px"><button class="btn sm" data-act="bio-card" data-id="${l.id}">पूरा रिपोर्ट कार्ड खोलें</button></div></div>`;
+  }else if(l){
+    rc=`<div class="card"><h3>बाहर की लेबर का हिसाब · ${esc(l.name)}</h3><div class="btns"><button class="btn sm" data-act="bio-osw" data-id="${l.id}">पूरा हिसाब खोलें</button></div></div>`;
+  }
+  const imgs=ui.showAad?[w.aadFront,w.aadBack].filter(Boolean).map(x=>`<img src="${x}" alt="आधार" style="width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px">`).join(''):'';
+  $('v-biod').innerHTML=`<div class="card"><div style="display:flex;gap:12px;align-items:flex-start">${w.photo?`<img src="${w.photo}" alt="फोटो" style="width:96px;height:96px;object-fit:cover;border-radius:12px;border:1px solid var(--line);flex:none">`:`<div class="av" style="width:64px;height:64px;font-size:26px;flex:none">${esc(initial(b.name))}</div>`}<div style="flex:1;min-width:0"><div class="nm" style="font-size:20px;font-weight:800">${esc(b.name)}</div><div class="chips" style="margin-top:6px"><span class="chip ${b.status==='working'?'good':b.status==='recall'?'warn':''}">${BIO_ST[b.status]||'काम पर'}</span>${b.gender?`<span class="chip">${esc(b.gender)}</span>`:''}</div></div></div>
+  ${rows.map(x=>`<div class="kv"><span>${x[0]}</span><b style="text-align:right;overflow-wrap:anywhere;font-size:15px;font-family:var(--font-body)">${esc(x[1])}</b></div>`).join('')}
+  ${imgs}
+  ${p.length===10?`<div class="btns" style="margin-top:10px"><a class="btn sm" href="tel:${p}" style="text-decoration:none">📞 कॉल करें</a><a class="btn sm" href="${waLink(b.phone)}" target="_blank" rel="noopener" style="text-decoration:none">💬 WhatsApp</a></div>`:''}
+  <div class="btns" style="margin-top:8px"><button class="btn ghost sm" data-act="edit-bio" data-id="${b.id}">जानकारी बदलें</button>${(b.aadhaar||w.aadFront||w.aadBack)?`<button class="btn ghost sm" data-act="bio-aad">${ui.showAad?'आधार छुपाएँ':'आधार दिखाएँ'}</button>`:''}<button class="btn ghost sm" data-act="bio-sheet" data-mode="pdf" data-bid="${b.id}">बायोडाटा PDF</button><button class="btn ghost sm" data-act="bio-sheet" data-mode="share" data-bid="${b.id}">WhatsApp पर भेजें</button></div></div>
+  <div class="card"><h3>स्थिति बदलें</h3><div class="chiprow">${Object.keys(BIO_ST).map(k=>`<button class="pick${b.status===k?' on':''}" data-act="bio-st" data-id="${b.id}" data-s="${k}">${BIO_ST[k]}</button>`).join('')}</div></div>
+  ${rc}
+  <div class="btns"><button class="btn ghost bad" data-act="bio-del" data-id="${b.id}">🗑 यह बायोडाटा हटाएँ</button></div>`;
+}
+function bioStatus(id,st){const b=bioRec(id);if(!b)return;b.status=st;if(st==='left'&&!b.left)b.left=today();if(st!=='left')b.left='';toast(BIO_ST[st]);save()}
+async function bioPhoto(inp){const f=inp.files&&inp.files[0];if(!f)return;const du=await blobSq(f,256,.72);if(!du){toast('फोटो नहीं खुल सकी');return}sheetCtx.photo=du;const pv=$('b-photo-prev');if(pv){pv.src=du;pv.hidden=false}}
+function bioFormSheet(id){
+  const b=id?bioRec(id):null,pc=(!b&&pendUse&&pend&&pend.cur)?pend.cur:null;
+  sheetCtx={type:'bioedit',id:id||'',photo:(b&&b.photo)||(pc&&pc.photo)||'',af:(b&&b.aadFront)||'',ab:(b&&b.aadBack)||''};
+  const opts=[['','कोई नहीं (हिसाब से नहीं जुड़ा)']].concat(db.workers.map(w=>['w:'+w.id,'मजदूर: '+w.name]),(db.osw||[]).map(w=>['x:'+w.id,'बाहर की लेबर: '+w.name]));
+  const st=b?b.status:'working';
+  openSheet(b?'बायोडाटा बदलें':'नया बायोडाटा',`<div class="form">${pendBox(b,'b')}
+    <div class="fld"><label class="lbl" for="b-name">नाम *</label><input id="b-name" value="${esc(b?b.name:(pc?pc.name:''))}" autocomplete="off"></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="b-phone">मोबाइल नंबर</label><input id="b-phone" type="tel" inputmode="numeric" maxlength="15" value="${esc(b?b.phone||'':(pc?pc.phone:''))}"></div>
+    <div class="fld"><label class="lbl" for="b-gender">लिंग</label><select id="b-gender"><option${!b||b.gender!==FEM?' selected':''}>पुरुष</option><option${b&&b.gender===FEM?' selected':''}>महिला</option></select></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="b-phone2">घर का / दूसरा नंबर</label><input id="b-phone2" type="tel" inputmode="numeric" maxlength="15" value="${esc(b?b.phone2||'':'')}"></div>
+    <div class="fld"><label class="lbl" for="b-email">ईमेल</label><input id="b-email" type="email" value="${esc(b?b.email||'':'')}"></div></div>
+    <div class="fld"><label class="lbl" for="b-status">अभी की स्थिति</label><select id="b-status">${Object.keys(BIO_ST).map(k=>`<option value="${k}"${k===st?' selected':''}>${BIO_ST[k]}</option>`).join('')}</select></div>
+    <div class="fld"><label class="lbl" for="b-photo">वर्कर की अपनी फोटो (कैमरा या गैलरी)</label><input id="b-photo" type="file" accept="image/*"><img id="b-photo-prev" alt="" ${sheetCtx.photo?`src="${sheetCtx.photo}"`:'hidden'} style="width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line);margin-top:8px"></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="b-father">पिता / पति का नाम</label><input id="b-father" value="${esc(b?b.father||'':'')}"></div>
+    <div class="fld"><label class="lbl" for="b-dob">जन्मतिथि</label><input id="b-dob" type="date" value="${esc(b?b.dob||'':'')}"></div></div>
+    <div class="fld"><label class="lbl" for="b-addr">पूरा पता</label><input id="b-addr" value="${esc(b?b.address||'':'')}" placeholder="गाँव / मोहल्ला, शहर, जिला"></div>
+    <div class="fld"><label class="lbl" for="b-aad">आधार नंबर (12 अंक)</label><input id="b-aad" inputmode="numeric" maxlength="14" value="${esc(b?b.aadhaar||'':'')}" placeholder="XXXX XXXX XXXX"></div>
+    ${aadBlock(b,'b')}
+    <div class="g2"><div class="fld"><label class="lbl" for="b-emn">आपातकालीन संपर्क का नाम</label><input id="b-emn" value="${esc(b?b.emerName||'':'')}"></div>
+    <div class="fld"><label class="lbl" for="b-emp">उसका मोबाइल</label><input id="b-emp" type="tel" inputmode="numeric" maxlength="15" value="${esc(b?b.emerPhone||'':'')}"></div></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="b-start">काम पर आने की तारीख</label><input id="b-start" type="date" value="${esc(b?b.start||'':today())}"></div>
+    <div class="fld"><label class="lbl" for="b-left">काम छोड़ने की तारीख</label><input id="b-left" type="date" value="${esc(b?b.left||'':'')}"></div></div>
+    <div class="fld"><label class="lbl" for="b-note">टिप्पणी (कौन सा काम, कहाँ का, कैसा काम)</label><input id="b-note" value="${esc(b?b.note||'':'')}"></div>
+    <div class="fld"><label class="lbl" for="b-link">इसका हिसाब / रिपोर्ट कार्ड किससे जुड़े?</label><select id="b-link">${opts.map(o=>`<option value="${esc(o[0])}"${(b&&b.link||'')===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select></div>
+    <div class="err" id="formErr" hidden></div>
+    <button class="btn wide" data-act="save-bio" data-id="${id||''}">बायोडाटा सेव करें</button></div>`);
+}
+function saveBio(id){
+  const name=$('b-name').value.trim();if(!name)return ferr('नाम लिखें');
+  const aad=($('b-aad').value||'').replace(/\s+/g,'');if(aad&&!/^\d{12}$/.test(aad))return ferr('आधार नंबर 12 अंकों का होना चाहिए');
+  const old=id?bioRec(id):null,st=$('b-status').value,ph=$('b-phone').value.trim();
+  let link=$('b-link').value;
+  if(!link&&phClean(ph).length===10){const m=db.workers.find(w=>phClean(w.phone)===phClean(ph));const x=!m&&(db.osw||[]).find(w=>phClean(w.phone)===phClean(ph));link=m?'w:'+m.id:x?'x:'+x.id:''}
+  const o={id:id||uid(),name,phone:ph,phone2:$('b-phone2').value.trim(),email:$('b-email').value.trim(),gender:$('b-gender').value,status:st,father:$('b-father').value.trim(),dob:$('b-dob').value,address:$('b-addr').value.trim(),aadhaar:aad,emerName:$('b-emn').value.trim(),emerPhone:$('b-emp').value.trim(),start:$('b-start').value,left:$('b-left').value,note:$('b-note').value.trim(),link,photo:sheetCtx.photo||'',aadFront:sheetCtx.af||'',aadBack:sheetCtx.ab||''};
+  if(st==='left'&&!o.left)o.left=today();if(st!=='left')o.left='';
+  if(storeUsed()-(old?JSON.stringify(old).length:0)+JSON.stringify(o).length>4900000)return ferr('फोन की जगह भरने वाली है। पहले बैकअप लीजिए, फिर कुछ आधार फोटो हटाइए।');
+  const i=db.bio.findIndex(x=>x.id===o.id);if(i>=0)db.bio[i]=o;else db.bio.push(o);
+  closeSheet();toast('बायोडाटा सेव हो गया');save();
+  if(pend)setTimeout(pendNext,350);
+}
+function bioImport(){
+  let n=0;const has=new Set(db.bio.map(b=>b.link));
+  db.workers.forEach(w=>{if(has.has('w:'+w.id))return;db.bio.push({id:uid(),name:w.name,phone:w.phone||'',phone2:'',email:'',gender:w.gender,status:w.active===false?'left':'working',father:w.father||'',dob:w.dob||'',address:w.address||w.info||'',aadhaar:w.aadhaar||'',emerName:w.emerName||'',emerPhone:w.emerPhone||'',start:w.start||'',left:w.left||'',note:'',link:'w:'+w.id,photo:w.photo||'',aadFront:'',aadBack:''});n++});
+  (db.osw||[]).forEach(w=>{if(has.has('x:'+w.id))return;db.bio.push({id:uid(),name:w.name,phone:w.phone||'',phone2:'',email:'',gender:w.gender,status:w.left?'left':'working',father:w.father||'',dob:'',address:w.address||'',aadhaar:w.aadhaar||'',emerName:'',emerPhone:'',start:w.start||'',left:w.left||'',note:w.contractor?'ठेकेदार: '+w.contractor:'',link:'x:'+w.id,photo:w.photo||'',aadFront:'',aadBack:''});n++});
+  toast(n?n+' नाम बायोडाटा फोल्डर में आ गए':'सब नाम पहले से यहाँ हैं');save();
+}
 function osHomeCard(){
   if(!db.osw.length)return `<div class="card"><h3>बाहर की लेबर (दूसरे राज्य की)</h3><div class="muted">नाम, आधार, ठेकेदार, रहना-खाना और पूरा हिसाब एक जगह।</div><div style="margin-top:8px"><button class="btn ghost sm" data-go="ostate">शुरू करें</button></div></div>`;
   const D=osDash(today().slice(0,7));
@@ -1194,7 +1306,7 @@ function renderCard(){
 function ageOf(dob){if(!dob)return '';const d=new Date(dob+'T00:00:00'),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a>0&&a<100?a:''}
 function aadFmt(a,full){a=String(a||'');if(!a)return '';const g=a.replace(/(\d{4})(?=\d)/g,'$1 ');return full?g:'XXXX XXXX '+a.slice(-4)}
 function bioRows(w,inc){
-  const r=[['नाम',w.name],['पिता / पति का नाम',w.father],['लिंग',w.gender],['जन्मतिथि',w.dob?dShort(w.dob)+' '+new Date(w.dob+'T00:00:00').getFullYear()+(ageOf(w.dob)?' (उम्र '+ageOf(w.dob)+' वर्ष)':''):''],['मोबाइल नंबर',w.phone],['पता',w.address||w.info],['आपातकालीन संपर्क',[w.emerName,w.emerPhone].filter(Boolean).join(' – ')],['काम पर आने की तारीख',w.start?dShort(w.start)+' '+new Date(w.start+'T00:00:00').getFullYear():''],['काम छोड़ने की तारीख',w.left?dShort(w.left)+' '+w.left.slice(0,4):'']];
+  const r=[['नाम',w.name],['पिता / पति का नाम',w.father],['लिंग',w.gender],['जन्मतिथि',w.dob?dShort(w.dob)+' '+new Date(w.dob+'T00:00:00').getFullYear()+(ageOf(w.dob)?' (उम्र '+ageOf(w.dob)+' वर्ष)':''):''],['मोबाइल नंबर',w.phone],['घर का नंबर',w.phone2],['ईमेल',w.email],['पता',w.address||w.info],['आपातकालीन संपर्क',[w.emerName,w.emerPhone].filter(Boolean).join(' – ')],['काम पर आने की तारीख',w.start?dShort(w.start)+' '+new Date(w.start+'T00:00:00').getFullYear():''],['काम छोड़ने की तारीख',w.left?dShort(w.left)+' '+w.left.slice(0,4):'']];
   if(inc.aadhaar)r.push(['आधार नंबर',aadFmt(w.aadhaar,true)]);
   if(inc.bank){r.push(['बैंक खाता नंबर',w.bankAcc]);r.push(['IFSC',w.ifsc])}
   return r.filter(x=>x[1]);
@@ -1209,8 +1321,8 @@ function bioCard(w){
   <div class="btns" style="margin-top:10px"><button class="btn sm" data-act="bio-sheet" data-mode="pdf">बायोडाटा PDF</button><button class="btn sm" data-act="bio-sheet" data-mode="share">WhatsApp पर भेजें</button><button class="btn ghost sm" data-act="bio-sheet" data-mode="text">टेक्स्ट कॉपी</button></div>
   <div class="btns" style="margin-top:8px"><button class="btn ghost sm" data-act="edit-worker" data-id="${w.id}">जानकारी भरें / बदलें</button>${(w.aadhaar||w.bankAcc||w.aadFront||w.aadBack)?`<button class="btn ghost sm" data-act="aad-toggle">${ui.showAad?'आधार/बैंक छुपाएँ':'आधार/बैंक पूरा दिखाएँ'}</button>`:''}</div></div>`;
 }
-function bioSheet(mode,oid){
-  const w=oid?osW(oid):worker(ui.cardW);if(!w)return;
+function bioSheet(mode,oid,bid){
+  const w=bid?bioRec(bid):oid?osW(oid):worker(ui.cardW);if(!w)return;
   sheetCtx={type:'bio'};
   openSheet('बायोडाटा में क्या-क्या जाए?',`<div class="form">
     <p class="hint" style="margin:0">नाम, पता, मोबाइल, फोटो आदि जाएँगे। नीचे की संवेदनशील जानकारी अपनी मर्जी से जोड़ें:</p>
@@ -1218,17 +1330,17 @@ function bioSheet(mode,oid){
     ${oid?'':'<label class="chk"><input type="checkbox" id="f-binc-b"> बैंक खाता और IFSC शामिल करें</label>'}
     <label class="chk"><input type="checkbox" id="f-binc-p"> आधार की फोटो (आगे-पीछे) शामिल करें — दूसरे पन्ने पर</label>
     <div class="hint">जिसे भेज रहे हैं, उस पर भरोसा हो तभी आधार या बैंक की जानकारी जोड़ें।</div>
-    <button class="btn wide" data-act="bio-go" data-mode="${mode}" data-oid="${oid||''}">${mode==='share'?'WhatsApp पर भेजें':mode==='text'?'टेक्स्ट कॉपी करें':'PDF बनाएँ'}</button></div>`);
+    <button class="btn wide" data-act="bio-go" data-mode="${mode}" data-oid="${oid||''}" data-bid="${bid||''}">${mode==='share'?'WhatsApp पर भेजें':mode==='text'?'टेक्स्ट कॉपी करें':'PDF बनाएँ'}</button></div>`);
 }
 function bioText(w,inc){return ['बायोडाटा'].concat(bioRows(w,inc).map(x=>x[0]+': '+x[1])).join('\n')}
-async function bioGo(mode,oid){
-  const w0=oid?osW(oid):worker(ui.cardW);if(!w0)return;
-  const w=oid?Object.assign({},w0,{info:w0.address}):w0;
+async function bioGo(mode,oid,bid){
+  const w0=bid?bioRec(bid):oid?osW(oid):worker(ui.cardW);if(!w0)return;
+  const w=bid?bioFull(w0):oid?Object.assign({},w0,{info:w0.address}):w0;
   const inc={aadhaar:$('f-binc-a').checked,bank:!!($('f-binc-b')&&$('f-binc-b').checked),photos:!!($('f-binc-p')&&$('f-binc-p').checked)};closeSheet();
   if(mode==='text'){shareText(bioText(w,inc),'बायोडाटा');return}
   const blob=await bioPdf(w,inc);
   shareMode=mode==='share';
-  if(oid)savePdf(blob,pdfName(w0.name+'_बायोडाटा',today().slice(0,7)));else savePdf(blob,'Biodata_'+asc(w.name)+'_'+today()+'.pdf');
+  if(oid||bid)savePdf(blob,pdfName(w0.name+'_बायोडाटा',today().slice(0,7)));else savePdf(blob,'Biodata_'+asc(w.name)+'_'+today()+'.pdf');
 }
 async function bioPdf(w,inc){
   const W=1240,H=1754,M=80,FONT='"Noto Sans Devanagari","Mukta","Hind","Nirmala UI","Segoe UI",Arial,sans-serif',cv=document.createElement('canvas');cv.width=W;cv.height=H;
@@ -2599,9 +2711,21 @@ function act(a,el){
     case 'q-present':quick(d.w,'पूरा दिन');break;
     case 'q-absent':quick(d.w,'अनुपस्थित');break;
     case 'pick-contact':pickContacts(d.t);break;
+    case 'pick-phone':pickPhone(d.t);break;
     case 'qr-fill':qrFillBtn(d.p);break;
     case 'w-left':ui.wLeft=!ui.wLeft;renderWorkers();break;
     case 'pick-date':ui.attDate=d.d;renderAttendance();break;
+    case 'add-bio':pend=null;pendUse=false;bioFormSheet('');break;
+    case 'edit-bio':bioFormSheet(d.id);break;
+    case 'save-bio':saveBio(d.id);break;
+    case 'bio-open':ui.bioId=d.id;go('biod');break;
+    case 'bio-f':ui.bioF=d.f;renderBio();break;
+    case 'bio-import':bioImport();break;
+    case 'bio-st':bioStatus(d.id,d.s);break;
+    case 'bio-aad':ui.showAad=!ui.showAad;renderBiod();break;
+    case 'bio-card':ui.cardW=d.id;go('card');break;
+    case 'bio-osw':ui.osW=d.id;go('osw');break;
+    case 'bio-del':{const b=bioRec(d.id);if(b)confirmSheet({title:'बायोडाटा हटाएँ?',msg:b.name+' का बायोडाटा फोल्डर से हट जाएगा। मजदूर का हिसाब नहीं हटेगा।',ok:'हटाएँ',danger:true,run:()=>{db.bio=db.bio.filter(x=>x.id!==b.id);toast('हटा दिया');go('bio');save()}});break}
     case 'yday-att':ui.attDate=addDays(today(),-1);go('attendance');break;
     case 'add-prod':prodSheet(d.d||today());break;
     case 'edit-prod':prodSheet(d.d);break;
@@ -2626,8 +2750,8 @@ function act(a,el){
     case 'items':itemsSheet();break;
     case 'photo-del':sheetCtx.photo='';{const im=$('w-photo-prev');if(im){im.hidden=true;im.removeAttribute('src')}}break;
     case 'aad-toggle':ui.showAad=!ui.showAad;renderCard();break;
-    case 'bio-sheet':bioSheet(d.mode);break;
-    case 'bio-go':bioGo(d.mode,d.oid);break;
+    case 'bio-sheet':bioSheet(d.mode,'',d.bid);break;
+    case 'bio-go':bioGo(d.mode,d.oid,d.bid);break;
     case 'pin-set':pinSheet();break;
     case 'pin-save':pinSave();break;
     case 'pin-remove':pinRemoveSheet();break;
@@ -2681,10 +2805,14 @@ document.addEventListener('click',e=>{
   if(el.id==='backBtn'){appBack();return}
   if(el.dataset.act)act(el.dataset.act,el);else go(el.dataset.go);
 });
+document.addEventListener('input',e=>{if(e.target.id==='bio-q'){ui.bioQ=e.target.value;const l=$('bio-list');if(l)l.innerHTML=bioRowsHtml()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('layer').firstChild)closeSheet()});
 $('layer').addEventListener('change',e=>{
   const id=e.target.id;osOnEvent(e);
   if(id==='f-wphoto')readPhoto(e.target);
+  if(id==='b-photo')bioPhoto(e.target);
+  if(id==='b-aadf')aadImg(e.target,'af','b-aadf-prev','b');
+  if(id==='b-aadb')aadImg(e.target,'ab','b-aadb-prev','b');
   if(id==='f-aadf')aadImg(e.target,'af','f-aadf-prev','w');
   if(id==='f-aadb')aadImg(e.target,'ab','f-aadb-prev','w');
   if(id==='f-wmode'||id==='f-wot')wFields();
