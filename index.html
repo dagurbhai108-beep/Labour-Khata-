@@ -275,6 +275,23 @@ tr.fin td{font-weight:700;font-size:15px;border-top:2px solid var(--line)}
 .empty{background:color-mix(in srgb,#8b5cf6 7%,var(--surface))}
 @media (prefers-reduced-motion:no-preference){.card,.qa,.btn{transition:transform .12s ease,box-shadow .12s ease}.btn:active,.qa:active{transform:scale(.97)}}
 
+/* v4: होम जाली, कैश बुक, नोट बुक */
+.hg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.hb{border:0;border-radius:18px;padding:12px 4px 10px;color:#fff;font:inherit;font-weight:700;font-size:13px;line-height:1.25;min-height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 10px rgba(0,0,0,.25);cursor:pointer;text-align:center}
+.hb i{font-style:normal;font-size:28px;line-height:1}.hb:active{transform:scale(.97)}
+.daybar{padding:6px 0 8px;border-bottom:2px solid var(--line,#8884);margin-bottom:4px}
+.daybar>b{display:block;font-size:15px;margin-bottom:4px}
+.daybar .dl{display:inline-flex;flex-direction:column;margin-right:14px;font-size:13px}.daybar .dl span{opacity:.7;font-size:11px}
+.note{border-radius:16px;padding:14px;margin-bottom:12px;color:#1b2430;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.note .nt{font-weight:800;font-size:17px;margin-bottom:4px}.note .nb{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.note .nm2{font-size:12px;opacity:.75;margin-top:8px}.note .nr{font-size:13px;font-weight:700;margin-top:4px;color:#7a4b00}.note .nr.late{color:#b00020}
+.note .btn.ghost{background:rgba(255,255,255,.6);color:#1b2430}
+.swr{display:flex;gap:10px;flex-wrap:wrap}.sw{width:38px;height:38px;border-radius:50%;border:2px solid #8886;cursor:pointer}.sw.on{border:4px solid #1b2430;box-shadow:0 0 0 2px #fff}
+.remov{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:20px}
+.rembox{width:100%;max-width:380px;border-radius:20px;padding:18px;color:#1b2430}.rembox .remh{font-size:20px;font-weight:800;margin-bottom:8px}
+.rembox .nt{font-weight:800;font-size:17px}.rembox .nb{white-space:pre-wrap;font-size:16px;margin:6px 0}.rembox .nm2{font-size:12px;opacity:.75}
+.rembox .btn.ghost{background:rgba(255,255,255,.7);color:#1b2430}
+
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media print{
   :root:root:root{--bg:#fff;--ground:#fff;--surface:#fff;--surface2:#f1f1f1;--ink:#000;--ink2:#333;--ink3:#555;--line:#ccc;--good:#147d53;--bad:#b42318}
@@ -313,12 +330,15 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <section id="v-more" class="page gut" hidden>
       <div class="card menu">
         <button class="mi" data-go="production"><div class="ci" data-ic="box"></div><span>उत्पादन</span><i data-ic="chev" data-s="20"></i></button>
-        <button class="mi" data-go="khata"><div class="ci" data-ic="rupee"></div><span>मेरा निजी खाता (लेन-देन)</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-go="khata"><div class="ci" data-ic="rupee"></div><span>मेरा निजी खाता (कैश बुक)</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="card"><div class="ci" data-ic="users"></div><span>मजदूर रिपोर्ट कार्ड</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="slip"><div class="ci" data-ic="book"></div><span>पर्ची / हिसाब</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="ostate"><div class="ci" data-ic="users"></div><span>बाहर की लेबर (दूसरे राज्य की)</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="lent"><div class="ci" data-ic="rupee"></div><span>दूसरे ठेकेदार को दी हुई लेबर</span><i data-ic="chev" data-s="20"></i></button>
-        <button class="mi" data-go="outside"><div class="ci" data-ic="users"></div><span>बाहरी (नकद) लेबर</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-act="open-out" data-s="company"><div class="ci" data-ic="users"></div><span>कंपनी</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-act="open-out" data-s="contractor"><div class="ci" data-ic="users"></div><span>ठेकेदार कैश लेबर</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-go="bio"><div class="ci" data-ic="users"></div><span>बायोडाटा फोल्डर</span><i data-ic="chev" data-s="20"></i></button>
+        <button class="mi" data-go="notes"><div class="ci" data-ic="book"></div><span>नोट बुक</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="expenses"><div class="ci" data-ic="receipt"></div><span>अन्य खर्च</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="reports"><div class="ci" data-ic="chart"></div><span>रिपोर्ट</span><i data-ic="chev" data-s="20"></i></button>
         <button class="mi" data-go="settings"><div class="ci" data-ic="gear"></div><span>सेटिंग / बैकअप</span><i data-ic="chev" data-s="20"></i></button>
@@ -350,6 +370,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
     <section id="v-ostate" class="page gut" hidden></section>
     <section id="v-lent" class="page gut" hidden></section>
     <section id="v-bio" class="page gut" hidden></section>
+    <section id="v-notes" class="page gut" hidden></section>
     <section id="v-biod" class="page gut" hidden></section>
     <section id="v-osw" class="page gut" hidden></section>
 
@@ -490,7 +511,7 @@ const DEFAULT_ITEMS=[
   {key:'b252',name:'252 पीस बंडल',rate:12,active:true},
   {key:'khilona',name:'खिलौना (हर पाउच)',rate:2,active:true,extra:true}
 ];
-const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],osw:[],osatt:[],osexp:[],osleave:[],oscpay:[],lent:[],lentpay:[],bio:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
+const fresh=()=>({workers:[],attendance:[],production:[],expenses:[],transactions:[],outside:[],deductions:[],personal:[],osw:[],osatt:[],osexp:[],osleave:[],oscpay:[],lent:[],lentpay:[],bio:[],notes:[],settings:{title:'मेरा लेबर खाता',brand:'MAA GANGA',owner:'Mohanveer Singh Dagur',phone:'',exports:{},outRates:{},items:DEFAULT_ITEMS.map(x=>Object.assign({},x))}});
 function migrateProd(p){
   if(p.q)return p;
   const n280=Number(p.n280)||0,n500=Number(p.n500)||0,r280=Number(p.r280)||0,r500=Number(p.r500)||0,k=n280+n500;
@@ -501,7 +522,7 @@ function migrateProd(p){
 }
 function norm(d){
   const f=fresh();
-  ['workers','attendance','production','expenses','transactions','outside','deductions','personal','osw','osatt','osexp','osleave','oscpay','lent','lentpay','bio'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
+  ['workers','attendance','production','expenses','transactions','outside','deductions','personal','osw','osatt','osexp','osleave','oscpay','lent','lentpay','bio','notes'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=f[k]});
   d.settings=Object.assign(f.settings,d.settings||{});
   if(!Array.isArray(d.settings.items)||!d.settings.items.length)d.settings.items=f.settings.items;
   d.production.forEach(migrateProd);
@@ -600,13 +621,13 @@ function download(blob,name){const a=document.createElement('a'),u=URL.createObj
 function save(){persist();renderView();renderHeader()}
 
 /* navigation */
-const TITLES={bio:'बायोडाटा फोल्डर',biod:'बायोडाटा',home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता',ostate:'बाहर की लेबर',osw:'वर्कर का हिसाब',lent:'दी हुई लेबर'};
-const SUB=['production','expenses','reports','settings','outside','slip','card','khata','ostate','osw','lent','bio','biod'];
+const TITLES={notes:'नोट बुक',bio:'बायोडाटा फोल्डर',biod:'बायोडाटा',home:null,attendance:'हाजिरी',workers:'मजदूर',ledger:'हिसाब',more:'और',production:'उत्पादन',expenses:'अन्य खर्च',reports:'रिपोर्ट',settings:'सेटिंग / बैकअप',outside:'बाहरी (नकद) लेबर',slip:'पर्ची / हिसाब',card:'रिपोर्ट कार्ड',khata:'मेरा निजी खाता',ostate:'बाहर की लेबर',osw:'वर्कर का हिसाब',lent:'दी हुई लेबर'};
+const SUB=['production','expenses','reports','settings','outside','slip','card','khata','ostate','osw','lent','bio','biod','notes'];
 const TABOF=v=>SUB.includes(v)?'more':v;
-const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k',ostate:'os-add-w',lent:'add-lent',bio:'add-bio'};
+const FAB={attendance:'open-att',workers:'add-worker',ledger:'add-tx',production:'add-prod',expenses:'add-exp',outside:'add-out',slip:'add-ded',khata:'add-k',ostate:'os-add-w',lent:'add-lent',bio:'add-bio',notes:'add-note'};
 function renderHeader(){
   const v=ui.view,s=db.settings;
-  $('appTitle').textContent=v==='home'?(s.title||'मेरा लेबर खाता'):TITLES[v];
+  $('appTitle').textContent=v==='home'?(s.title||'मेरा लेबर खाता'):v==='outside'?(ui.outSrc==='company'?'कंपनी':'ठेकेदार कैश लेबर'):TITLES[v];
   $('appSub').textContent=v==='home'?((s.brand||'')+' · '+(s.owner||'')):'';
   $('appSub').hidden=v!=='home';
   $('logo').style.display=v==='home'?'block':'none';
@@ -631,7 +652,7 @@ function go(v,fromBack){
   renderView();renderHeader();
 }
 function renderView(){
-  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,ostate:renderOstate,osw:renderOsw,lent:renderLent,bio:renderBio,biod:renderBiod,more:()=>{},settings:renderMonths})[ui.view]();
+  ({home:renderHome,attendance:renderAttendance,workers:renderWorkers,ledger:renderLedger,production:renderProduction,expenses:renderExpenses,reports:renderReports,slip:renderSlip,outside:renderOutside,card:renderCard,khata:renderKhata,ostate:renderOstate,osw:renderOsw,lent:renderLent,bio:renderBio,biod:renderBiod,notes:renderNotes,more:()=>{},settings:renderMonths})[ui.view]();
 }
 
 /* home */
@@ -653,6 +674,9 @@ function renderHome(){
   ${dueBanner()}${hasDemo?`<div class="banner"><p>नमूना डेटा दिख रहा है। अपना काम शुरू करने से पहले इसे हटा दें।</p><button class="btn sm" data-act="remove-demo">नमूना हटाएँ</button></div>`:''}
   <div class="hero"><div class="date">${dfmt(t,{weekday:'long',day:'numeric',month:'long'})}</div><div class="lbl2">आज की मजदूरी</div><div class="big">${money(s.wages)}</div>
     <div class="hs-row"><div class="hs"><b>${s.present}</b><span>उपस्थित</span></div><div class="hs"><b>${s.absent}</b><span>अनुपस्थित</span></div><div class="hs"><b>${hh(s.hours)}</b><span>घंटे</span></div><div class="hs"><b>${hh(s.ot)}</b><span>OT घंटे</span></div></div></div>
+  ${homeGrid()}
+  ${cbHomeCard()}
+  ${noteHomeCard()}
   ${bioHomeCard()}
   ${ydayCard()}
   <div class="card"><h3>अब तक का कुल हिसाब</h3>
@@ -941,6 +965,148 @@ function bioImport(){
   (db.osw||[]).forEach(w=>{if(has.has('x:'+w.id))return;db.bio.push({id:uid(),name:w.name,phone:w.phone||'',phone2:'',email:'',gender:w.gender,status:w.left?'left':'working',father:w.father||'',dob:'',address:w.address||'',aadhaar:w.aadhaar||'',emerName:'',emerPhone:'',start:w.start||'',left:w.left||'',note:w.contractor?'ठेकेदार: '+w.contractor:'',link:'x:'+w.id,photo:w.photo||'',aadFront:'',aadBack:''});n++});
   toast(n?n+' नाम बायोडाटा फोल्डर में आ गए':'सब नाम पहले से यहाँ हैं');save();
 }
+
+/* ===== कैश बुक: कैश + बैंक ===== */
+function cbSplit(r){
+  const a=+r.amount||0;
+  if(r.cash!=null||r.bank!=null)return{cash:+r.cash||0,bank:+r.bank||0};
+  return /^(नकद|)$/.test(r.method||'नकद')?{cash:a,bank:0}:{cash:0,bank:a};
+}
+function cbEff(r){
+  const a=+r.amount||0;
+  if(r.kind==='nikala')return{cash:a,bank:-a};
+  if(r.kind==='jama')return{cash:-a,bank:a};
+  const k=kIn(r)?1:-1,s=cbSplit(r);return{cash:k*s.cash,bank:k*s.bank};
+}
+function cbLabel(r){
+  if(TR.includes(r.kind))return r.kind==='nikala'?'बैंक → कैश':'कैश → बैंक';
+  const s=cbSplit(r);
+  if(s.cash>0&&s.bank>0)return 'कैश '+money(s.cash)+' + ऑनलाइन '+money(s.bank);
+  return s.bank>0?'ऑनलाइन':'कैश';
+}
+function cbBal(d,incl){
+  const o=db.settings.cbOpen;if(!o)return null;
+  let c=+o.cash||0,b=+o.bank||0;
+  db.personal.forEach(r=>{if(r.date<o.date)return;if(incl?r.date>d:r.date>=d)return;const e=cbEff(r);c+=e.cash;b+=e.bank});
+  return{cash:c,bank:b,total:c+b};
+}
+function cbCard(){
+  const o=db.settings.cbOpen;
+  if(!o)return `<div class="card" style="border-left:6px solid #10b981"><h3>💰 कैश बुक शुरू कीजिए</h3><div class="muted">एक बार बताइए कि आज बैंक में कितना पैसा है और जेब में कितना कैश है। उसके बाद हर दिन का बचा पैसा अपने-आप अगले दिन में जुड़ता जाएगा।</div><div class="btns" style="margin-top:8px"><button class="btn sm" data-act="cb-open">शुरुआती पैसा डालें</button></div></div>`;
+  const b=cbBal(today(),true);
+  return `<div class="card" style="border-left:6px solid #10b981"><h3>💰 अभी मेरे पास (आज तक)</h3>
+  <div class="stats"><div class="stat"><span>कैश में</span><b class="${b.cash<0?'bad':'good'}">${money(b.cash)}</b></div><div class="stat"><span>बैंक में</span><b class="${b.bank<0?'bad':'good'}">${money(b.bank)}</b></div></div>
+  <div class="kv total"><span>कुल पैसा</span><b class="${b.total<0?'bad':'good'}">${money(b.total)}</b></div>
+  <div class="muted">${dShort(o.date)} से हिसाब चालू है · तब कैश ${money(o.cash)}, बैंक ${money(o.bank)}</div>
+  <div class="btns" style="margin-top:8px"><button class="btn ghost sm" data-act="add-k-tr" data-k="nikala">बैंक से कैश निकाला</button><button class="btn ghost sm" data-act="add-k-tr" data-k="jama">कैश बैंक में जमा किया</button><button class="btn ghost sm" data-act="cb-open">शुरुआती पैसा बदलें</button></div></div>`;
+}
+function cbHomeCard(){
+  const o=db.settings.cbOpen;
+  if(!o)return `<div class="card" style="margin-top:12px;border-left:6px solid #10b981"><h3>💰 कैश बुक</h3><div class="muted">कैश और बैंक का हिसाब रखने के लिए शुरू कीजिए।</div><div class="btns" style="margin-top:8px"><button class="btn sm" data-go="khata">कैश बुक खोलें</button></div></div>`;
+  const b=cbBal(today(),true),y=cbBal(today(),false);
+  return `<div class="card" style="margin-top:12px;border-left:6px solid #10b981"><h3>💰 कैश बुक · अभी मेरे पास</h3>
+  <div class="stats"><div class="stat"><span>कैश में</span><b class="${b.cash<0?'bad':'good'}">${money(b.cash)}</b></div><div class="stat"><span>बैंक में</span><b class="${b.bank<0?'bad':'good'}">${money(b.bank)}</b></div></div>
+  <div class="kv total"><span>कुल (आज सुबह ${money(y.total)})</span><b class="${b.total<0?'bad':'good'}">${money(b.total)}</b></div>
+  <div class="btns" style="margin-top:8px"><button class="btn sm" data-act="add-k">+ खर्च / एंट्री</button><button class="btn ghost sm" data-go="khata">कैश बुक खोलें</button></div></div>`;
+}
+function cbOpenSheet(){
+  const o=db.settings.cbOpen||{cash:'',bank:'',date:today()};
+  sheetCtx={type:'cbo'};
+  openSheet('शुरुआती पैसा',`<div class="form"><div class="hint">जिस दिन से हिसाब शुरू करना है, उस दिन सुबह आपके पास कितना था, वह लिखिए। इस तारीख से पहले की एंट्री बैलेंस में नहीं गिनी जाएँगी।</div>
+  <div class="fld"><label class="lbl" for="cbo-date">इस तारीख की सुबह से</label><input id="cbo-date" type="date" value="${o.date}"></div>
+  <div class="g2"><div class="fld"><label class="lbl" for="cbo-cash">जेब में कैश ₹</label><input id="cbo-cash" type="number" step=".01" inputmode="decimal" value="${o.cash}" placeholder="0"></div>
+  <div class="fld"><label class="lbl" for="cbo-bank">बैंक में ₹</label><input id="cbo-bank" type="number" step=".01" inputmode="decimal" value="${o.bank}" placeholder="0"></div></div>
+  <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="save-cbo">सेव करें</button></div>`);
+}
+function saveCbo(){
+  const d=$('cbo-date').value;if(!d)return ferr('तारीख चुनें');
+  db.settings.cbOpen={date:d,cash:+$('cbo-cash').value||0,bank:+$('cbo-bank').value||0};
+  closeSheet();toast('शुरुआती पैसा सेव हो गया');save();
+}
+function kListHtml(list){
+  if(!list.length)return '<div class="card"><div class="muted">कोई एंट्री नहीं है।</div></div>';
+  const o=db.settings.cbOpen;
+  if(ui.kParty||(ui.kFilter||'all')!=='all'||!o)return '<div class="card">'+list.map(kRow).join('')+'</div>';
+  const days=[...new Set(list.map(r=>r.date))].sort().reverse();
+  return days.map(d=>{
+    const L=list.filter(r=>r.date===d),inn=sum(L.filter(kIn),r=>r.amount),out=sum(L.filter(r=>!kIn(r)&&!TR.includes(r.kind)),r=>r.amount);
+    let hdr=`<div class="daybar"><b>${wkd(d)}, ${dShort(d)}</b></div>`;
+    if(d>=o.date){const a=cbBal(d,false),c=cbBal(d,true);hdr=`<div class="daybar"><b>${wkd(d)}, ${dShort(d)}</b><div class="dl"><span>सुबह</span><b>${money(a.total)}</b></div><div class="dl"><span>आए</span><b class="good">+${money(inn)}</b></div><div class="dl"><span>गए</span><b class="bad">−${money(out)}</b></div><div class="dl"><span>रात को बचा</span><b>${money(c.total)}</b></div><div class="sub">कैश ${money(c.cash)} · बैंक ${money(c.bank)}</div></div>`}
+    return '<div class="card">'+hdr+L.map(kRow).join('')+'</div>';
+  }).join('');
+}
+
+/* ===== होम की बटन जाली ===== */
+function homeGrid(){
+  const B=[['production','📦','उत्पादन','#f59e0b,#d97706'],['khata','💰','मेरा निजी खाता<br>(कैश बुक)','#10b981,#047857'],['card','🧾','मजदूरों का रिपोर्ट कार्ड','#3b82f6,#1d4ed8'],['slip','📄','पर्ची हिसाब','#ec4899,#be185d'],['ostate','🚆','बाहर की लेबर<br>(दूसरे राज्य की)','#8b5cf6,#6d28d9'],['lent','🤝','दूसरे ठेकेदार की लेबर','#06b6d4,#0e7490'],['out:company','🏭','कंपनी','#ef4444,#b91c1c'],['out:contractor','👷','ठेकेदार कैश लेबर','#f97316,#c2410c'],['expenses','📌','अन्य','#64748b,#334155'],['reports','📊','रिपोर्ट','#14b8a6,#0f766e'],['settings','⚙️','सेटिंग','#6366f1,#4338ca'],['notes','📒','नोट बुक','#eab308,#a16207']];
+  return '<div class="hg">'+B.map(b=>{const o=b[0].indexOf('out:')===0;return `<button class="hb" style="background:linear-gradient(135deg,${b[3]})" ${o?`data-act="open-out" data-s="${b[0].slice(4)}"`:`data-go="${b[0]}"`}><i>${b[1]}</i><span>${b[2]}</span></button>`}).join('')+'</div>';
+}
+
+/* ===== नोट बुक + रिमाइंडर ===== */
+const NCOL=['#fff4b8','#d4f5dc','#cfe6ff','#ffd9e6','#ffe0c2','#e6dcff','#ffd0d0','#e5e7eb'];
+const p2=n=>String(n).padStart(2,'0');
+const nowKey=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes())};
+const hm=t=>{if(!t)return '';const [h,m]=t.split(':').map(Number);return (h%12||12)+':'+p2(m)+' '+(h<12?'सुबह':h<16?'दोपहर':h<20?'शाम':'रात')};
+const rkLabel=k=>k?dShort(k.slice(0,10))+', '+hm(k.slice(11,16)):'';
+function renderNotes(){
+  const f=ui.nF||'all',L=db.notes.filter(n=>f==='all'||(f==='rem'&&n.remind&&!n.done)||(f==='done'&&n.done)).slice().sort((a,b)=>(b.date+(b.time||'')).localeCompare(a.date+(a.time||'')));
+  const chip=(k,t)=>`<button class="pick${f===k?' on':''}" data-act="note-f" data-f="${k}">${t}</button>`;
+  const perm=('Notification' in window)&&Notification.permission==='default';
+  $('v-notes').innerHTML=`<div class="btns" style="margin-bottom:10px"><button class="btn sm" data-act="add-note">➕ नया नोट</button>${perm?'<button class="btn ghost sm" data-act="note-perm">🔔 सूचना की अनुमति दें</button>':''}</div>
+  <div class="chiprow" style="margin-bottom:10px">${chip('all','सब ('+db.notes.length+')')}${chip('rem','रिमाइंडर बाकी ('+db.notes.filter(n=>n.remind&&!n.done).length+')')}${chip('done','हो गया ('+db.notes.filter(n=>n.done).length+')')}</div>
+  ${L.length?L.map(n=>`<div class="note" style="background:${n.color||NCOL[0]}"><div data-act="edit-note" data-id="${n.id}">${n.title?`<div class="nt">${esc(n.title)}</div>`:''}<div class="nb">${esc(n.text||'')}</div><div class="nm2">📅 ${dShort(n.date)} ${n.date.slice(0,4)} · 🕒 ${hm(n.time)}</div>${n.remind?`<div class="nr${!n.done&&n.remind<=nowKey()?' late':''}">⏰ याद दिलाना: ${rkLabel(n.remind)}${n.done?' (हो गया)':''}</div>`:''}</div><div class="btns" style="margin-top:8px"><button class="btn sm" data-act="note-done" data-id="${n.id}">${n.done?'↩ फिर खोलें':'✔ हो गया'}</button><button class="btn ghost sm" data-act="edit-note" data-id="${n.id}">बदलें</button><button class="btn ghost sm bad" data-act="del-note" data-id="${n.id}">हटाएँ</button></div></div>`).join(''):'<div class="card empty">अभी कोई नोट नहीं है। ऊपर "नया नोट" दबाइए।</div>'}`;
+}
+function noteSheet(id){
+  const n=id?db.notes.find(x=>x.id===id):null,now=new Date();
+  const v=Object.assign({title:'',text:'',color:NCOL[0],date:today(),time:p2(now.getHours())+':'+p2(now.getMinutes()),remind:''},n||{});
+  sheetCtx={type:'note',id:id||'',color:v.color};
+  const rd=v.remind?v.remind.slice(0,10):v.date,rt=v.remind?v.remind.slice(11,16):p2((now.getHours()+1)%24)+':'+p2(now.getMinutes());
+  openSheet(n?'नोट बदलें':'नया नोट',`<div class="form">
+  <div class="fld"><label class="lbl" for="n-title">शीर्षक (वैकल्पिक)</label><input id="n-title" value="${esc(v.title)}"></div>
+  <div class="fld"><label class="lbl" for="n-text">नोट लिखिए (कीबोर्ड के माइक से बोलकर भी लिख सकते हैं)</label><textarea id="n-text" rows="6" style="width:100%">${esc(v.text)}</textarea></div>
+  <div class="g2"><div class="fld"><label class="lbl" for="n-date">तारीख</label><input id="n-date" type="date" value="${v.date}"></div><div class="fld"><label class="lbl" for="n-time">समय</label><input id="n-time" type="time" value="${v.time}"></div></div>
+  <div class="fld"><span class="lbl">पन्ने का रंग</span><div class="swr" id="n-sw">${NCOL.map(c=>`<button type="button" class="sw${c===v.color?' on':''}" data-act="note-col" data-c="${c}" style="background:${c}" aria-label="रंग"></button>`).join('')}</div></div>
+  <label class="chk"><input type="checkbox" id="n-rem"${v.remind?' checked':''}> रिमाइंडर लगाओ (याद दिलाना)</label>
+  <div class="g2" id="n-rbox"${v.remind?'':' hidden'}><div class="fld"><label class="lbl" for="n-rd">याद दिलाने की तारीख</label><input id="n-rd" type="date" value="${rd}"></div><div class="fld"><label class="lbl" for="n-rt">समय</label><input id="n-rt" type="time" value="${rt}"></div></div>
+  <div class="hint">रिमाइंडर तब बजेगा जब ऐप खुला होगा या फोन में चल रहा होगा। ऐप पूरी तरह बंद होने पर पक्का अलार्म नहीं बजता।</div>
+  <div class="err" id="formErr" hidden></div><button class="btn wide" data-act="save-note" data-id="${id||''}">सेव करें</button></div>`);
+}
+function saveNote(id){
+  const text=$('n-text').value.trim(),title=$('n-title').value.trim();
+  if(!text&&!title)return ferr('कुछ तो लिखिए');
+  const old=id?db.notes.find(x=>x.id===id):null;
+  const rem=$('n-rem').checked?($('n-rd').value+'T'+($('n-rt').value||'09:00')):'';
+  if($('n-rem').checked&&!$('n-rd').value)return ferr('याद दिलाने की तारीख चुनें');
+  const o={id:id||uid(),title,text,color:sheetCtx.color||NCOL[0],date:$('n-date').value||today(),time:$('n-time').value||'',remind:rem,done:old?old.done:false,fired:old&&old.remind===rem?old.fired:false};
+  const i=db.notes.findIndex(x=>x.id===o.id);if(i>=0)db.notes[i]=o;else db.notes.push(o);
+  closeSheet();toast(rem?'नोट सेव हुआ, रिमाइंडर लग गया':'नोट सेव हो गया');save();
+}
+function noteHomeCard(){
+  const k=nowKey(),L=db.notes.filter(n=>n.remind&&!n.done&&n.remind.slice(0,10)<=k.slice(0,10)).sort((a,b)=>a.remind.localeCompare(b.remind)).slice(0,4);
+  if(!L.length)return '';
+  return `<div class="card" style="margin-top:12px;border-left:6px solid #eab308"><h3>⏰ आज के रिमाइंडर</h3>${L.map(n=>`<div class="kv"><span>${esc((n.title||n.text).slice(0,40))}</span><b class="${n.remind<=k?'bad':''}" style="font-size:14px">${hm(n.remind.slice(11,16))}</b></div>`).join('')}<div class="btns" style="margin-top:8px"><button class="btn ghost sm" data-go="notes">नोट बुक खोलें</button></div></div>`;
+}
+let remBusy=false;
+function beep(){try{const A=window.AudioContext||window.webkitAudioContext,c=new A();[0,.35,.7].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.25,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.3);o.start(c.currentTime+t);o.stop(c.currentTime+t+.32)});if(navigator.vibrate)navigator.vibrate([300,150,300,150,300])}catch(e){}}
+function noteCheck(){
+  if(remBusy||!db||!Array.isArray(db.notes))return;
+  const k=nowKey(),n=db.notes.find(x=>x.remind&&!x.done&&!x.fired&&x.remind<=k);if(!n)return;
+  remBusy=true;beep();
+  try{if('Notification' in window&&Notification.permission==='granted'){const t=n.title||n.text.slice(0,60);if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification('⏰ याद दिलाना',{body:t,tag:n.id})).catch(()=>{});else new Notification('⏰ याद दिलाना',{body:t})}}catch(e){}
+  let b=document.getElementById('remBox');if(b)b.remove();
+  b=document.createElement('div');b.id='remBox';b.className='remov';
+  b.innerHTML=`<div class="rembox" style="background:${n.color||NCOL[0]}"><div class="remh">⏰ याद दिलाना</div>${n.title?`<div class="nt">${esc(n.title)}</div>`:''}<div class="nb">${esc(n.text||'')}</div><div class="nm2">${rkLabel(n.remind)}</div>
+  <div class="btns" style="margin-top:12px"><button class="btn" data-rem="done" data-id="${n.id}">✔ हो गया</button><button class="btn ghost" data-rem="snooze" data-id="${n.id}">10 मिनट बाद</button><button class="btn ghost" data-rem="ok" data-id="${n.id}">ठीक है</button></div></div>`;
+  document.body.appendChild(b);
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-rem]');if(!t)return;
+  const n=db.notes.find(x=>x.id===t.dataset.id),a=t.dataset.rem;
+  if(n){if(a==='done'){n.done=true;n.fired=true}else if(a==='ok')n.fired=true;else{const d=new Date(Date.now()+600000);n.remind=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());n.fired=false}}
+  const b=document.getElementById('remBox');if(b)b.remove();remBusy=false;save();
+});
+setInterval(noteCheck,15000);setTimeout(noteCheck,2500);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(noteCheck,500)});
 function osHomeCard(){
   if(!db.osw.length)return `<div class="card"><h3>बाहर की लेबर (दूसरे राज्य की)</h3><div class="muted">नाम, आधार, ठेकेदार, रहना-खाना और पूरा हिसाब एक जगह।</div><div style="margin-top:8px"><button class="btn ghost sm" data-go="ostate">शुरू करें</button></div></div>`;
   const D=osDash(today().slice(0,7));
@@ -1390,13 +1556,14 @@ function cardText(c){
 }
 
 /* personal khata (निजी खाता) */
-const KIND={liya:'पैसे लिए (उधार)',diya:'पैसे दिए (उधार)',wapas_diya:'मैंने लौटाए',wapas_mila:'मुझे वापस मिले',kharcha:'खर्च'};
+const KIND={kharcha:'खर्च',liya:'पैसे लिए (उधार)',diya:'पैसे दिए (उधार)',wapas_diya:'मैंने लौटाए',wapas_mila:'मुझे वापस मिले',nikala:'बैंक से कैश निकाला',jama:'कैश बैंक में जमा किया'};
+const TR=['nikala','jama'];
 const KIN=['liya','wapas_mila'],CATS=['घर','काम / दुकान','मजदूर','यात्रा','दवाई / इलाज','बिजली / किराया','अन्य'],WORK=['लागू नहीं','हुआ','बाकी'];
 const kIn=r=>KIN.includes(r.kind);
 function kParties(){return Array.from(new Set(db.personal.map(r=>(r.party||'').trim()).filter(Boolean))).sort()}
 function kBal(){
   const m={};
-  db.personal.forEach(r=>{const n=(r.party||'').trim();if(!n||r.kind==='kharcha')return;m[n]=(m[n]||0)+(kIn(r)?-r.amount:r.amount)});
+  db.personal.forEach(r=>{const n=(r.party||'').trim();if(!n||r.kind==='kharcha'||TR.includes(r.kind))return;m[n]=(m[n]||0)+(kIn(r)?-r.amount:r.amount)});
   return Object.keys(m).map(n=>({name:n,net:Math.round(m[n]*100)/100})).sort((a,b)=>Math.abs(b.net)-Math.abs(a.net));
 }
 function kDues(){
@@ -1407,8 +1574,8 @@ function kRow(r){
   const inn=kIn(r),chips=[`<span class="chip ${inn?'good':r.kind==='kharcha'?'warn':''}">${KIND[r.kind]}</span>`];
   if(r.work==='बाकी')chips.push('<span class="chip bad">काम बाकी</span>');else if(r.work==='हुआ')chips.push('<span class="chip good">काम हुआ</span>');
   if(r.due&&(r.kind==='liya'||r.kind==='diya'))chips.push(`<span class="chip ${r.due<today()?'bad':'acc'}">${r.kind==='liya'?'देना':'लेना'}: ${dShort(r.due)}</span>`);
-  const sub=[dShort(r.date),r.cat,r.method].filter(Boolean).join(' · ');
-  return `<div class="row rec" data-act="edit-k" data-id="${r.id}"><div class="mid"><div class="nm">${esc(r.party||r.purpose||'खर्च')}</div><div class="chips">${chips.join('')}</div>${r.purpose&&r.party?`<div class="sub">काम: ${esc(r.purpose)}</div>`:''}${r.note?`<div class="sub">कारण: ${esc(r.note)}</div>`:''}<div class="sub">${esc(sub)}</div></div><div class="end"><div class="amt ${inn?'good':''}">${inn?'+':'−'}${money(r.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="personal" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`;
+  const sub=[dShort(r.date),TR.includes(r.kind)?'':r.cat,cbLabel(r)].filter(Boolean).join(' · ');
+  return `<div class="row rec" data-act="edit-k" data-id="${r.id}"><div class="mid"><div class="nm">${esc(r.party||r.purpose||(TR.includes(r.kind)?KIND[r.kind]:'खर्च'))}</div><div class="chips">${chips.join('')}</div>${r.purpose&&r.party?`<div class="sub">काम: ${esc(r.purpose)}</div>`:''}${r.note?`<div class="sub">कारण: ${esc(r.note)}</div>`:''}<div class="sub">${esc(sub)}</div></div><div class="end"><div class="amt ${inn?'good':''}">${TR.includes(r.kind)?'⇄ ':inn?'+':'−'}${money(r.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="personal" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`;
 }
 function kFiltered(){
   const m=ui.kMonth,rg=monthRange(m),bal=kBal(),net={};bal.forEach(b=>net[b.name]=b.net);
@@ -1425,10 +1592,10 @@ function renderKhata(){
   const m=ui.kMonth,rg=monthRange(m),bal=kBal();
   const lena=sum(bal.filter(b=>b.net>0),b=>b.net),dena=-sum(bal.filter(b=>b.net<0),b=>b.net);
   const mm=db.personal.filter(r=>r.date>=rg.s&&r.date<=rg.e),spent=sum(mm.filter(r=>r.kind==='kharcha'),r=>r.amount);
-  const inn=sum(mm.filter(kIn),r=>r.amount),out=sum(mm.filter(r=>!kIn(r)),r=>r.amount);
+  const inn=sum(mm.filter(kIn),r=>r.amount),out=sum(mm.filter(r=>!kIn(r)&&!TR.includes(r.kind)),r=>r.amount);
   const list=kFiltered(),dues=kDues();
   const F=[['all','इस महीने सब'],['lena','मुझे लेना बाकी'],['dena','मुझे देना बाकी'],['kharcha','खर्च'],['kaam','काम बाकी']];
-  $('v-khata').innerHTML=`
+  $('v-khata').innerHTML=`${cbCard()}
   <div class="mstep"><button class="ibtn" data-act="k-prev" aria-label="पिछला महीना">${ic('back',18)}</button><span>${monthLabel(m)}</span><button class="ibtn" data-act="k-next" aria-label="अगला महीना">${ic('chev',18)}</button></div>
   <div class="stats"><div class="stat"><span>मुझे लेना (कुल)</span><b class="good">${money(lena)}</b></div><div class="stat"><span>मुझे देना (कुल)</span><b class="${dena>0?'bad':''}">${money(dena)}</b></div><div class="stat"><span>इस महीने खर्च</span><b>${money(spent)}</b></div><div class="stat"><span>इस महीने आए / गए</span><b style="font-size:15px">${money(inn)} / ${money(out)}</b></div></div>
   ${dues.length?`<div class="card"><h3>जल्दी देना / लेना है</h3>${dues.map(r=>`<div class="kv"><span>${esc(r.party)} · ${r.kind==='liya'?'मुझे देना':'मुझे लेना'} · ${dShort(r.due)}${r.due<today()?' (देर)':''}</span><b>${money(r.left)}</b></div>`).join('')}</div>`:''}
@@ -1436,12 +1603,13 @@ function renderKhata(){
   <div class="card"><h3>किसका कितना बाकी</h3>${bal.length?bal.map(b=>`<div class="row"><div class="mid"><div class="nm">${esc(b.name)}</div><div class="sub">${b.net>.005?'वह मुझे देगा':b.net<-.005?'मुझे उसे देना है':'हिसाब बराबर'}</div></div><div class="end"><div class="amt ${b.net>.005?'good':b.net<-.005?'bad':''}">${money(Math.abs(b.net))}</div></div><button class="ibtn" data-act="k-party" data-n="${esc(b.name)}" aria-label="खाता देखें">${ic('chev',18)}</button></div>`).join(''):'<div class="muted">किसी से लेन-देन दर्ज नहीं है।</div>'}</div>
   <div class="chiprow" role="group" aria-label="छाँटें">${F.map(f=>`<button class="pick${!ui.kParty&&ui.kFilter===f[0]?' on':''}" data-act="k-filter" data-f="${f[0]}">${f[1]}</button>`).join('')}</div>
   ${ui.kParty?`<div class="card"><div class="kv"><span>खाता: <b>${esc(ui.kParty)}</b></span><b>${money(Math.abs((bal.find(b=>b.name===ui.kParty)||{net:0}).net))}</b></div><div class="btns" style="margin-top:8px"><button class="btn sm" data-act="k-settle" data-n="${esc(ui.kParty)}">हिसाब चुकता करें</button><button class="btn ghost sm" data-act="k-pdf">इसका PDF</button><button class="btn ghost sm" data-act="k-pdf" data-share="1">WhatsApp पर भेजें</button><button class="btn ghost sm" data-act="k-party" data-n="">सब देखें</button></div></div>`:''}
-  <div class="card">${list.length?list.map(kRow).join(''):'<div class="muted">कोई एंट्री नहीं है।</div>'}</div>
+  ${kListHtml(list)}
   <div class="muted" style="text-align:center">किसी एंट्री पर दबाकर बदल सकते हैं।${!ui.kParty&&['lena','dena','kaam'].includes(ui.kFilter)?' (यह सूची सभी महीनों की है)':''}</div>`;
 }
 function kSheet(id,pre){
   const r=id?db.personal.find(x=>x.id===id):null,v=Object.assign({date:today(),kind:'kharcha',party:'',amount:'',purpose:'',cat:'अन्य',method:'नकद',due:'',work:'लागू नहीं',note:''},r||pre||{});
   sheetCtx={type:'k',id:id||''};
+  const sc=cbSplit(Object.assign({amount:+v.amount||0},v)),mth=(v.method==='दोनों'||(sc.cash>0&&sc.bank>0))?'दोनों':(id&&v.method!=='नकद')?'ऑनलाइन':(v.method==='ऑनलाइन'?'ऑनलाइन':'नकद');
   const opt=(arr,sel)=>arr.map(x=>`<option${x===sel?' selected':''}>${x}</option>`).join('');
   openSheet(r?'एंट्री बदलें':'नई एंट्री',`<div class="form">
     <div class="g2"><div class="fld"><label class="lbl" for="f-kdate">तारीख</label><input id="f-kdate" type="date" value="${v.date}"></div>
@@ -1450,7 +1618,8 @@ function kSheet(id,pre){
     <div class="fld"><label class="lbl" for="f-kamt">राशि ₹</label><input id="f-kamt" type="number" min="0" step=".01" inputmode="decimal" value="${v.amount}" placeholder="0"></div></div>
     <div class="fld"><label class="lbl" for="f-kpurpose">किस काम के लिए</label><input id="f-kpurpose" value="${esc(v.purpose)}" placeholder="जैसे मशीन की मरम्मत, राशन, दवाई"></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-kcat">श्रेणी</label><select id="f-kcat">${opt(CATS,v.cat)}</select></div>
-    <div class="fld"><label class="lbl" for="f-kmethod">तरीका</label><select id="f-kmethod">${opt(['नकद','UPI','बैंक','चेक'],v.method)}</select></div></div>
+    <div class="fld"><label class="lbl" for="f-kmethod">पैसा कैसे</label><select id="f-kmethod">${opt(['नकद','ऑनलाइन','दोनों'],mth)}</select></div></div>
+    <div class="g2" id="k-split" ${mth==='दोनों'?'':'hidden'}><div class="fld"><label class="lbl" for="f-kcash">इसमें कैश ₹</label><input id="f-kcash" type="number" min="0" step=".01" inputmode="decimal" value="${sc.cash||''}"></div><div class="fld"><label class="lbl" for="f-kbank">इसमें ऑनलाइन ₹</label><input id="f-kbank" type="number" min="0" step=".01" inputmode="decimal" value="${sc.bank||''}"></div></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-kdue">वापसी की तारीख (वैकल्पिक)</label><input id="f-kdue" type="date" value="${v.due||''}"></div>
     <div class="fld"><label class="lbl" for="f-kwork">काम हुआ या नहीं</label><select id="f-kwork">${opt(WORK,v.work)}</select></div></div>
     <div class="fld"><label class="lbl" for="f-knote">कारण / याद की बात</label><input id="f-knote" value="${esc(v.note)}" placeholder="क्यों लिया या दिया, कोई शर्त, गवाह..."></div>
@@ -1458,11 +1627,14 @@ function kSheet(id,pre){
     <button class="btn wide" data-act="save-k">सेव करें</button></div>`);
 }
 function saveK(){
-  const kind=$('f-kkind').value,party=$('f-kparty').value.trim(),amount=+$('f-kamt').value,date=$('f-kdate').value;
+  const kind=$('f-kkind').value,party=$('f-kparty').value.trim(),date=$('f-kdate').value,mt=$('f-kmethod').value,amount=(mt==='दोनों'&&!TR.includes(kind))?(+$('f-kcash').value||0)+(+$('f-kbank').value||0):+$('f-kamt').value;
   if(!date)return ferr('तारीख चुनें');
   if(!(amount>0))return ferr('सही राशि भरें');
-  if(kind!=='kharcha'&&!party)return ferr('नाम लिखें (किससे लिया या किसको दिया)');
+  if(kind!=='kharcha'&&!TR.includes(kind)&&!party)return ferr('नाम लिखें (किससे लिया या किसको दिया)');
   const o={id:sheetCtx.id||uid(),date,kind,party,amount,purpose:$('f-kpurpose').value.trim(),cat:$('f-kcat').value,method:$('f-kmethod').value,due:$('f-kdue').value,work:$('f-kwork').value,note:$('f-knote').value.trim()};
+  if(TR.includes(kind)){o.method='बैंक↔कैश';o.cash=undefined;o.bank=undefined}
+  else if(mt==='दोनों'){o.cash=+$('f-kcash').value||0;o.bank=+$('f-kbank').value||0}
+  else if(mt==='ऑनलाइन'){o.cash=0;o.bank=amount}else{o.cash=amount;o.bank=0}
   const i=db.personal.findIndex(x=>x.id===o.id);
   if(i>=0){if(db.personal[i].demo)o.demo=true;db.personal[i]=o}else db.personal.push(o);
   ui.kMonth=date.slice(0,7);
@@ -1470,7 +1642,7 @@ function saveK(){
 }
 function kStatement(party){
   const rg=monthRange(ui.kMonth);
-  let list=db.personal.filter(r=>party?(r.party||'').trim()===party:(r.date>=rg.s&&r.date<=rg.e)).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  let list=db.personal.filter(r=>!TR.includes(r.kind)&&(party?(r.party||'').trim()===party:(r.date>=rg.s&&r.date<=rg.e))).slice().sort((a,b)=>a.date.localeCompare(b.date));
   let run=0;
   const rows=list.map(r=>{
     const inn=kIn(r);
@@ -1714,6 +1886,11 @@ function contractorRows(s,e){
   }).filter(x=>x.amt||x.paid||Math.abs(x.allDue)>.005);
 }
 function renderOutside(){
+  const full=db.outside;if(ui.outSrc)db.outside=full.filter(r=>(r.src||'contractor')===ui.outSrc);
+  try{renderOutside0()}finally{db.outside=full}
+  const h=$('v-outside').querySelector('.mstep');if(h)h.insertAdjacentHTML('beforebegin','<div class="card" style="border-left:6px solid '+(ui.outSrc==='company'?'#ef4444':'#f97316')+'"><b>'+(ui.outSrc==='company'?'🏭 कंपनी':'👷 ठेकेदार कैश लेबर')+'</b></div>');
+}
+function renderOutside0(){
   const m=ui.outMonth,rg=monthRange(m),sm=labourSummary(rg.s,rg.e),cr=contractorRows(rg.s,rg.e);
   const entries=db.outside.filter(r=>r.date>=rg.s&&r.date<=rg.e).slice().sort((a,b)=>b.date.localeCompare(a.date));
   const given=sm.paid+sm.adv,due=sm.outAmt-given,all=sm.ownAmt+sm.outAmt;
@@ -1757,7 +1934,8 @@ function outModeUI(){const c=$('f-omode').value==='custom';$('box-oeq').hidden=c
 function outPersons(){return Array.from(document.querySelectorAll('#o-persons .prow')).map(r=>({name:r.querySelector('.o-pn').value.trim(),gender:r.querySelector('.o-pg').value,hours:+r.querySelector('.o-ph').value||0,amount:+r.querySelector('.o-pa').value||0})).filter(x=>x.amount>0)}
 function outRateFill(){const r=(db.settings.outRates||{})[$('f-ogender').value+'|'+$('f-oshift').value];if(r)$('f-orate').value=r}
 function outPreview(){const b=$('out-prev');if(!b)return;if($('f-omode')&&$('f-omode').value==='custom'){const ps=outPersons();b.innerHTML='कुल राशि <b>'+money(sum(ps,x=>x.amount))+'</b> ('+ps.length+' व्यक्ति)';return}const n=+$('f-ocount').value||0,r=+$('f-orate').value||0;b.innerHTML='कुल राशि <b>'+money(n*r)+'</b> ('+n+' × '+money(r)+')'}
-function saveOut(){
+function saveOut(){const n0=db.outside.length;saveOut0();db.outside.slice(n0).forEach(r=>{if(!r.src)r.src=ui.outSrc||'contractor'});save()}
+function saveOut0(){
   if($('f-omode').value==='custom'){
     const con=$('f-ocon').value.trim(),date=$('f-odate').value,ps=outPersons(),sh=$('f-oshift').value;
     if(!con)return ferr('ठेकेदार का नाम लिखें');
@@ -1795,7 +1973,8 @@ function outPaySheet(){
     <div class="err" id="formErr" hidden></div>
     <button class="btn wide" data-act="save-outpay">सेव करें</button></div>`);
 }
-function saveOutPay(){
+function saveOutPay(){const n0=db.outside.length;saveOutPay0();db.outside.slice(n0).forEach(r=>{if(!r.src)r.src=ui.outSrc||'contractor'});save()}
+function saveOutPay0(){
   const con=$('f-qcon').value.trim(),amount=+$('f-qamt').value,date=$('f-qdate').value;
   if(!con)return ferr('ठेकेदार का नाम लिखें');
   if(!(amount>0)||!date)return ferr('तारीख और सही राशि भरें');
@@ -2726,6 +2905,15 @@ function act(a,el){
     case 'bio-card':ui.cardW=d.id;go('card');break;
     case 'bio-osw':ui.osW=d.id;go('osw');break;
     case 'bio-del':{const b=bioRec(d.id);if(b)confirmSheet({title:'बायोडाटा हटाएँ?',msg:b.name+' का बायोडाटा फोल्डर से हट जाएगा। मजदूर का हिसाब नहीं हटेगा।',ok:'हटाएँ',danger:true,run:()=>{db.bio=db.bio.filter(x=>x.id!==b.id);toast('हटा दिया');go('bio');save()}});break}
+    case 'open-out':ui.outSrc=d.s;go('outside');break;
+    case 'add-note':noteSheet('');break;
+    case 'edit-note':noteSheet(d.id);break;
+    case 'save-note':saveNote(d.id);break;
+    case 'note-f':ui.nF=d.f;renderNotes();break;
+    case 'note-done':{const n=db.notes.find(x=>x.id===d.id);if(n){n.done=!n.done;if(n.done)n.fired=true;save()}break}
+    case 'del-note':{const n=db.notes.find(x=>x.id===d.id);if(n)confirmSheet({title:'नोट हटाएँ?',msg:'यह नोट हमेशा के लिए हट जाएगा।',ok:'हटाएँ',danger:true,run:()=>{db.notes=db.notes.filter(x=>x.id!==n.id);toast('हटा दिया');save()}});break}
+    case 'note-col':{sheetCtx.color=d.c;document.querySelectorAll('#n-sw .sw').forEach(b=>b.classList.toggle('on',b.dataset.c===d.c));break}
+    case 'note-perm':try{Notification.requestPermission().then(()=>renderNotes())}catch(e){toast('इस फोन में सूचना नहीं चल सकती')}break;
     case 'yday-att':ui.attDate=addDays(today(),-1);go('attendance');break;
     case 'add-prod':prodSheet(d.d||today());break;
     case 'edit-prod':prodSheet(d.d);break;
@@ -2758,6 +2946,9 @@ function act(a,el){
     case 'pin-remove-go':pinRemoveGo();break;
     case 'lock-go':lockTry();break;
     case 'lock-forgot':lockForgot();break;
+    case 'cb-open':cbOpenSheet();break;
+    case 'save-cbo':saveCbo();break;
+    case 'add-k-tr':kSheet('',{kind:d.k});break;
     case 'add-k':kSheet('',ui.kParty?{party:ui.kParty}:null);break;
     case 'edit-k':kSheet(d.id);break;
     case 'save-k':saveK();break;
@@ -2805,11 +2996,14 @@ document.addEventListener('click',e=>{
   if(el.id==='backBtn'){appBack();return}
   if(el.dataset.act)act(el.dataset.act,el);else go(el.dataset.go);
 });
-document.addEventListener('input',e=>{if(e.target.id==='bio-q'){ui.bioQ=e.target.value;const l=$('bio-list');if(l)l.innerHTML=bioRowsHtml()}});
+document.addEventListener('input',e=>{if(e.target.id==='f-kcash'||e.target.id==='f-kbank'){const a=$('f-kamt');if(a)a.value=(+$('f-kcash').value||0)+(+$('f-kbank').value||0)||''}
+  if(e.target.id==='bio-q'){ui.bioQ=e.target.value;const l=$('bio-list');if(l)l.innerHTML=bioRowsHtml()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('layer').firstChild)closeSheet()});
 $('layer').addEventListener('change',e=>{
   const id=e.target.id;osOnEvent(e);
   if(id==='f-wphoto')readPhoto(e.target);
+  if(id==='n-rem'){const bx=$('n-rbox');if(bx)bx.hidden=!e.target.checked}
+  if(id==='f-kmethod'){const sp=$('k-split');if(sp)sp.hidden=e.target.value!=='दोनों'}
   if(id==='b-photo')bioPhoto(e.target);
   if(id==='b-aadf')aadImg(e.target,'af','b-aadf-prev','b');
   if(id==='b-aadb')aadImg(e.target,'ab','b-aadb-prev','b');
