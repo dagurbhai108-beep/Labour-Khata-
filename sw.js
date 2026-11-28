@@ -1,4 +1,4 @@
-const CACHE = 'maa-ganga-labour-v19';
+const CACHE = 'maa-ganga-labour-v20';
 const FILES = ['./', './index.html', './manifest.json', './icon-v2-192.png', './icon-v2-512.png', './icon-v2-maskable-512.png'];
 
 self.addEventListener('install', event => {
