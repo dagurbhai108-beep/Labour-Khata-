@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#142b45">
+<meta name="theme-color" content="#241a73">
 <meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-v2-192.png">
+<link rel="apple-touch-icon" href="icon-v2-192.png">
 <title>मेरा लेबर खाता</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -376,9 +376,11 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
           <div class="fld"><label class="lbl" for="s-owner">मालिक</label><input id="s-owner"></div>
         </div>
         <div class="fld"><label class="lbl" for="s-phone">संपर्क मोबाइल</label><input id="s-phone" type="tel" inputmode="numeric" maxlength="15"></div>
-        <div class="fld"><label class="lbl" for="s-nh">रात की शिफ्ट कितने घंटे की (पूरे ₹500 / ₹400 के लिए)</label><input id="s-nh" type="number" min="1" max="24" step=".5" inputmode="decimal" placeholder="10"></div>
-        <div class="fld"><label class="lbl" for="s-notr">रात के OT का रेट ₹ प्रति घंटा (खाली = रात के घंटे के रेट जितना)</label><input id="s-notr" type="number" min="0" step=".01" inputmode="decimal" placeholder="खाली छोड़ें"></div>
-        <div class="hint">उदाहरण: रात ₹400 की 10 घंटे की शिफ्ट है, तो 5 घंटे काम पर ₹200 बनेंगे। 10 घंटे से ज्यादा रुके तो हर अतिरिक्त घंटे पर रात का OT जुड़ेगा।</div>
+        <div class="fld"><label class="lbl" for="s-nh">पूरी रात कितने घंटे की (7 बजे से 3 बजे = 8)</label><input id="s-nh" type="number" min="1" max="24" step=".5" inputmode="decimal" placeholder="8"></div>
+        <div class="g2"><div class="fld"><label class="lbl" for="s-nhf">रात का घंटे का रेट: महिला ₹</label><input id="s-nhf" type="number" min="0" step=".01" inputmode="decimal" placeholder="40"></div>
+        <div class="fld"><label class="lbl" for="s-nhm">रात का घंटे का रेट: पुरुष ₹</label><input id="s-nhm" type="number" min="0" step=".01" inputmode="decimal" placeholder="50"></div></div>
+        <div class="fld"><label class="lbl" for="s-notr">पूरी रात के बाद के घंटे का रेट ₹ (खाली = रात के घंटे का रेट)</label><input id="s-notr" type="number" min="0" step=".01" inputmode="decimal" placeholder="खाली छोड़ें"></div>
+        <div class="hint">उदाहरण (महिला): 7 से 12 बजे = 5 घंटे × ₹40 = ₹200। 7 से 3 बजे = पूरे ₹400। 7 से 4 बजे = ₹400 + 1 घंटा × ₹40 = ₹440। पुरुष में ₹500 और ₹50 घंटा। सब तरह की लेबर पर यही नियम लगता है।</div>
         <button class="btn wide" data-act="save-settings">सेटिंग सेव करें</button>
       </div>
       <div class="card form"><h3>आपका डेटा कहाँ है</h3>
@@ -518,15 +520,18 @@ const otPerHour=w=>w.otAuto===false?otRateOf(w):baseHourly(w);
 function addHours(t,h){const p=t.split(':').map(Number);const m=((Math.round(p[0]*60+p[1]+h*60)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
 function baseHourly(w){if(!w)return 0;if(w.payMode==='monthly')return (Number(w.salary)||0)/30/stdHours(w);if(w.payMode==='daily')return (Number(w.daily)||0)/stdHours(w);return Number(w.hourly)||0}
 function calcHours(a){if(!a.in||!a.out)return 0;const [h1,m1]=a.in.split(':').map(Number),[h2,m2]=a.out.split(':').map(Number);const x=h1*60+m1;let y=h2*60+m2;if(y<x)y+=1440;return Math.max(0,(y-x)/60)}
-const nightH=()=>Number(db.settings.nightHours)>0?Number(db.settings.nightHours):10;
+const nightH=()=>Number(db.settings.nightHours)>0?Number(db.settings.nightHours):8;
+const nightHrOf=g=>g===FEM?(Number(db.settings.nightHrF)||40):(Number(db.settings.nightHrM)||50);
+/* रात का नियम: 7 बजे से पूरी रात (nightH घंटे) = तय रकम (₹400/₹500); उससे कम = घंटे × रात का घंटे का रेट; पूरी रात के बाद के घंटे भी घंटे के रेट से */
+const nightPayFor=(g,h)=>{const pay=g===FEM?NIGHT_F:NIGHT_M,hr=nightHrOf(g),NH=nightH();return h>=NH?pay+(h-NH)*hr:h*hr};
 const nightEnd=()=>{const e=(19+nightH())%24;return String(e).padStart(2,'0')+':00'};
 /* रात की शिफ्ट: तय रकम पूरी शिफ्ट (nightH घंटे) की है, इसलिए जितने घंटे काम उतना ही पैसा; तय घंटों से ज्यादा हुआ तो रात का OT */
 function nightPart(w,a,h,nightPay){
-  const NH=nightH(),nhr=nightPay/NH;
+  const NH=nightH(),base=w.gender===FEM?NIGHT_F:NIGHT_M,nhr=nightHrOf(w.gender)*nightPay/base;
   if(a.nightFlat)return{hours:h,reg:h,ot:0,nhr:nhr,otR:nhr,regWage:nightPay,otWage:0,wage:nightPay,flat:true};
-  const reg=Math.min(h,NH),ot=Math.max(0,h-NH);
   const otR=Number(a.nightOtRate)>0?Number(a.nightOtRate):(Number(w.nightOtRate)>0?Number(w.nightOtRate):(Number(db.settings.nightOtRate)>0?Number(db.settings.nightOtRate):nhr));
-  return{hours:h,reg,ot,nhr,otR,regWage:reg*nhr,otWage:ot*otR,wage:reg*nhr+ot*otR};
+  if(h>=NH-1e-9){const ot=h-NH;return{hours:h,reg:NH,ot,nhr,otR,regWage:nightPay,otWage:ot*otR,wage:nightPay+ot*otR}}
+  return{hours:h,reg:h,ot:0,nhr,otR,regWage:h*nhr,otWage:0,wage:h*nhr};
 }
 function calcAttendance(a){
   const w=worker(a.workerId);
@@ -706,7 +711,7 @@ function renderAttendance(){
   }else{
     if(pending.length)h+=`<div class="card"><h3>हाजिरी बाकी (${pending.length})</h3>${pending.map(w=>`<div class="row"><div class="av">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${defIn(w)} से 19:00</div></div><div class="quick"><button class="btn sm" data-act="q-present" data-w="${w.id}">पूरा दिन</button><button class="btn ghost sm" data-act="q-absent" data-w="${w.id}">गैर-हाजिर</button><button class="ibtn" data-act="open-att" data-w="${w.id}" aria-label="विवरण भरें">${ic('edit',18)}</button></div></div>`).join('')}</div>`;
     h+=`<div class="sec"><span>${wkd(sel)}, ${dShort(sel)}${sel===t?' (आज)':''} की हाजिरी</span></div>`;
-    h+=s.att.length?`<div class="card">${s.att.map(a=>{const c=calcAttendance(a),w=worker(a.workerId);return `<div class="row rec" data-act="edit-att" data-id="${a.id}"><div class="av${w&&!w.active?' off':''}">${esc(initial(w?w.name:'?'))}</div><div class="mid"><div class="nm">${esc(w?w.name:'हटाया गया')}</div><div class="chips"><span class="chip ${STATUS_CHIP[a.status]||''}">${esc(a.status)}</span>${a.shift!=='day'?`<span class="chip night">${ic('moon',12)} ${a.shift==='both'?'दिन+रात':'रात'}</span>`:''}${timeText(a)?`<span class="sub">${timeText(a)}</span>`:''}</div></div><div class="end"><div class="amt">${money(c.wage)}</div><div class="sub">${hh(c.hours)} घं</div>${c.ot>0?`<div class="sub good">OT ${hh(c.ot)} घं = ${money(c.otWage)}</div>`:''}${a.shift==='both'?`<div class="sub">दिन ${money(c.dayWage)} + रात ${money(c.nightWage+(c.nightOtWage||0))}</div>`:''}${a.shift==='night'&&c.nightHours?`<div class="sub">रात ${hh(c.nightHours)} घं × ${money(c.nightPer)}</div>`:''}</div><button class="ibtn bad" data-act="del" data-arr="attendance" data-id="${a.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">इस तारीख की हाजिरी नहीं लगी।</div>`;
+    h+=s.att.length?`<div class="card">${s.att.map(a=>{const c=calcAttendance(a),w=worker(a.workerId);return `<div class="row rec" data-act="edit-att" data-id="${a.id}"><div class="av${w&&!w.active?' off':''}">${esc(initial(w?w.name:'?'))}</div><div class="mid"><div class="nm">${esc(w?w.name:'हटाया गया')}</div><div class="chips"><span class="chip ${STATUS_CHIP[a.status]||''}">${esc(a.status)}</span>${a.shift!=='day'?`<span class="chip night">${ic('moon',12)} ${a.shift==='both'?'दिन+रात':'रात'}</span>`:''}${timeText(a)?`<span class="sub">${timeText(a)}</span>`:''}</div></div><div class="end"><div class="amt">${money(c.wage)}</div><div class="sub">${hh(c.hours)} घं</div>${c.ot>0?`<div class="sub good">OT ${hh(c.ot)} घं = ${money(c.otWage)}</div>`:''}${a.shift==='both'?`<div class="sub">दिन ${money(c.dayWage)} + रात ${money(c.nightWage+(c.nightOtWage||0))}</div>`:''}${a.shift==='night'&&c.nightHours?`<div class="sub">${Math.abs(c.nightHours-5)<.01?'हाफ नाइट · ':''}${c.nightHours>=nightH()-.001?'पूरी रात'+(c.nightOt>0?' + '+hh(c.nightOt)+' घं':''):'रात '+hh(c.nightHours)+' घं × '+money(c.nightPer)}</div>`:''}</div><button class="ibtn bad" data-act="del" data-arr="attendance" data-id="${a.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">इस तारीख की हाजिरी नहीं लगी।</div>`;
   }
   $('att-body').innerHTML=h;
 }
@@ -730,6 +735,7 @@ function attSheet(o){
     <div class="fld" id="box-extra"><span class="lbl">एक्स्ट्रा समय (OT) जोड़ें</span><div class="chiprow"><button type="button" class="pick" data-act="extra" data-h="0">सामान्य</button><button type="button" class="pick" data-act="extra" data-h="0.5">+ आधा घंटा</button><button type="button" class="pick" data-act="extra" data-h="1">+ 1 घंटा</button><button type="button" class="pick" data-act="extra" data-h="1.5">+ 1.5 घंटा</button><button type="button" class="pick" data-act="extra" data-h="2">+ 2 घंटे</button></div></div>
     <div class="g2" id="box-n2" hidden><div class="fld"><label class="lbl" for="f-ain2">रात: आने का समय</label><input id="f-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div>
     <div class="fld"><label class="lbl" for="f-aout2">रात: जाने का समय</label><input id="f-aout2" type="time" value="${rec&&rec.out2?rec.out2:nightEnd()}"></div></div>
+<div class="fld" id="f-nch" hidden><span class="lbl">रात कितनी देर की? (दबाकर चुनें)</span><div class="chiprow"><button type="button" class="pick" data-act="night-pre" data-p="f" data-h="half">हाफ नाइट (7→12, 5 घं)</button><button type="button" class="pick" data-act="night-pre" data-p="f" data-h="full">पूरी रात (${nightH()} घं)</button><button type="button" class="pick" data-act="night-pre" data-p="f" data-h="-1">− 1 घंटा</button><button type="button" class="pick" data-act="night-pre" data-p="f" data-h="1">+ 1 घंटा</button></div><div class="hint">जैसे कमलेश 7 बजे से 12 बजे, 1 बजे या 4 बजे तक: "जाने का समय" बदल दीजिए। पूरी रात (7 से 3 बजे) का पूरा तय पैसा, और उससे ज्यादा या कम घंटों का पैसा घंटे के रेट से अपने-आप जुड़ेगा।</div></div>
     <div class="preview" id="att-prev"></div>
     <div class="hint">सामान्य ड्यूटी से ज्यादा रुकने पर हर घंटे का पैसा मजदूर के दैनिक भत्ते के हिसाब से अपने-आप जुड़ता है। रात 12 बजे के बाद का समय भी गिना जाता है। रात की शिफ्ट पुरुष ₹500 और महिला ₹400 तय है। "दिन + रात" चुनने पर दिन की मजदूरी वेतन के हिसाब से और रात की तय राशि जुड़कर पूरे दिन का भुगतान बनता है।</div>
     <div class="err" id="formErr" hidden></div>
@@ -742,7 +748,7 @@ function attDefaults(){
 }
 function attUI(){
   const sh=$('f-ashift').value,off=ABS.includes($('f-astatus').value);
-  $('box-n2').hidden=sh!=='both';
+  $('box-n2').hidden=sh!=='both';$('f-nch').hidden=!(sh==='night'||sh==='both')||off;
   $('box-extra').hidden=sh==='night'||off;
   $('l-ain').textContent=sh==='both'?'दिन: आने का समय':'आने का समय';
   $('l-aout').textContent=sh==='both'?'दिन: जाने का समय':'जाने का समय';
@@ -754,7 +760,8 @@ function attStatus(){
   attUI();
 }
 function nightPrev(c){
-  return `रात <b>${hh(c.nightRegHours)} घं</b> × ${money(c.nightPer)} = <b>${money(c.nightRegWage)}</b>`+(c.nightOt>0?`<br>रात का OT <b>${hh(c.nightOt)} घं</b> × ${money(c.nightOtPer)} = <b>${money(c.nightOtWage)}</b>`:`<br><span style="opacity:.8">रात का OT नहीं (${nightH()} घंटे से ज्यादा रुकने पर जुड़ेगा)</span>`);
+  const full=c.nightRegHours>=nightH()-.001;
+  return (full?`पूरी रात (${hh(nightH())} घं) = <b>${money(c.nightRegWage)}</b>`:`रात <b>${hh(c.nightRegHours)} घं</b> × ${money(c.nightPer)} = <b>${money(c.nightRegWage)}</b>`)+(c.nightOt>0?`<br>पूरी रात के बाद <b>${hh(c.nightOt)} घं</b> × ${money(c.nightOtPer)} = <b>${money(c.nightOtWage)}</b>`:(full?'':`<br><span style="opacity:.8">${nightH()} घंटे पूरे होने पर पूरी रात का पैसा मिलेगा</span>`));
 }
 function attPreview(){
   const box=$('att-prev');if(!box)return;
@@ -1463,15 +1470,19 @@ function outSheet(){
     <div class="fld"><label class="lbl" for="f-opaid">भुगतान</label><select id="f-opaid"><option value="cash">नकद अभी दिया</option><option value="due">बाकी रखा (बाद में देंगे)</option></select></div>
     <div class="fld"><label class="lbl" for="f-onote">विवरण</label><input id="f-onote" placeholder="वैकल्पिक"></div>
     <div class="preview" id="out-prev"></div>
-    <div class="hint">हर व्यक्ति का नाम (वैकल्पिक), पुरुष/महिला, कितने घंटे काम किया (वैकल्पिक) और उसे दी जाने वाली रकम लिखिए। कुल रकम अपने-आप जुड़ जाएगी।</div>
+    <div class="hint">हर व्यक्ति का नाम (वैकल्पिक), पुरुष/महिला और रात में कितने घंटे काम किया, यह लिखिए। शिफ्ट "रात" हो तो रकम अपने-आप बन जाएगी (पूरी रात ₹400/₹500, कम-ज्यादा घंटे पर घंटे के रेट से)। रकम आप खुद भी बदल सकते हैं।</div>
     <div class="err" id="formErr" hidden></div>
     <button class="btn wide" data-act="save-out">सेव करें</button></div>`,()=>{outAddPerson();outAddPerson();outModeUI();outRateFill();outPreview()});
 }
 function outAddPerson(){
   const box=$('o-persons');if(!box)return;const i=box.children.length+1;
   const d=document.createElement('div');d.className='prow';d.style.cssText='display:grid;grid-template-columns:1.3fr .9fr .7fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center';
-  d.innerHTML=`<input class="o-pn" placeholder="नाम ${i}" aria-label="नाम"><select class="o-pg" aria-label="पुरुष या महिला"><option>पुरुष</option><option>महिला</option></select><input class="o-ph" type="number" min="0" step=".25" inputmode="decimal" placeholder="घंटे" aria-label="घंटे"><input class="o-pa" type="number" min="0" step=".01" inputmode="decimal" placeholder="₹ रकम" aria-label="रकम"><button type="button" class="ibtn bad" data-act="out-delp" aria-label="हटाएँ">×</button>`;
-  box.appendChild(d);d.querySelector('.o-pa').addEventListener('input',outPreview);
+  d.innerHTML=`<input class="o-pn" placeholder="नाम ${i}" aria-label="नाम"><select class="o-pg" aria-label="पुरुष या महिला"><option>पुरुष</option><option>महिला</option></select><input class="o-ph" type="number" min="0" step=".25" inputmode="decimal" placeholder="रात घंटे" aria-label="घंटे"><input class="o-pa" type="number" min="0" step=".01" inputmode="decimal" placeholder="₹ रकम" aria-label="रकम"><button type="button" class="ibtn bad" data-act="out-delp" aria-label="हटाएँ">×</button>`;
+  box.appendChild(d);
+  const pa=d.querySelector('.o-pa'),ph=d.querySelector('.o-ph'),pg=d.querySelector('.o-pg');
+  pa.addEventListener('input',()=>{pa.dataset.m='1';outPreview()});
+  const auto=()=>{const sh=$('f-oshift').value,h=+ph.value||0;if(pa.dataset.m==='1'||!(sh==='night'||sh==='both')||!(h>0))return;pa.value=Math.round(nightPayFor(pg.value,h)*100)/100;outPreview()};
+  ph.addEventListener('input',auto);pg.addEventListener('change',auto);d._auto=auto;
 }
 function outModeUI(){const c=$('f-omode').value==='custom';$('box-oeq').hidden=c;$('box-ocu').hidden=!c;outPreview()}
 function outPersons(){return Array.from(document.querySelectorAll('#o-persons .prow')).map(r=>({name:r.querySelector('.o-pn').value.trim(),gender:r.querySelector('.o-pg').value,hours:+r.querySelector('.o-ph').value||0,amount:+r.querySelector('.o-pa').value||0})).filter(x=>x.amount>0)}
@@ -1594,13 +1605,13 @@ function csvText(){
 /* settings and backup */
 function fillSettings(){
   const s=db.settings;
-  $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';$('s-nh').value=s.nightHours||'';$('s-notr').value=s.nightOtRate||'';
+  $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';$('s-nh').value=s.nightHours||'';$('s-nhf').value=s.nightHrF||'';$('s-nhm').value=s.nightHrM||'';$('s-notr').value=s.nightOtRate||'';
   $('restoreErr').hidden=true;
   $('pin-note').textContent=s.pinHash?'PIN चालू है: ऐप खोलने पर और 1 मिनट बाहर रहने के बाद PIN माँगेगा। यह सिर्फ दूसरों से आँख बचाने के लिए है।':'PIN लगाने पर ऐप खोलते ही 4 से 6 अंक का PIN माँगेगा, ताकि मजदूरों की निजी जानकारी और हिसाब कोई और न देख सके।';
   $('pin-rm').hidden=!s.pinHash;$('s-pdfascii').checked=!!s.pdfAscii;
 }
 function saveSettings(){
-  Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||'',nightHours:+$('s-nh').value>0?+$('s-nh').value:0,nightOtRate:+$('s-notr').value>0?+$('s-notr').value:0});
+  Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||'',nightHours:+$('s-nh').value>0?+$('s-nh').value:0,nightHrF:+$('s-nhf').value>0?+$('s-nhf').value:0,nightHrM:+$('s-nhm').value>0?+$('s-nhm').value:0,nightOtRate:+$('s-notr').value>0?+$('s-notr').value:0});
   toast('सेटिंग सेव हो गई');save();
 }
 const backupText=()=>JSON.stringify(db,null,2);
@@ -2178,12 +2189,12 @@ function osAttSheet(o){
     <div class="fld"><label class="lbl" for="x-aout">जाने का समय</label><input id="x-aout" type="time" value="${rec?rec.out:'19:00'}"${off?' disabled':''}></div></div>
     <div class="fld" id="x-bx"><span class="lbl">एक्स्ट्रा समय (OT) जोड़ें</span><div class="chiprow"><button type="button" class="pick" data-act="os-extra" data-h="0">सामान्य</button><button type="button" class="pick" data-act="os-extra" data-h="0.5">+ आधा घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="1">+ 1 घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="2">+ 2 घंटे</button></div></div>
     <div class="g2" id="x-bn" hidden><div class="fld"><label class="lbl" for="x-ain2">रात: आने का समय</label><input id="x-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div><div class="fld"><label class="lbl" for="x-aout2">रात: जाने का समय</label><input id="x-aout2" type="time" value="${rec&&rec.out2?rec.out2:nightEnd()}"></div></div>
-    <div class="preview" id="x-aprev"></div>
+    <div class="fld" id="x-nch" hidden><span class="lbl">रात कितनी देर की? (दबाकर चुनें)</span><div class="chiprow"><button type="button" class="pick" data-act="night-pre" data-p="x" data-h="half">हाफ नाइट (7→12, 5 घं)</button><button type="button" class="pick" data-act="night-pre" data-p="x" data-h="full">पूरी रात (${nightH()} घं)</button><button type="button" class="pick" data-act="night-pre" data-p="x" data-h="-1">− 1 घंटा</button><button type="button" class="pick" data-act="night-pre" data-p="x" data-h="1">+ 1 घंटा</button></div><div class="hint">जैसे कमलेश 7 बजे से 12 बजे, 1 बजे या 4 बजे तक: "जाने का समय" बदल दीजिए। पूरी रात (7 से 3 बजे) का पूरा तय पैसा, और उससे ज्यादा या कम घंटों का पैसा घंटे के रेट से अपने-आप जुड़ेगा।</div></div><div class="preview" id="x-aprev"></div>
     <div class="hint">ड्यूटी से ज्यादा रुकने पर OT अपने-आप जुड़ता है। रात की शिफ्ट का रेट वर्कर की जानकारी में तय किया हुआ (या एक दिन की मजदूरी) लगता है।</div>
     <div class="err" id="formErr" hidden></div>
     <button class="btn wide" data-act="os-save-att">हाजिरी सेव करें</button></div>`,()=>{osAttUi();osAttPrev()});
 }
-function osAttUi(){const sh=$('x-ash').value,off=ABS.includes($('x-ast').value);$('x-bn').hidden=sh!=='both';$('x-bx').hidden=sh==='night'||off;['x-ain','x-aout','x-ain2','x-aout2'].forEach(i=>{$(i).disabled=off})}
+function osAttUi(){const sh=$('x-ash').value,off=ABS.includes($('x-ast').value);$('x-bn').hidden=sh!=='both';$('x-nch').hidden=!(sh==='night'||sh==='both')||off;$('x-bx').hidden=sh==='night'||off;['x-ain','x-aout','x-ain2','x-aout2'].forEach(i=>{$(i).disabled=off})}
 function osAttDefaults(){const w=osW($('x-aw').value),n=$('x-ash').value==='night';$('x-ain').value=n?'19:00':defIn(w);$('x-aout').value=n?nightEnd():'19:00';$('x-ain2').value='19:00';$('x-aout2').value=nightEnd()}
 function osAttPrev(){
   const b=$('x-aprev');if(!b)return;const w=osW($('x-aw').value);if(!w){b.textContent='पहले वर्कर चुनें';return}
@@ -2418,6 +2429,11 @@ function act(a,el){
     case 'open-att':attSheet({workerId:d.w,date:d.d||ui.attDate});break;
     case 'edit-att':{const r=db.attendance.find(x=>x.id===d.id);if(r)attSheet({rec:r});break}
     case 'save-att':saveAtt();break;
+    case 'night-pre':{const pre=d.p==='x'?'x':'f',sh=$(pre==='x'?'x-ash':'f-ashift').value;
+      const iIn=pre==='x'?(sh==='both'?'x-ain2':'x-ain'):(sh==='both'?'f-ain2':'f-ain'),iOut=pre==='x'?(sh==='both'?'x-aout2':'x-aout'):(sh==='both'?'f-aout2':'f-aout');
+      const st=$(iIn).value||'19:00';$(iIn).value=st;
+      let h=nightH();if(d.h==='half')h=5;else if(d.h==='full')h=nightH();else{const cur=calcHours({in:st,out:$(iOut).value})||nightH();h=Math.max(.5,cur+Number(d.h))}
+      $(iOut).value=addHours(st,h);if(pre==='x')osAttPrev();else attPreview();break}
     case 'extra':{const w=worker($('f-aworker').value);if(!w)break;const inT=$('f-ain').value||defIn(w);$('f-ain').value=inT;$('f-aout').value=addHours(inT,stdHours(w)+Number(d.h));attPreview();break}
     case 'q-present':quick(d.w,'पूरा दिन');break;
     case 'q-absent':quick(d.w,'अनुपस्थित');break;
@@ -2511,7 +2527,7 @@ $('layer').addEventListener('change',e=>{
   if(id==='f-astatus')attStatus();
   if(id.indexOf('f-a')===0)attPreview();
   if(id==='f-pdate')prodFill(e.target.value);
-  if(id==='f-ogender'||id==='f-oshift'){outRateFill();outPreview()}
+  if(id==='f-ogender'||id==='f-oshift'){outRateFill();document.querySelectorAll('#o-persons .prow').forEach(r=>r._auto&&r._auto());outPreview()}
   if(id==='f-omode')outModeUI();
 });
 $('layer').addEventListener('input',e=>{const id=e.target.id;if(!(e.target.type==='file'))osOnEvent(e);if(id.indexOf('f-w')===0)wPrev();if(id.indexOf('f-a')===0)attPreview();if(id.indexOf('f-p')===0&&id!=='f-pdate')prodPreview();if(id.indexOf('f-o')===0)outPreview()});
