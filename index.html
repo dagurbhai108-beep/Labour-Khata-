@@ -218,6 +218,62 @@ tr.fin td{font-weight:700;font-size:15px;border-top:2px solid var(--line)}
 #lock[hidden]{display:none}
 .lockbox{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;text-align:center}
 .lockbox input{text-align:center;font-size:24px;letter-spacing:6px}
+/* ===== रंगीन नया रूप (v3) ===== */
+:root{--g1:linear-gradient(135deg,#0aa5a0,#2f6fed);--shadow:0 6px 18px rgba(20,43,69,.10);--bg-grad:linear-gradient(180deg,#dff1fb 0,#efe9fb 34%,#f3f6f9 62%);--gold:#f5b82e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--shadow:0 6px 18px rgba(0,0,0,.4);--bg-grad:linear-gradient(180deg,#0d2a40 0,#171636 36%,#0e1924 70%)}}
+:root[data-theme="dark"]{--shadow:0 6px 18px rgba(0,0,0,.4);--bg-grad:linear-gradient(180deg,#0d2a40 0,#171636 36%,#0e1924 70%)}
+.app{background:var(--bg-grad)}
+.appbar{background:linear-gradient(115deg,#241a73 0%,#0f5c9a 58%,#0aa5a0 100%);box-shadow:0 4px 16px rgba(15,40,90,.35);border-bottom:3px solid var(--gold)}
+.titles .t{letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.titles .s{opacity:.9;color:#ffe9a8}
+.logo{border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.4);width:42px;height:42px}
+.card{border:0;border-radius:20px;box-shadow:var(--shadow)}
+.card h3{display:flex;align-items:center;gap:9px;font-size:15.5px;color:var(--ink)}
+.card h3::before{content:"";flex:none;width:5px;height:19px;border-radius:3px;background:var(--g1)}
+.page>.card:nth-of-type(4n+2) h3::before{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.page>.card:nth-of-type(4n+3) h3::before{background:linear-gradient(135deg,#8b5cf6,#ec4899)}
+.page>.card:nth-of-type(4n+4) h3::before{background:linear-gradient(135deg,#16a34a,#0aa5a0)}
+.hero{background:radial-gradient(circle at 88% -5%,rgba(255,196,70,.55),transparent 46%),radial-gradient(circle at -5% 105%,rgba(0,230,205,.4),transparent 52%),linear-gradient(135deg,#2a1b7d 0%,#1565c0 56%,#0a9d9a 100%);border-radius:26px;box-shadow:0 14px 30px rgba(30,60,160,.38);padding:20px 16px 16px}
+.hero .big{text-shadow:0 3px 14px rgba(0,0,0,.3);color:#fff}
+.hero .date{color:#ffe9a8;opacity:1;font-weight:700}
+.hs{background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.22);border-radius:14px}
+.hs:nth-child(1) b{color:#9bffc8}.hs:nth-child(2) b{color:#ffb3ad}.hs:nth-child(3) b{color:#ffe08a}.hs:nth-child(4) b{color:#c9b8ff}
+.stats .stat{border-radius:16px;border-left:5px solid var(--sc,#0aa5a0);background:color-mix(in srgb,var(--sc,#0aa5a0) 13%,var(--surface));box-shadow:0 2px 8px rgba(20,43,69,.06)}
+.stats .stat:nth-child(4n+1){--sc:#0aa5a0}.stats .stat:nth-child(4n+2){--sc:#f59e0b}.stats .stat:nth-child(4n+3){--sc:#8b5cf6}.stats .stat:nth-child(4n+4){--sc:#ef4444}
+.stat span{font-weight:600}
+.qa{border:0;box-shadow:var(--shadow);border-radius:18px}
+.qa .ci,.mi .ci{color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+.qa:nth-child(4n+1) .ci{background:linear-gradient(135deg,#0aa5a0,#2f6fed)}.qa:nth-child(4n+2) .ci{background:linear-gradient(135deg,#f59e0b,#ef4444)}.qa:nth-child(4n+3) .ci{background:linear-gradient(135deg,#8b5cf6,#ec4899)}.qa:nth-child(4n+4) .ci{background:linear-gradient(135deg,#16a34a,#84cc16)}
+.mi:nth-child(8n+1) .ci{background:linear-gradient(135deg,#0aa5a0,#2f6fed)}.mi:nth-child(8n+2) .ci{background:linear-gradient(135deg,#f59e0b,#ef4444)}.mi:nth-child(8n+3) .ci{background:linear-gradient(135deg,#8b5cf6,#ec4899)}.mi:nth-child(8n+4) .ci{background:linear-gradient(135deg,#16a34a,#84cc16)}.mi:nth-child(8n+5) .ci{background:linear-gradient(135deg,#2f6fed,#8b5cf6)}.mi:nth-child(8n+6) .ci{background:linear-gradient(135deg,#ef4444,#f97316)}.mi:nth-child(8n+7) .ci{background:linear-gradient(135deg,#0ea5e9,#10b981)}.mi:nth-child(8n+8) .ci{background:linear-gradient(135deg,#d946ef,#f43f5e)}
+.mi{font-size:16.5px}
+.mi .ci svg,.qa .ci svg{color:#fff!important}
+.btn{background:var(--g1);color:#fff;box-shadow:0 5px 14px rgba(47,111,237,.32);border-radius:14px}
+.btn.ghost{background:var(--surface);color:var(--accent-strong);border:1.5px solid color-mix(in srgb,var(--accent) 50%,transparent);box-shadow:none}
+.btn.bad{background:var(--bad-btn);box-shadow:0 5px 14px rgba(180,35,24,.3)}
+.fab{background:linear-gradient(135deg,#ff9a1f,#ff3d6e);color:#fff;box-shadow:0 8px 20px rgba(255,80,90,.45)}
+.tabbar{border-top:0;border-radius:22px 22px 0 0;box-shadow:0 -8px 24px rgba(20,43,69,.16)}
+.tab{color:var(--ink2)}
+.tab .ico{transition:background .15s}
+.tab[data-go=home] .ico{color:#2f6fed}.tab[data-go=attendance] .ico{color:#f59e0b}.tab[data-go=workers] .ico{color:#8b5cf6}.tab[data-go=ledger] .ico{color:#16a34a}.tab[data-go=more] .ico{color:#db2777}
+.tab.on{color:var(--ink)}
+.tab.on .ico{color:#fff!important;box-shadow:0 4px 10px rgba(0,0,0,.22)}
+.tab[data-go=home].on .ico{background:linear-gradient(135deg,#2f6fed,#0aa5a0)}.tab[data-go=attendance].on .ico{background:linear-gradient(135deg,#f59e0b,#ef4444)}.tab[data-go=workers].on .ico{background:linear-gradient(135deg,#8b5cf6,#ec4899)}.tab[data-go=ledger].on .ico{background:linear-gradient(135deg,#16a34a,#0aa5a0)}.tab[data-go=more].on .ico{background:linear-gradient(135deg,#db2777,#f97316)}
+.kv.total{background:color-mix(in srgb,var(--accent) 11%,transparent);border-radius:12px;padding:10px;border-top:0;margin-top:6px}
+.kv.total span{color:var(--ink)}
+.mstep{border:0;box-shadow:var(--shadow);border-radius:16px;background:linear-gradient(90deg,color-mix(in srgb,#2f6fed 10%,var(--surface)),color-mix(in srgb,#0aa5a0 10%,var(--surface)))}
+.av{background:var(--g1);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.av.off{background:var(--surface2);color:var(--ink3);box-shadow:none}
+.row:nth-child(4n+2) .av{background:linear-gradient(135deg,#f59e0b,#ef4444)}.row:nth-child(4n+3) .av{background:linear-gradient(135deg,#8b5cf6,#ec4899)}.row:nth-child(4n+4) .av{background:linear-gradient(135deg,#16a34a,#0aa5a0)}
+.dchip{border:0;box-shadow:0 2px 8px rgba(20,43,69,.1)}
+.dchip.on{background:var(--g1);color:#fff}
+.preview{border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.chip{font-size:12px}
+.sheet{border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.28)}
+.pick.on{background:var(--g1);color:#fff;border-color:transparent}
+#lock{background:var(--bg-grad)!important}
+.lockbox h2{background:var(--g1);-webkit-background-clip:text;background-clip:text;color:transparent}
+.empty{background:color-mix(in srgb,#8b5cf6 7%,var(--surface))}
+@media (prefers-reduced-motion:no-preference){.card,.qa,.btn{transition:transform .12s ease,box-shadow .12s ease}.btn:active,.qa:active{transform:scale(.97)}}
 
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media print{
@@ -238,7 +294,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
 <div class="app">
   <header class="appbar"><div class="appbar-in gut">
     <button class="iconbtn" id="backBtn" data-go="more" aria-label="पीछे" hidden></button>
-    <svg class="logo" id="logo" viewBox="0 0 512 512" aria-hidden="true"><rect x="40" y="40" width="432" height="432" rx="96" fill="#087e8b"/><rect x="128" y="112" width="256" height="288" rx="30" fill="#fff"/><rect x="249" y="128" width="14" height="256" fill="#142b45"/><g fill="#087e8b"><rect x="163" y="186" width="64" height="10"/><rect x="163" y="250" width="64" height="10"/><rect x="163" y="312" width="64" height="10"/><rect x="286" y="186" width="64" height="10"/><rect x="286" y="250" width="64" height="10"/><rect x="286" y="312" width="64" height="10"/></g></svg>
+    <img class="logo" id="logo" alt="" src="data:image/png;base64,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">
     <div class="titles"><div class="t" id="appTitle"></div><div class="s" id="appSub"></div></div>
   </div></header>
 
@@ -320,6 +376,9 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
           <div class="fld"><label class="lbl" for="s-owner">मालिक</label><input id="s-owner"></div>
         </div>
         <div class="fld"><label class="lbl" for="s-phone">संपर्क मोबाइल</label><input id="s-phone" type="tel" inputmode="numeric" maxlength="15"></div>
+        <div class="fld"><label class="lbl" for="s-nh">रात की शिफ्ट कितने घंटे की (पूरे ₹500 / ₹400 के लिए)</label><input id="s-nh" type="number" min="1" max="24" step=".5" inputmode="decimal" placeholder="10"></div>
+        <div class="fld"><label class="lbl" for="s-notr">रात के OT का रेट ₹ प्रति घंटा (खाली = रात के घंटे के रेट जितना)</label><input id="s-notr" type="number" min="0" step=".01" inputmode="decimal" placeholder="खाली छोड़ें"></div>
+        <div class="hint">उदाहरण: रात ₹400 की 10 घंटे की शिफ्ट है, तो 5 घंटे काम पर ₹200 बनेंगे। 10 घंटे से ज्यादा रुके तो हर अतिरिक्त घंटे पर रात का OT जुड़ेगा।</div>
         <button class="btn wide" data-act="save-settings">सेटिंग सेव करें</button>
       </div>
       <div class="card form"><h3>आपका डेटा कहाँ है</h3>
@@ -442,6 +501,8 @@ function norm(d){
   d.settings=Object.assign(f.settings,d.settings||{});
   if(!Array.isArray(d.settings.items)||!d.settings.items.length)d.settings.items=f.settings.items;
   d.production.forEach(migrateProd);
+  /* पुरानी रात की एंट्री पुराने तय रेट पर ही रहें (नया घंटे वाला हिसाब सिर्फ नई एंट्री पर) */
+  ['attendance','osatt'].forEach(k=>d[k].forEach(a=>{if(a.nv==null){a.nv=1;if(a.shift==='night'||a.shift==='both')a.nightFlat=true}}));
   return d;
 }
 function load(){try{const s=localStorage.getItem(KEY);if(s){const d=JSON.parse(s);if(d&&Array.isArray(d.workers))return norm(d)}}catch(e){}return null}
@@ -457,11 +518,25 @@ const otPerHour=w=>w.otAuto===false?otRateOf(w):baseHourly(w);
 function addHours(t,h){const p=t.split(':').map(Number);const m=((Math.round(p[0]*60+p[1]+h*60)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
 function baseHourly(w){if(!w)return 0;if(w.payMode==='monthly')return (Number(w.salary)||0)/30/stdHours(w);if(w.payMode==='daily')return (Number(w.daily)||0)/stdHours(w);return Number(w.hourly)||0}
 function calcHours(a){if(!a.in||!a.out)return 0;const [h1,m1]=a.in.split(':').map(Number),[h2,m2]=a.out.split(':').map(Number);const x=h1*60+m1;let y=h2*60+m2;if(y<x)y+=1440;return Math.max(0,(y-x)/60)}
+const nightH=()=>Number(db.settings.nightHours)>0?Number(db.settings.nightHours):10;
+const nightEnd=()=>{const e=(19+nightH())%24;return String(e).padStart(2,'0')+':00'};
+/* रात की शिफ्ट: तय रकम पूरी शिफ्ट (nightH घंटे) की है, इसलिए जितने घंटे काम उतना ही पैसा; तय घंटों से ज्यादा हुआ तो रात का OT */
+function nightPart(w,a,h,nightPay){
+  const NH=nightH(),nhr=nightPay/NH;
+  if(a.nightFlat)return{hours:h,reg:h,ot:0,nhr:nhr,otR:nhr,regWage:nightPay,otWage:0,wage:nightPay,flat:true};
+  const reg=Math.min(h,NH),ot=Math.max(0,h-NH);
+  const otR=Number(a.nightOtRate)>0?Number(a.nightOtRate):(Number(w.nightOtRate)>0?Number(w.nightOtRate):(Number(db.settings.nightOtRate)>0?Number(db.settings.nightOtRate):nhr));
+  return{hours:h,reg,ot,nhr,otR,regWage:reg*nhr,otWage:ot*otR,wage:reg*nhr+ot*otR};
+}
 function calcAttendance(a){
   const w=worker(a.workerId);
   if(!w||ABS.includes(a.status))return{hours:0,regular:0,ot:0,wage:0};
   const nightPay=Number(a.nightRate)||(w.gender===FEM?NIGHT_F:NIGHT_M);
-  if(a.shift==='night')return{hours:calcHours(a),regular:calcHours(a),ot:0,wage:nightPay,dayWage:0,nightWage:nightPay};
+  if(a.shift==='night'){
+    let h=calcHours(a);if(!h)h=a.status==='आधा दिन'?nightH()/2:nightH();
+    const n=nightPart(w,a,h,nightPay);
+    return{hours:h,regular:n.reg,ot:n.ot,wage:n.wage,dayWage:0,nightWage:n.regWage,otWage:n.otWage,otPer:n.otR,nightHours:h,nightOt:n.ot,nightOtWage:n.otWage,nightPer:n.nhr,nightOtPer:n.otR,nightRegHours:n.reg,nightRegWage:n.regWage}
+  }
   let h=calcHours(a);
   if(!h&&a.status==='आधा दिन')h=stdHours(w)/2;
   if(!h&&a.status==='पूरा दिन')h=stdHours(w);
@@ -469,8 +544,9 @@ function calcAttendance(a){
   const hr=Number(a.hourlyRate!=null?a.hourlyRate:baseHourly(w)),otR=w.otAuto===false?Number(a.otRate!=null?a.otRate:otRateOf(w)):hr;
   const regWage=regular*hr,otWage=ot*otR,wage=regWage+otWage;
   if(a.shift==='both'){
-    const nh=calcHours({in:a.in2,out:a.out2})||8;
-    return{hours:h+nh,regular:regular+nh,ot,wage:wage+nightPay,dayWage:wage,nightWage:nightPay,dayHours:h,regWage,otWage,otPer:otR}
+    const nh=calcHours({in:a.in2,out:a.out2})||nightH();
+    const n=nightPart(w,a,nh,nightPay);
+    return{hours:h+nh,regular:regular+n.reg,ot:ot+n.ot,wage:wage+n.wage,dayWage:wage,nightWage:n.regWage,dayHours:h,regWage,otWage:otWage+n.otWage,dayOtWage:otWage,otPer:otR,nightHours:nh,nightOt:n.ot,nightOtWage:n.otWage,nightPer:n.nhr,nightOtPer:n.otR,nightRegHours:n.reg,nightRegWage:n.regWage}
   }
   return{hours:h,regular,ot,wage,dayWage:wage,nightWage:0,dayHours:h,regWage,otWage,otPer:otR}
 }
@@ -484,8 +560,8 @@ const defIn=w=>w&&w.gender===FEM?'09:30':'09:00';
 function putAttendance(o){
   const w=worker(o.workerId);
   const old=db.attendance.find(x=>x.date===o.date&&x.workerId===o.workerId);
-  const a={id:old?old.id:uid(),date:o.date,workerId:o.workerId,status:o.status,shift:o.shift,in:o.inT,out:o.outT,in2:o.in2||'',out2:o.out2||'',hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:w.gender===FEM?NIGHT_F:NIGHT_M};
-  if(old)Object.assign(old,a);else db.attendance.push(a);
+  const a={id:old?old.id:uid(),date:o.date,workerId:o.workerId,status:o.status,shift:o.shift,in:o.inT,out:o.outT,in2:o.in2||'',out2:o.out2||'',hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:w.gender===FEM?NIGHT_F:NIGHT_M,nv:1};
+  if(old){Object.assign(old,a);delete old.nightFlat}else db.attendance.push(a);
 }
 
 let db=load()||fresh();
@@ -630,7 +706,7 @@ function renderAttendance(){
   }else{
     if(pending.length)h+=`<div class="card"><h3>हाजिरी बाकी (${pending.length})</h3>${pending.map(w=>`<div class="row"><div class="av">${avIn(w)}</div><div class="mid"><div class="nm">${esc(w.name)}</div><div class="sub">${defIn(w)} से 19:00</div></div><div class="quick"><button class="btn sm" data-act="q-present" data-w="${w.id}">पूरा दिन</button><button class="btn ghost sm" data-act="q-absent" data-w="${w.id}">गैर-हाजिर</button><button class="ibtn" data-act="open-att" data-w="${w.id}" aria-label="विवरण भरें">${ic('edit',18)}</button></div></div>`).join('')}</div>`;
     h+=`<div class="sec"><span>${wkd(sel)}, ${dShort(sel)}${sel===t?' (आज)':''} की हाजिरी</span></div>`;
-    h+=s.att.length?`<div class="card">${s.att.map(a=>{const c=calcAttendance(a),w=worker(a.workerId);return `<div class="row rec" data-act="edit-att" data-id="${a.id}"><div class="av${w&&!w.active?' off':''}">${esc(initial(w?w.name:'?'))}</div><div class="mid"><div class="nm">${esc(w?w.name:'हटाया गया')}</div><div class="chips"><span class="chip ${STATUS_CHIP[a.status]||''}">${esc(a.status)}</span>${a.shift!=='day'?`<span class="chip night">${ic('moon',12)} ${a.shift==='both'?'दिन+रात':'रात'}</span>`:''}${timeText(a)?`<span class="sub">${timeText(a)}</span>`:''}</div></div><div class="end"><div class="amt">${money(c.wage)}</div><div class="sub">${hh(c.hours)} घं</div>${c.ot>0?`<div class="sub good">OT ${hh(c.ot)} घं = ${money(c.otWage)}</div>`:''}${a.shift==='both'?`<div class="sub">दिन ${money(c.dayWage)} + रात ${money(c.nightWage)}</div>`:''}</div><button class="ibtn bad" data-act="del" data-arr="attendance" data-id="${a.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">इस तारीख की हाजिरी नहीं लगी।</div>`;
+    h+=s.att.length?`<div class="card">${s.att.map(a=>{const c=calcAttendance(a),w=worker(a.workerId);return `<div class="row rec" data-act="edit-att" data-id="${a.id}"><div class="av${w&&!w.active?' off':''}">${esc(initial(w?w.name:'?'))}</div><div class="mid"><div class="nm">${esc(w?w.name:'हटाया गया')}</div><div class="chips"><span class="chip ${STATUS_CHIP[a.status]||''}">${esc(a.status)}</span>${a.shift!=='day'?`<span class="chip night">${ic('moon',12)} ${a.shift==='both'?'दिन+रात':'रात'}</span>`:''}${timeText(a)?`<span class="sub">${timeText(a)}</span>`:''}</div></div><div class="end"><div class="amt">${money(c.wage)}</div><div class="sub">${hh(c.hours)} घं</div>${c.ot>0?`<div class="sub good">OT ${hh(c.ot)} घं = ${money(c.otWage)}</div>`:''}${a.shift==='both'?`<div class="sub">दिन ${money(c.dayWage)} + रात ${money(c.nightWage+(c.nightOtWage||0))}</div>`:''}${a.shift==='night'&&c.nightHours?`<div class="sub">रात ${hh(c.nightHours)} घं × ${money(c.nightPer)}</div>`:''}</div><button class="ibtn bad" data-act="del" data-arr="attendance" data-id="${a.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`}).join('')}</div>`:`<div class="card empty">इस तारीख की हाजिरी नहीं लगी।</div>`;
   }
   $('att-body').innerHTML=h;
 }
@@ -647,13 +723,13 @@ function attSheet(o){
   openSheet(rec?'हाजिरी बदलें':'हाजिरी दर्ज करें',`<div class="form">
     <div class="g2"><div class="fld"><label class="lbl" for="f-adate">तारीख</label><input id="f-adate" type="date" value="${date}"></div>
     <div class="fld"><label class="lbl" for="f-aworker">मजदूर</label><select id="f-aworker">${list.map(w=>`<option value="${w.id}"${w.id===wid?' selected':''}>${esc(w.name)}</option>`).join('')}</select></div></div>
-    <div class="g2"><div class="fld"><label class="lbl" for="f-ashift">शिफ्ट</label><select id="f-ashift"><option value="day"${shift==='day'?' selected':''}>दिन</option><option value="night"${shift==='night'?' selected':''}>रात (7 PM–3 AM)</option><option value="both"${shift==='both'?' selected':''}>दिन + रात (दोनों)</option></select></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="f-ashift">शिफ्ट</label><select id="f-ashift"><option value="day"${shift==='day'?' selected':''}>दिन</option><option value="night"${shift==='night'?' selected':''}>रात (7 PM से, ${nightH()} घंटे की शिफ्ट)</option><option value="both"${shift==='both'?' selected':''}>दिन + रात (दोनों)</option></select></div>
     <div class="fld"><label class="lbl" for="f-astatus">स्थिति</label><select id="f-astatus">${['पूरा दिन','आधा दिन','अनुपस्थित','छुट्टी','अतिरिक्त काम'].map(s=>`<option${s===status?' selected':''}>${s}</option>`).join('')}</select></div></div>
     <div class="g2"><div class="fld"><label class="lbl" id="l-ain" for="f-ain">आने का समय</label><input id="f-ain" type="time" value="${rec?rec.in:defIn(worker(wid))}"${off?' disabled':''}></div>
     <div class="fld"><label class="lbl" id="l-aout" for="f-aout">जाने का समय</label><input id="f-aout" type="time" value="${rec?rec.out:'19:00'}"${off?' disabled':''}></div></div>
     <div class="fld" id="box-extra"><span class="lbl">एक्स्ट्रा समय (OT) जोड़ें</span><div class="chiprow"><button type="button" class="pick" data-act="extra" data-h="0">सामान्य</button><button type="button" class="pick" data-act="extra" data-h="0.5">+ आधा घंटा</button><button type="button" class="pick" data-act="extra" data-h="1">+ 1 घंटा</button><button type="button" class="pick" data-act="extra" data-h="1.5">+ 1.5 घंटा</button><button type="button" class="pick" data-act="extra" data-h="2">+ 2 घंटे</button></div></div>
     <div class="g2" id="box-n2" hidden><div class="fld"><label class="lbl" for="f-ain2">रात: आने का समय</label><input id="f-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div>
-    <div class="fld"><label class="lbl" for="f-aout2">रात: जाने का समय</label><input id="f-aout2" type="time" value="${rec&&rec.out2?rec.out2:'03:00'}"></div></div>
+    <div class="fld"><label class="lbl" for="f-aout2">रात: जाने का समय</label><input id="f-aout2" type="time" value="${rec&&rec.out2?rec.out2:nightEnd()}"></div></div>
     <div class="preview" id="att-prev"></div>
     <div class="hint">सामान्य ड्यूटी से ज्यादा रुकने पर हर घंटे का पैसा मजदूर के दैनिक भत्ते के हिसाब से अपने-आप जुड़ता है। रात 12 बजे के बाद का समय भी गिना जाता है। रात की शिफ्ट पुरुष ₹500 और महिला ₹400 तय है। "दिन + रात" चुनने पर दिन की मजदूरी वेतन के हिसाब से और रात की तय राशि जुड़कर पूरे दिन का भुगतान बनता है।</div>
     <div class="err" id="formErr" hidden></div>
@@ -661,8 +737,8 @@ function attSheet(o){
 }
 function attDefaults(){
   const night=$('f-ashift').value==='night',w=worker($('f-aworker').value);
-  $('f-ain').value=night?'19:00':defIn(w);$('f-aout').value=night?'03:00':'19:00';
-  $('f-ain2').value='19:00';$('f-aout2').value='03:00';
+  $('f-ain').value=night?'19:00':defIn(w);$('f-aout').value=night?nightEnd():'19:00';
+  $('f-ain2').value='19:00';$('f-aout2').value=nightEnd();
 }
 function attUI(){
   const sh=$('f-ashift').value,off=ABS.includes($('f-astatus').value);
@@ -677,15 +753,18 @@ function attStatus(){
   if(off){$('f-ain').value='';$('f-aout').value='';$('f-ain2').value='';$('f-aout2').value=''}else if(!$('f-ain').value||!$('f-aout').value||!$('f-ain2').value||!$('f-aout2').value)attDefaults();
   attUI();
 }
+function nightPrev(c){
+  return `रात <b>${hh(c.nightRegHours)} घं</b> × ${money(c.nightPer)} = <b>${money(c.nightRegWage)}</b>`+(c.nightOt>0?`<br>रात का OT <b>${hh(c.nightOt)} घं</b> × ${money(c.nightOtPer)} = <b>${money(c.nightOtWage)}</b>`:`<br><span style="opacity:.8">रात का OT नहीं (${nightH()} घंटे से ज्यादा रुकने पर जुड़ेगा)</span>`);
+}
 function attPreview(){
   const box=$('att-prev');if(!box)return;
   const w=worker($('f-aworker').value);if(!w){box.textContent='पहले मजदूर चुनें';return}
   const c=calcAttendance({workerId:w.id,status:$('f-astatus').value,shift:$('f-ashift').value,in:$('f-ain').value,out:$('f-aout').value,in2:$('f-ain2').value,out2:$('f-aout2').value,hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:w.gender===FEM?NIGHT_F:NIGHT_M});
   const sh=$('f-ashift').value;
   if(ABS.includes($('f-astatus').value)){box.innerHTML='इस दिन की मजदूरी <b>'+money(0)+'</b>';return}
-  if(sh==='night'){box.innerHTML=`रात की तय राशि <b>${money(c.wage)}</b> · ${hh(c.hours)} घंटे`;return}
+  if(sh==='night'){box.innerHTML=nightPrev(c);return}
   const day=`सामान्य <b>${hh(Math.min(c.dayHours,stdHours(w)))} घं</b> = ${money(c.regWage)}`+(c.ot>0?`<br>OT <b>${hh(c.ot)} घं</b> × ${money(c.otPer)} = <b>${money(c.otWage)}</b>`:`<br><span style="opacity:.8">OT नहीं (ज्यादा रुकने पर अपने-आप जुड़ेगा)</span>`);
-  box.innerHTML=day+(sh==='both'?`<br>रात की तय राशि <b>${money(c.nightWage)}</b>`:'')+`<br>कुल <b>${money(c.wage)}</b>`;
+  box.innerHTML=day.replace(/OT <b>[^<]*<\/b> × [^=]*= <b>[^<]*<\/b>/,c.dayOtWage!=null?('OT <b>'+hh(c.ot-c.nightOt)+' घं</b> × '+money(c.otPer)+' = <b>'+money(c.dayOtWage)+'</b>'):'$&')+(sh==='both'?'<br>'+nightPrev(c):'')+`<br>कुल <b>${money(c.wage)}</b>`;
 }
 function saveAtt(){
   const wid=$('f-aworker').value,date=$('f-adate').value,status=$('f-astatus').value,shift=$('f-ashift').value,inT=$('f-ain').value,outT=$('f-aout').value,in2=shift==='both'?$('f-ain2').value:'',out2=shift==='both'?$('f-aout2').value:'';
@@ -740,6 +819,7 @@ function workerSheet(id){
     <div class="fld" id="box-otc"><label class="lbl" for="f-wotc">अपना OT रेट ₹</label><input id="f-wotc" type="number" min="0" step=".01" inputmode="decimal" value="${w&&sel==='custom'?w.otRate:''}"></div></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-wduty">ड्यूटी के घंटे</label><input id="f-wduty" type="number" min="0" max="24" step=".25" inputmode="decimal" value="${w&&w.dutyHours?w.dutyHours:''}" placeholder="खाली = पुरुष 10, महिला 9.5"></div>
     <div class="fld"><label class="lbl">&nbsp;</label><label class="chk" style="margin:0;min-height:44px"><input type="checkbox" id="f-wre"${w?' checked':''}> इस महीने की हाजिरी में भी नया रेट लगाएँ</label></div></div>
+    <div class="fld"><label class="lbl" for="f-wnotr">रात के OT का रेट ₹ प्रति घंटा (खाली = सेटिंग के हिसाब से)</label><input id="f-wnotr" type="number" min="0" step=".01" inputmode="decimal" value="${w&&w.nightOtRate?w.nightOtRate:''}" placeholder="खाली छोड़ें"></div>
     <div class="hint">जैसे लक्ष्मी: 9:30 से 6:00 = 8.5 घंटे, दैनिक ₹260, OT "₹35 तय"। ड्यूटी से पहले जाने पर घंटे × (260 ÷ 8.5) मिलता है।</div>
     <div class="preview" id="w-prev"></div>
     <div class="g2"><div class="fld"><label class="lbl" for="f-wstart">शुरू तारीख</label><input id="f-wstart" type="date" value="${w&&w.start?w.start:today()}"></div>
@@ -788,7 +868,7 @@ function saveWorker(id){
   const name=$('f-wname').value.trim();if(!name)return ferr('मजदूर का नाम लिखें');
   const mode=$('f-wmode').value,gender=$('f-wgender').value,otSel=$('f-wot').value,auto=otSel==='auto',ot=auto?0:(otSel==='custom'?Number($('f-wotc').value)||0:Number(otSel));
   const old=id?db.workers.find(x=>x.id===id):null;
-  const o={id:id||uid(),name,phone:$('f-wphone').value.trim(),gender,payMode:mode,salary:+$('f-wsalary').value||0,daily:+$('f-wdaily').value||0,hourly:+$('f-whourly').value||0,otRate:ot,otAuto:auto,dutyHours:+$('f-wduty').value||0,info:$('f-winfo').value.trim(),start:$('f-wstart').value,active:old?old.active:true};
+  const o={id:id||uid(),name,phone:$('f-wphone').value.trim(),gender,payMode:mode,salary:+$('f-wsalary').value||0,daily:+$('f-wdaily').value||0,hourly:+$('f-whourly').value||0,otRate:ot,otAuto:auto,dutyHours:+$('f-wduty').value||0,nightOtRate:+$('f-wnotr').value||0,info:$('f-winfo').value.trim(),start:$('f-wstart').value,active:old?old.active:true};
   const aad=($('f-waadhaar').value||'').replace(/\s+/g,'');
   if(aad&&!/^\d{12}$/.test(aad))return ferr('आधार नंबर 12 अंकों का होना चाहिए');
   Object.assign(o,{father:$('f-wfather').value.trim(),dob:$('f-wdob').value,address:$('f-waddress').value.trim(),aadhaar:aad,bankAcc:$('f-wbank').value.trim(),ifsc:$('f-wifsc').value.trim().toUpperCase(),emerName:$('f-wemn').value.trim(),emerPhone:$('f-wemp').value.trim(),photo:sheetCtx.photo||''});
@@ -1367,27 +1447,50 @@ function renderOutside(){
   <div class="btns"><button class="btn" data-act="add-out">+ बाहरी लेबर</button><button class="btn ghost" data-act="add-outpay">भुगतान / एडवांस</button></div>
   <div class="card"><h3>अपना और बाहरी लेबर (शिफ्ट गिनती)</h3>${labourTable(sm)}<div class="muted" style="margin-top:8px">${all>0?'सारा लेबर खर्च '+money(all)+', इसमें बाहरी '+Math.round(sm.outAmt/all*100)+'%':'इस महीने कोई लेबर खर्च नहीं।'}</div></div>
   <div class="card"><h3>ठेकेदार का हिसाब</h3>${cr.length?`<div class="tw"><table><thead><tr><th>ठेकेदार</th><th class="n">पुरुष</th><th class="n">महिला</th><th class="n">राशि</th><th class="n">दिया</th><th class="n">बाकी</th><th class="n">कुल बाकी</th></tr></thead><tbody>${cr.map(x=>`<tr><td>${esc(x.name)}</td><td class="n">${x.m}</td><td class="n">${x.f}</td><td class="n">${money(x.amt)}</td><td class="n">${money(x.paid)}</td><td class="n">${money(x.due)}</td><td class="n"><b class="${x.allDue>.005?'bad':''}">${money(x.allDue)}</b></td></tr>`).join('')}</tbody></table></div><div class="muted" style="margin-top:6px">पुरुष और महिला की गिनती शिफ्ट के हिसाब से है। "कुल बाकी" सभी महीनों का है।</div>`:'<div class="muted">इस महीने कोई ठेकेदार का हिसाब नहीं है।</div>'}</div>
-  <div class="card"><h3>इस महीने की एंट्री</h3>${entries.length?entries.map(r=>r.kind==='work'?`<div class="row"><div class="mid"><div class="nm">${esc(r.contractor)}</div><div class="chips"><span class="chip ${r.gender===FEM?'acc':''}">${r.gender}</span><span class="chip night">${OUT_SHIFT[r.shift]||''}</span><span class="sub">${dShort(r.date)} · ${r.count} × ${money(r.rate)}</span></div></div><div class="end"><div class="amt">${money(r.count*r.rate)}</div></div><button class="ibtn bad" data-act="del" data-arr="outside" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`:`<div class="row"><div class="mid"><div class="nm">${esc(r.contractor)}</div><div class="chips"><span class="chip ${r.ptype==='advance'?'warn':'good'}">${r.ptype==='advance'?'एडवांस':'भुगतान'}</span><span class="sub">${dShort(r.date)} · ${esc(r.method||'')}${r.note?' · '+esc(r.note):''}</span></div></div><div class="end"><div class="amt good">${money(r.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="outside" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join(''):'<div class="muted">इस महीने कोई एंट्री नहीं है।</div>'}</div>`;
+  <div class="card"><h3>इस महीने की एंट्री</h3>${entries.length?entries.map(r=>r.kind==='work'?`<div class="row"><div class="mid"><div class="nm">${esc(r.contractor)}</div><div class="chips"><span class="chip ${r.gender===FEM?'acc':''}">${r.gender}</span><span class="chip night">${OUT_SHIFT[r.shift]||''}</span><span class="sub">${dShort(r.date)} · ${r.persons?r.count+' व्यक्ति':r.count+' × '+money(r.rate)}</span></div>${r.persons?`<div class="sub">${r.persons.map(x=>esc(x.name||'—')+' '+money(x.amount)+(x.hours?' ('+hh(x.hours)+' घं)':'')).join(' · ')}</div>`:''}</div><div class="end"><div class="amt">${money(r.count*r.rate)}</div></div><button class="ibtn bad" data-act="del" data-arr="outside" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`:`<div class="row"><div class="mid"><div class="nm">${esc(r.contractor)}</div><div class="chips"><span class="chip ${r.ptype==='advance'?'warn':'good'}">${r.ptype==='advance'?'एडवांस':'भुगतान'}</span><span class="sub">${dShort(r.date)} · ${esc(r.method||'')}${r.note?' · '+esc(r.note):''}</span></div></div><div class="end"><div class="amt good">${money(r.amount)}</div></div><button class="ibtn bad" data-act="del" data-arr="outside" data-id="${r.id}" aria-label="हटाएँ">${ic('trash',18)}</button></div>`).join(''):'<div class="muted">इस महीने कोई एंट्री नहीं है।</div>'}</div>`;
 }
 function outSheet(){
   sheetCtx={type:'out'};
   openSheet('बाहरी लेबर दर्ज करें',`<div class="form">
     <div class="g2"><div class="fld"><label class="lbl" for="f-odate">तारीख</label><input id="f-odate" type="date" value="${today()}"></div>
     <div class="fld"><label class="lbl" for="f-ocon">ठेकेदार का नाम</label><input id="f-ocon" list="dl-con" autocomplete="off" placeholder="नाम लिखें"><datalist id="dl-con">${conNames().map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div></div>
-    <div class="g2"><div class="fld"><label class="lbl" for="f-ogender">लेबर</label><select id="f-ogender"><option>पुरुष</option><option>महिला</option></select></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="f-omode">रकम कैसे तय करनी है</label><select id="f-omode"><option value="custom">हर व्यक्ति की रकम मैं खुद लिखूँगा</option><option value="equal">सबका एक ही रेट</option></select></div>
     <div class="fld"><label class="lbl" for="f-oshift">शिफ्ट</label><select id="f-oshift"><option value="day">दिन</option><option value="night">रात</option><option value="both">दिन + रात</option></select></div></div>
-    <div class="g2"><div class="fld"><label class="lbl" for="f-ocount">कितने लोग</label><input id="f-ocount" type="number" min="1" step="1" inputmode="numeric" placeholder="जैसे 3"></div>
-    <div class="fld"><label class="lbl" for="f-orate">रेट ₹ प्रति व्यक्ति</label><input id="f-orate" type="number" min="0" step=".01" inputmode="decimal" placeholder="रेट"></div></div>
+    <div id="box-oeq" hidden><div class="g3"><div class="fld"><label class="lbl" for="f-ogender">लेबर</label><select id="f-ogender"><option>पुरुष</option><option>महिला</option></select></div>
+    <div class="fld"><label class="lbl" for="f-ocount">कितने लोग</label><input id="f-ocount" type="number" min="1" step="1" inputmode="numeric" placeholder="जैसे 3"></div>
+    <div class="fld"><label class="lbl" for="f-orate">रेट ₹ प्रति व्यक्ति</label><input id="f-orate" type="number" min="0" step=".01" inputmode="decimal" placeholder="रेट"></div></div></div>
+    <div id="box-ocu"><span class="lbl">किसको कितने रुपये देने हैं (जितना काम, उतनी रकम)</span><div id="o-persons"></div><button type="button" class="btn ghost sm" data-act="out-addp">+ एक और व्यक्ति</button></div>
     <div class="fld"><label class="lbl" for="f-opaid">भुगतान</label><select id="f-opaid"><option value="cash">नकद अभी दिया</option><option value="due">बाकी रखा (बाद में देंगे)</option></select></div>
     <div class="fld"><label class="lbl" for="f-onote">विवरण</label><input id="f-onote" placeholder="वैकल्पिक"></div>
     <div class="preview" id="out-prev"></div>
-    <div class="hint">लेबर और शिफ्ट चुनने पर पिछली बार का रेट अपने-आप भर जाता है।</div>
+    <div class="hint">हर व्यक्ति का नाम (वैकल्पिक), पुरुष/महिला, कितने घंटे काम किया (वैकल्पिक) और उसे दी जाने वाली रकम लिखिए। कुल रकम अपने-आप जुड़ जाएगी।</div>
     <div class="err" id="formErr" hidden></div>
-    <button class="btn wide" data-act="save-out">सेव करें</button></div>`,()=>{outRateFill();outPreview()});
+    <button class="btn wide" data-act="save-out">सेव करें</button></div>`,()=>{outAddPerson();outAddPerson();outModeUI();outRateFill();outPreview()});
 }
+function outAddPerson(){
+  const box=$('o-persons');if(!box)return;const i=box.children.length+1;
+  const d=document.createElement('div');d.className='prow';d.style.cssText='display:grid;grid-template-columns:1.3fr .9fr .7fr 1fr auto;gap:6px;margin-bottom:8px;align-items:center';
+  d.innerHTML=`<input class="o-pn" placeholder="नाम ${i}" aria-label="नाम"><select class="o-pg" aria-label="पुरुष या महिला"><option>पुरुष</option><option>महिला</option></select><input class="o-ph" type="number" min="0" step=".25" inputmode="decimal" placeholder="घंटे" aria-label="घंटे"><input class="o-pa" type="number" min="0" step=".01" inputmode="decimal" placeholder="₹ रकम" aria-label="रकम"><button type="button" class="ibtn bad" data-act="out-delp" aria-label="हटाएँ">×</button>`;
+  box.appendChild(d);d.querySelector('.o-pa').addEventListener('input',outPreview);
+}
+function outModeUI(){const c=$('f-omode').value==='custom';$('box-oeq').hidden=c;$('box-ocu').hidden=!c;outPreview()}
+function outPersons(){return Array.from(document.querySelectorAll('#o-persons .prow')).map(r=>({name:r.querySelector('.o-pn').value.trim(),gender:r.querySelector('.o-pg').value,hours:+r.querySelector('.o-ph').value||0,amount:+r.querySelector('.o-pa').value||0})).filter(x=>x.amount>0)}
 function outRateFill(){const r=(db.settings.outRates||{})[$('f-ogender').value+'|'+$('f-oshift').value];if(r)$('f-orate').value=r}
-function outPreview(){const b=$('out-prev');if(!b)return;const n=+$('f-ocount').value||0,r=+$('f-orate').value||0;b.innerHTML='कुल राशि <b>'+money(n*r)+'</b> ('+n+' × '+money(r)+')'}
+function outPreview(){const b=$('out-prev');if(!b)return;if($('f-omode')&&$('f-omode').value==='custom'){const ps=outPersons();b.innerHTML='कुल राशि <b>'+money(sum(ps,x=>x.amount))+'</b> ('+ps.length+' व्यक्ति)';return}const n=+$('f-ocount').value||0,r=+$('f-orate').value||0;b.innerHTML='कुल राशि <b>'+money(n*r)+'</b> ('+n+' × '+money(r)+')'}
 function saveOut(){
+  if($('f-omode').value==='custom'){
+    const con=$('f-ocon').value.trim(),date=$('f-odate').value,ps=outPersons(),sh=$('f-oshift').value;
+    if(!con)return ferr('ठेकेदार का नाम लिखें');
+    if(!date)return ferr('तारीख चुनें');
+    if(!ps.length)return ferr('कम से कम एक व्यक्ति की रकम लिखें');
+    ['पुरुष','महिला'].forEach(g=>{
+      const pg=ps.filter(x=>x.gender===g);if(!pg.length)return;
+      const tot=sum(pg,x=>x.amount),wid=uid();
+      db.outside.push({id:wid,kind:'work',date,contractor:con,gender:g,shift:sh,count:pg.length,rate:tot/pg.length,persons:pg,note:$('f-onote').value.trim()});
+      if($('f-opaid').value==='cash')db.outside.push({id:uid(),kind:'pay',date,contractor:con,ptype:'payment',amount:tot,method:'नकद',note:'नकद (साथ में दिया)',ref:wid});
+    });
+    ui.outMonth=date.slice(0,7);closeSheet();toast(ps.length+' व्यक्ति की एंट्री जुड़ गई');save();return;
+  }
   const con=$('f-ocon').value.trim(),n=+$('f-ocount').value,r=+$('f-orate').value,date=$('f-odate').value;
   if(!con)return ferr('ठेकेदार का नाम लिखें');
   if(!(n>0))return ferr('कितने लोग आए, यह भरें');
@@ -1491,13 +1594,13 @@ function csvText(){
 /* settings and backup */
 function fillSettings(){
   const s=db.settings;
-  $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';
+  $('s-title').value=s.title||'';$('s-brand').value=s.brand||'';$('s-owner').value=s.owner||'';$('s-phone').value=s.phone||'';$('s-nh').value=s.nightHours||'';$('s-notr').value=s.nightOtRate||'';
   $('restoreErr').hidden=true;
   $('pin-note').textContent=s.pinHash?'PIN चालू है: ऐप खोलने पर और 1 मिनट बाहर रहने के बाद PIN माँगेगा। यह सिर्फ दूसरों से आँख बचाने के लिए है।':'PIN लगाने पर ऐप खोलते ही 4 से 6 अंक का PIN माँगेगा, ताकि मजदूरों की निजी जानकारी और हिसाब कोई और न देख सके।';
   $('pin-rm').hidden=!s.pinHash;$('s-pdfascii').checked=!!s.pdfAscii;
 }
 function saveSettings(){
-  Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||''});
+  Object.assign(db.settings,{title:$('s-title').value||'मेरा लेबर खाता',brand:$('s-brand').value||'MAA GANGA',owner:$('s-owner').value||'Mohanveer Singh Dagur',phone:$('s-phone').value||'',nightHours:+$('s-nh').value>0?+$('s-nh').value:0,nightOtRate:+$('s-notr').value>0?+$('s-notr').value:0});
   toast('सेटिंग सेव हो गई');save();
 }
 const backupText=()=>JSON.stringify(db,null,2);
@@ -1743,8 +1846,8 @@ function lentMarkAtt(w,date,duty){
   const mk=o=>putAttendance(Object.assign({workerId:w.id,date,inT:ti,outT:'19:00',in2:'',out2:''},o));
   if(duty==='full')mk({status:'पूरा दिन',shift:'day'});
   else if(duty==='half')mk({status:'आधा दिन',shift:'day',outT:'14:00'});
-  else if(duty==='night')mk({status:'पूरा दिन',shift:'night',inT:'19:00',outT:'03:00'});
-  else if(duty==='both')mk({status:'पूरा दिन',shift:'both',in2:'19:00',out2:'03:00'});
+  else if(duty==='night')mk({status:'पूरा दिन',shift:'night',inT:'19:00',outT:nightEnd()});
+  else if(duty==='both')mk({status:'पूरा दिन',shift:'both',in2:'19:00',out2:nightEnd()});
   else return false;
   return true;
 }
@@ -1826,8 +1929,8 @@ function osNight(w){return Number(w.nightRate)>0?Number(w.nightRate):(dailyOf(w)
 function osPutAtt(o){
   const w=osW(o.workerId);if(!w)return;
   const old=db.osatt.find(x=>x.date===o.date&&x.workerId===o.workerId);
-  const a={id:old?old.id:uid(),date:o.date,workerId:o.workerId,status:o.status,shift:o.shift,in:o.inT,out:o.outT,in2:o.in2||'',out2:o.out2||'',hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:osNight(w)};
-  if(old)Object.assign(old,a);else db.osatt.push(a);
+  const a={id:old?old.id:uid(),date:o.date,workerId:o.workerId,status:o.status,shift:o.shift,in:o.inT,out:o.outT,in2:o.in2||'',out2:o.out2||'',hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:osNight(w),nv:1};
+  if(old){Object.assign(old,a);delete old.nightFlat}else db.osatt.push(a);
 }
 function osCalc(w,m){
   const rg=monthRange(m),t=today();
@@ -2069,26 +2172,26 @@ function osAttSheet(o){
   openSheet(rec?'हाजिरी बदलें':'हाजिरी दर्ज करें',`<div class="form">
     <div class="g2"><div class="fld"><label class="lbl" for="x-adate">तारीख</label><input id="x-adate" type="date" value="${date}"></div>
     <div class="fld"><label class="lbl" for="x-aw">वर्कर</label><select id="x-aw">${list.map(w=>`<option value="${w.id}"${w.id===wid?' selected':''}>${esc(w.name)}</option>`).join('')}</select></div></div>
-    <div class="g2"><div class="fld"><label class="lbl" for="x-ash">शिफ्ट</label><select id="x-ash"><option value="day"${shift==='day'?' selected':''}>दिन</option><option value="night"${shift==='night'?' selected':''}>रात (7 PM–3 AM)</option><option value="both"${shift==='both'?' selected':''}>दिन + रात</option></select></div>
+    <div class="g2"><div class="fld"><label class="lbl" for="x-ash">शिफ्ट</label><select id="x-ash"><option value="day"${shift==='day'?' selected':''}>दिन</option><option value="night"${shift==='night'?' selected':''}>रात (7 PM से, ${nightH()} घंटे की शिफ्ट)</option><option value="both"${shift==='both'?' selected':''}>दिन + रात</option></select></div>
     <div class="fld"><label class="lbl" for="x-ast">स्थिति</label><select id="x-ast">${['पूरा दिन','आधा दिन','अनुपस्थित','छुट्टी','अतिरिक्त काम'].map(s=>`<option${s===status?' selected':''}>${s}</option>`).join('')}</select></div></div>
     <div class="g2"><div class="fld"><label class="lbl" for="x-ain">आने का समय</label><input id="x-ain" type="time" value="${rec?rec.in:defIn(w0)}"${off?' disabled':''}></div>
     <div class="fld"><label class="lbl" for="x-aout">जाने का समय</label><input id="x-aout" type="time" value="${rec?rec.out:'19:00'}"${off?' disabled':''}></div></div>
     <div class="fld" id="x-bx"><span class="lbl">एक्स्ट्रा समय (OT) जोड़ें</span><div class="chiprow"><button type="button" class="pick" data-act="os-extra" data-h="0">सामान्य</button><button type="button" class="pick" data-act="os-extra" data-h="0.5">+ आधा घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="1">+ 1 घंटा</button><button type="button" class="pick" data-act="os-extra" data-h="2">+ 2 घंटे</button></div></div>
-    <div class="g2" id="x-bn" hidden><div class="fld"><label class="lbl" for="x-ain2">रात: आने का समय</label><input id="x-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div><div class="fld"><label class="lbl" for="x-aout2">रात: जाने का समय</label><input id="x-aout2" type="time" value="${rec&&rec.out2?rec.out2:'03:00'}"></div></div>
+    <div class="g2" id="x-bn" hidden><div class="fld"><label class="lbl" for="x-ain2">रात: आने का समय</label><input id="x-ain2" type="time" value="${rec&&rec.in2?rec.in2:'19:00'}"></div><div class="fld"><label class="lbl" for="x-aout2">रात: जाने का समय</label><input id="x-aout2" type="time" value="${rec&&rec.out2?rec.out2:nightEnd()}"></div></div>
     <div class="preview" id="x-aprev"></div>
     <div class="hint">ड्यूटी से ज्यादा रुकने पर OT अपने-आप जुड़ता है। रात की शिफ्ट का रेट वर्कर की जानकारी में तय किया हुआ (या एक दिन की मजदूरी) लगता है।</div>
     <div class="err" id="formErr" hidden></div>
     <button class="btn wide" data-act="os-save-att">हाजिरी सेव करें</button></div>`,()=>{osAttUi();osAttPrev()});
 }
 function osAttUi(){const sh=$('x-ash').value,off=ABS.includes($('x-ast').value);$('x-bn').hidden=sh!=='both';$('x-bx').hidden=sh==='night'||off;['x-ain','x-aout','x-ain2','x-aout2'].forEach(i=>{$(i).disabled=off})}
-function osAttDefaults(){const w=osW($('x-aw').value),n=$('x-ash').value==='night';$('x-ain').value=n?'19:00':defIn(w);$('x-aout').value=n?'03:00':'19:00';$('x-ain2').value='19:00';$('x-aout2').value='03:00'}
+function osAttDefaults(){const w=osW($('x-aw').value),n=$('x-ash').value==='night';$('x-ain').value=n?'19:00':defIn(w);$('x-aout').value=n?nightEnd():'19:00';$('x-ain2').value='19:00';$('x-aout2').value=nightEnd()}
 function osAttPrev(){
   const b=$('x-aprev');if(!b)return;const w=osW($('x-aw').value);if(!w){b.textContent='पहले वर्कर चुनें';return}
   const st=$('x-ast').value,sh=$('x-ash').value;
   if(ABS.includes(st)){b.innerHTML='इस दिन की मजदूरी <b>'+money(0)+'</b>';return}
   const c=calcAttendance({workerId:w.id,status:st,shift:sh,in:$('x-ain').value,out:$('x-aout').value,in2:$('x-ain2').value,out2:$('x-aout2').value,hourlyRate:baseHourly(w),otRate:w.otRate,nightRate:osNight(w)});
-  if(sh==='night'){b.innerHTML=`रात की राशि <b>${money(c.wage)}</b> · ${hh(c.hours)} घंटे`;return}
-  b.innerHTML=`सामान्य <b>${hh(Math.min(c.dayHours,stdHours(w)))} घं</b> = ${money(c.regWage)}`+(c.ot>0?`<br>OT <b>${hh(c.ot)} घं</b> × ${money(c.otPer)} = <b>${money(c.otWage)}</b>`:'')+(sh==='both'?`<br>रात की राशि <b>${money(c.nightWage)}</b>`:'')+`<br>कुल <b>${money(c.wage)}</b>`;
+  if(sh==='night'){b.innerHTML=nightPrev(c)+`<br>कुल <b>${money(c.wage)}</b>`;return}
+  b.innerHTML=`सामान्य <b>${hh(Math.min(c.dayHours,stdHours(w)))} घं</b> = ${money(c.regWage)}`+((c.ot-(c.nightOt||0))>0?`<br>OT <b>${hh(c.ot-(c.nightOt||0))} घं</b> × ${money(c.otPer)} = <b>${money(c.otWage-(c.nightOtWage||0))}</b>`:'')+(sh==='both'?'<br>'+nightPrev(c):'')+`<br>कुल <b>${money(c.wage)}</b>`;
 }
 function osSaveAtt(){
   const wid=$('x-aw').value,date=$('x-adate').value,status=$('x-ast').value,shift=$('x-ash').value,inT=$('x-ain').value,outT=$('x-aout').value,in2=shift==='both'?$('x-ain2').value:'',out2=shift==='both'?$('x-aout2').value:'';
@@ -2376,6 +2479,8 @@ function act(a,el){
     case 'save-ded':saveDed();break;
     case 'add-out':outSheet();break;
     case 'save-out':saveOut();break;
+    case 'out-addp':outAddPerson();break;
+    case 'out-delp':{const t=el.closest('.prow');if(t&&$('o-persons').children.length>1)t.remove();outPreview();break}
     case 'add-outpay':outPaySheet();break;
     case 'save-outpay':saveOutPay();break;
     case 'out-prev':ui.outMonth=addDays(ui.outMonth+'-01',-1).slice(0,7);renderOutside();break;
@@ -2407,6 +2512,7 @@ $('layer').addEventListener('change',e=>{
   if(id.indexOf('f-a')===0)attPreview();
   if(id==='f-pdate')prodFill(e.target.value);
   if(id==='f-ogender'||id==='f-oshift'){outRateFill();outPreview()}
+  if(id==='f-omode')outModeUI();
 });
 $('layer').addEventListener('input',e=>{const id=e.target.id;if(!(e.target.type==='file'))osOnEvent(e);if(id.indexOf('f-w')===0)wPrev();if(id.indexOf('f-a')===0)attPreview();if(id.indexOf('f-p')===0&&id!=='f-pdate')prodPreview();if(id.indexOf('f-o')===0)outPreview()});
 $('v-ostate').addEventListener('change',e=>{if(e.target.id==='os-date'&&e.target.value){ui.osDate=e.target.value;renderOstate()}});
